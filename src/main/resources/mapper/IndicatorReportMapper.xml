@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tree.clouds.assessment.mapper.IndicatorReportMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.IndicatorReport">
+        <id column="report_id" property="reportId" />
+        <result column="unit_id" property="unitId" />
+        <result column="user_score" property="userScore" />
+        <result column="illustrate" property="illustrate" />
+        <result column="CREATED_USER" property="createdUser" />
+        <result column="CREATED_TIME" property="createdTime" />
+        <result column="UPDATED_USER" property="updatedUser" />
+        <result column="UPDATED_TIME" property="updatedTime" />
+        <result column="DEL" property="del" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        report_id, unit_id, user_score, illustrate, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
+    </sql>
+
+</mapper>
