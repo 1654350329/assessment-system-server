@@ -1,7 +1,13 @@
 package com.tree.clouds.assessment.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.entity.AssessmentIndicators;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.tree.clouds.assessment.model.vo.AssessmentPageVO;
+import com.tree.clouds.assessment.model.vo.AssessmentVO;
+import com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +19,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicators> {
 
+    List<indicatorsTreeTreeVO> getByYear(Integer year,Integer type);
+
+    List<indicatorsTreeTreeVO> getByIndicatorId(String id);
+
+    IPage<AssessmentVO> assessmentPage(IPage<AssessmentVO> page, AssessmentPageVO assessmentPageVO);
+
+    void updateExpirationDate(String assessmentYear, String expirationDate);
 }

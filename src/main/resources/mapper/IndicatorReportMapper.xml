@@ -4,20 +4,39 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.IndicatorReport">
-        <id column="report_id" property="reportId" />
-        <result column="unit_id" property="unitId" />
-        <result column="user_score" property="userScore" />
-        <result column="illustrate" property="illustrate" />
-        <result column="CREATED_USER" property="createdUser" />
-        <result column="CREATED_TIME" property="createdTime" />
-        <result column="UPDATED_USER" property="updatedUser" />
-        <result column="UPDATED_TIME" property="updatedTime" />
-        <result column="DEL" property="del" />
+        <id column="report_id" property="reportId"/>
+        <result column="unit_id" property="unitId"/>
+        <result column="user_score" property="userScore"/>
+        <result column="illustrate" property="illustrate"/>
+        <result column="CREATED_USER" property="createdUser"/>
+        <result column="CREATED_TIME" property="createdTime"/>
+        <result column="UPDATED_USER" property="updatedUser"/>
+        <result column="UPDATED_TIME" property="updatedTime"/>
+        <result column="DEL" property="del"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         report_id, unit_id, user_score, illustrate, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
+    <select id="getSubmitNumber" resultType="java.lang.String">
+        select file_Id from indicator_report where unit_id=#{unit_id}
+    </select>
+
+    <select id="getStatusNumber" resultType="java.lang.Integer">
+        select count(*) from indicator_report where unit_id=#{unit_id} and report_status=#{status}
+        <if test="progress!=null">
+            report_progress=#{progress}
+        </if>
+    </select>
+    <select id="getErrorList" resultType="com.tree.clouds.assessment.model.entity.IndicatorReport">
+
+    select * from indicator_report where report_Status=2
+    </select>
+    <select id="getListByType" resultType="com.tree.clouds.assessment.model.entity.IndicatorReport">
+        select * from indicator_report
+	 where report_Progress=3 and report_status=1
+
+    </select>
 
 </mapper>

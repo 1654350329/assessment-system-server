@@ -54,9 +54,9 @@ public class UserManage extends BaseEntity {
     @TableField("PHONE_NUMBER")
     private String phoneNumber;
 
-    @ApiModelProperty(value = "工作单位")
-    @TableField("UNIT")
-    private String unit;
+    @ApiModelProperty(value = "工作单位主键")
+    @TableField("UNIT_Id")
+    private String unitId;
 
     @ApiModelProperty(value = "科别")
     @TableField("category")

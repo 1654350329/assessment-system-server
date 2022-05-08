@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tree.clouds.assessment.mapper.SubmitLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.SubmitLog">
+        <id column="submit_id" property="submitId" />
+        <result column="indicators_Name" property="indicatorsName" />
+        <result column="assessment_Criteria" property="assessmentCriteria" />
+        <result column="evaluation_method" property="evaluationMethod" />
+        <result column="indicators_Status" property="indicatorsStatus" />
+        <result column="remark" property="remark" />
+        <result column="expiration_Date" property="expirationDate" />
+        <result column="CREATED_USER" property="createdUser" />
+        <result column="CREATED_TIME" property="createdTime" />
+        <result column="UPDATED_USER" property="updatedUser" />
+        <result column="UPDATED_TIME" property="updatedTime" />
+        <result column="DEL" property="del" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        submit_id, indicators_Name, assessment_Criteria, evaluation_method, indicators_Status, remark, expiration_Date, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
+    </sql>
+    <select id="submitLogPage" resultType="com.tree.clouds.assessment.model.vo.SubmitLogVO">
+        select * from submit_log
+    </select>
+
+</mapper>

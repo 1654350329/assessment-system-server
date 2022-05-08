@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+
 import java.io.Serializable;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -22,8 +24,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("audit_log")
-@ApiModel(value="AuditLog对象", description="审核日志")
-public class AuditLog extends BaseEntity  {
+@ApiModel(value = "AuditLog对象", description = "审核日志")
+public class AuditLog extends BaseEntity {
     public static final String AUDIT_ID = "audit_id";
 
     public static final String INDICATORS_ID = "indicators_id";
@@ -35,7 +37,7 @@ public class AuditLog extends BaseEntity  {
     public static final String EXPIRATION_DATE = "expiration_date";
 
     @ApiModelProperty(value = "审核记录id")
-      @TableId(value = "audit_id", type = IdType.UUID)
+    @TableId(value = "audit_id", type = IdType.UUID)
     private String auditId;
 
     @ApiModelProperty(value = "考核指标id")
@@ -53,12 +55,6 @@ public class AuditLog extends BaseEntity  {
     @ApiModelProperty(value = "修改截止日期")
     @TableField("expiration_date")
     private String expirationDate;
-
-
-
-
-
-
 
 
 }

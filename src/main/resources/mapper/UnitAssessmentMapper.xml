@@ -4,19 +4,27 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.UnitAssessment">
-        <id column="assessment_id" property="assessmentId" />
-        <result column="indicators_id" property="indicatorsId" />
-        <result column="unit_id" property="unitId" />
-        <result column="CREATED_USER" property="createdUser" />
-        <result column="CREATED_TIME" property="createdTime" />
-        <result column="UPDATED_USER" property="updatedUser" />
-        <result column="UPDATED_TIME" property="updatedTime" />
-        <result column="DEL" property="del" />
+        <id column="assessment_id" property="assessmentId"/>
+        <result column="indicators_id" property="indicatorsId"/>
+        <result column="unit_id" property="unitId"/>
+        <result column="CREATED_USER" property="createdUser"/>
+        <result column="CREATED_TIME" property="createdTime"/>
+        <result column="UPDATED_USER" property="updatedUser"/>
+        <result column="UPDATED_TIME" property="updatedTime"/>
+        <result column="DEL" property="del"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         assessment_id, indicators_id, unit_id, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from unit_assessment
+        where indicators_id in (select indicators_id from assessment_indicators where assessment_Year=#{assessmentYear})
+    </select>
+    <select id="getDistributeNumber" resultType="java.lang.Integer">
+      select count(*) from unit_assessment where unit_id=#{unitId}
+    </select>
+
 
 </mapper>

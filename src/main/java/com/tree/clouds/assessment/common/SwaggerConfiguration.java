@@ -26,8 +26,8 @@ public class SwaggerConfiguration {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("劳动能力鉴定协同系统接口文档")
-                .description("劳动能力鉴定协同系统接口文档")
+                .title("分级考核评价系统接口文档")
+                .description("分级考核评价系统接口文档")
                 .termsOfServiceUrl("http://localhost:8084/")
 //                .contact("developer@mail.com")
                 .version("1.0")

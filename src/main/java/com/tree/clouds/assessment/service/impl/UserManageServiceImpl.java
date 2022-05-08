@@ -3,10 +3,8 @@ package com.tree.clouds.assessment.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.tree.clouds.assessment.common.Constants;
 import com.tree.clouds.assessment.mapper.SysRoleMenuMapper;
 import com.tree.clouds.assessment.model.bo.UserManageBO;
 import com.tree.clouds.assessment.model.entity.RoleManage;
@@ -15,6 +13,7 @@ import com.tree.clouds.assessment.model.entity.UserManage;
 import com.tree.clouds.assessment.mapper.UserManageMapper;
 import com.tree.clouds.assessment.model.vo.UpdatePasswordVO;
 import com.tree.clouds.assessment.model.vo.UserManagePageVO;
+import com.tree.clouds.assessment.service.UnitUserService;
 import com.tree.clouds.assessment.service.RoleUserService;
 import com.tree.clouds.assessment.service.SysMenuService;
 import com.tree.clouds.assessment.service.UserManageService;
@@ -23,10 +22,7 @@ import com.tree.clouds.assessment.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,7 +41,8 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
     private RoleUserService roleUserService;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    @Autowired
+    private UnitUserService unitUserService;
     @Autowired
     private RedisUtil redisUtil;
     @Autowired
@@ -142,6 +139,8 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         String password = bCryptPasswordEncoder.encode(Base64.decodeStr(userManage.getPassword()));
         userManage.setPassword(password);
         this.save(userManage);
+        //添加分组
+        unitUserService.saveUnitUser(userManage.getUserId(), userManageBO.getGroupId());
         //绑定角色
         roleUserService.addRole(userManageBO.getRoleIds(), userManage.getUserId());
 
@@ -169,6 +168,7 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         userManage.setDel(1);
         this.updateById(userManage);
         roleUserService.removeRole(userId);
+        unitUserService.removeUserByUserId(userId);
     }
 
     @Override

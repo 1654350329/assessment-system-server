@@ -28,6 +28,15 @@ public class LoginUserUtil {
         }
     }
 
+    public static String getUnitId() {
+        UserManage userManage = JwtAuthenticationFilter.getLoginUser();
+        if (userManage == null) {
+            return null;
+        } else {
+            return userManage.getUnitId();
+        }
+    }
+
     public static String getUserAccount() {
         UserManage userManage = JwtAuthenticationFilter.getLoginUser();
         if (userManage == null) {

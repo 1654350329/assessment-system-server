@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tree.clouds.assessment.mapper.AssessmentIndicatorsDetailMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail">
+        <id column="detail_id" property="detailId" />
+        <result column="project_id" property="projectId" />
+        <result column="task_id" property="taskId" />
+        <result column="assessment_id" property="assessmentId" />
+        <result column="assessment_criteria" property="assessmentCriteria" />
+        <result column="instructions" property="instructions" />
+        <result column="fraction" property="fraction" />
+        <result column="file_id" property="fileId" />
+        <result column="CREATED_USER" property="createdUser" />
+        <result column="CREATED_TIME" property="createdTime" />
+        <result column="UPDATED_USER" property="updatedUser" />
+        <result column="UPDATED_TIME" property="updatedTime" />
+        <result column="DEL" property="del" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        detail_id, project_id, task_id, assessment_id, assessment_criteria, instructions, fraction, file_id, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
+    </sql>
+    <select id="getScoreByType" resultType="java.lang.Double">
+        select sum(fraction) from assessment_indicators_detail
+        <where>
+            <if test="type==0">
+                indicators_id=#{id}
+            </if>
+            <if test="type==1">
+                project_id=#{id}
+            </if>
+            <if test="type==2">
+                task_id=#{id}
+            </if>
+            <if test="type==3">
+                assessment_id=#{id}
+            </if>
+        </where>
+    </select>
+    <select id="getScoreByUnit" resultType="java.lang.Double">
+        select sum(fraction) from unit_assessment a
+        left join assessment_indicators_detail b on a.detail_id=b.detail_id
+        <where>
+            a.unit_id=#{unitId} and indicators_id=#{id}
+        </where>
+    </select>
+
+</mapper>

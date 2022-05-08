@@ -2,6 +2,9 @@ package com.tree.clouds.assessment.service;
 
 import com.tree.clouds.assessment.model.entity.UnitAssessment;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tree.clouds.assessment.model.vo.UnitVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,15 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UnitAssessmentService extends IService<UnitAssessment> {
 
+    List<UnitVO> assessmentList(UnitVO unitVO);
+
+    void addAssessment(List<String> ids,String unitId);
+
+    List<String> getAssessment(String unitId);
+
+    int getCount(String assessmentYear);
+
+    Integer getDistributeNumber(String unitId);
+
+    List<Integer> getScoreByYearAndUnit(String assessmentYear, String unitId);
 }

@@ -88,9 +88,9 @@ public class DecryptUsernamePasswordFilter extends GenericFilterBean {
         }
 
         private boolean isDecryptParameter(String name) {
-            if ("username".equals(name)) {
-                return true;
-            }
+//            if ("username".equals(name)) {
+//                return true;
+//            }
 
             if ("password".equals(name)) {
                 return true;

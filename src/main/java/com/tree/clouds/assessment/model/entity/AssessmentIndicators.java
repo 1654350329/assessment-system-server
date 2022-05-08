@@ -34,9 +34,9 @@ public class AssessmentIndicators extends BaseEntity {
     @TableId(value = "indicators_id", type = IdType.UUID)
     private String indicatorsId;
 
-    @ApiModelProperty(value = "pid")
-    @TableField("p_id")
-    private String pId;
+    @ApiModelProperty(value = "parentId")
+    @TableField("parent_Id")
+    private String parentId;
 
     @ApiModelProperty(value = "指标名称")
     @TableField("indicators_name")
@@ -50,21 +50,14 @@ public class AssessmentIndicators extends BaseEntity {
     @TableField("user_id")
     private String userId;
 
-    @ApiModelProperty(value = "考核标准")
-    @TableField("assessment_criteria")
-    private String assessmentCriteria;
+    @ApiModelProperty(value = "目录级别 0顶级目录1项目2指标任务3考评标准")
+    @TableField("assessment_type")
+    private Integer assessmentType;
 
-    @ApiModelProperty(value = "申报填报说明")
-    @TableField("instructions")
-    private String instructions;
-
-    @ApiModelProperty(value = "分数")
-    @TableField("fraction")
-    private BigDecimal fraction;
 
     @ApiModelProperty(value = "状态")
     @TableField("indicators_status")
-    private String indicatorsStatus;
+    private Integer indicatorsStatus;
 
     @ApiModelProperty(value = "发布日期")
     @TableField("release_date")
@@ -77,6 +70,8 @@ public class AssessmentIndicators extends BaseEntity {
     @ApiModelProperty(value = "考评年份")
     @TableField("assessment_year")
     private String assessmentYear;
+
+
 
     public static final String INDICATORS_ID = "indicators_id";
 

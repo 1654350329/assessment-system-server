@@ -29,10 +29,10 @@ spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
-#    username: root
-#    password: 123456
-    username: assessment
-    password: root
+    username: root
+    password: 123456
+#    username: assessment
+#    password: root
 
 #    password: root
 # mybatis-plus 配置

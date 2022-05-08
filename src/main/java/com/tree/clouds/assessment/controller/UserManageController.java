@@ -10,6 +10,7 @@ import com.tree.clouds.assessment.model.vo.UpdatePasswordVO;
 import com.tree.clouds.assessment.model.vo.UserManagePageVO;
 import com.tree.clouds.assessment.model.vo.UserStatusVO;
 import com.tree.clouds.assessment.service.UserManageService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @RestController
 @RequestMapping("/user-manage")
+@Api(tags = "用户管理模块")
 public class UserManageController {
 
     @Autowired

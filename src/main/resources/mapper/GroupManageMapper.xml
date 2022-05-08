@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tree.clouds.assessment.mapper.UnitManageMapper">
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        GROUP_ID, GROUP_NAME, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
+    </sql>
+    <select id="unitManagePage" resultType="com.tree.clouds.assessment.model.entity.UnitManage">
+        select * from group_manage where 1=1
+        <if test="unitManagePageVO.unitName !=null and unitManagePageVO.unitName !=''">
+            and unit_NAME like "%"#{unitManagePageVO.unitName}"%"
+        </if>
+    </select>
+
+</mapper>

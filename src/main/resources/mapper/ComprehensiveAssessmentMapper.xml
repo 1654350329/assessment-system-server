@@ -5,16 +5,12 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.ComprehensiveAssessment">
         <id column="comprehensive_id" property="comprehensiveId" />
-        <result column="comprehensive_year" property="comprehensiveYear" />
         <result column="task_score" property="taskScore" />
         <result column="innovation_score_sum" property="innovationScoreSum" />
-        <result column="positive_score" property="positiveScore" />
         <result column="performance_score" property="performanceScore" />
         <result column="user_score" property="userScore" />
-        <result column="expert_score" property="expertScore" />
         <result column="innovation_score" property="innovationScore" />
         <result column="score_sum" property="scoreSum" />
-        <result column="evel_name" property="evelName" />
         <result column="comprehensive_status" property="comprehensiveStatus" />
         <result column="remark" property="remark" />
         <result column="CREATED_USER" property="createdUser" />
@@ -28,5 +24,8 @@
     <sql id="Base_Column_List">
         comprehensive_id, comprehensive_year, task_score, innovation_score_sum, positive_score, performance_score, user_score, expert_score, innovation_score, score_sum, evel_name, comprehensive_status, remark, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
+    <select id="performancePage" resultType="com.tree.clouds.assessment.model.vo.PerformanceVO">
+        select * from comprehensive_assessment
+    </select>
 
 </mapper>

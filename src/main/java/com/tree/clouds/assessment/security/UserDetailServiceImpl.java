@@ -27,7 +27,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
         if (userManage == null) {
             throw new BaseBusinessException(400, "账号不存在");
         }
-        if (userManage.getAccountStatus() == 1) {
+        if (userManage.getAccountStatus() == 0) {
             throw new BaseBusinessException(400, "账号已停用");
         }
         return new AccountUser(userManage.getUserId(), userManage.getAccount(), userManage.getPassword(), getUserAuthority(userManage.getUserId()));
