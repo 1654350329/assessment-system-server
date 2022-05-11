@@ -3,8 +3,11 @@ package com.tree.clouds.assessment.mapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.entity.ComprehensiveAssessment;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.tree.clouds.assessment.model.vo.AssessmentConditionVO;
 import com.tree.clouds.assessment.model.vo.PerformancePageVO;
 import com.tree.clouds.assessment.model.vo.PerformanceVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -16,6 +19,7 @@ import com.tree.clouds.assessment.model.vo.PerformanceVO;
  */
 public interface ComprehensiveAssessmentMapper extends BaseMapper<ComprehensiveAssessment> {
 
-    IPage<PerformanceVO> performancePage(IPage<PerformanceVO> page, PerformancePageVO performancePageVO);
+    IPage<ComprehensiveAssessment> performancePage(IPage<PerformanceVO> page, PerformancePageVO performancePageVO);
 
+    List<AssessmentConditionVO> getCompleteDate(String unitId, String assessmentYear);
 }

@@ -1,6 +1,8 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tree.clouds.assessment.model.entity.UnitAssessment;
@@ -12,9 +14,13 @@ import com.tree.clouds.assessment.service.AssessmentIndicatorsService;
 import com.tree.clouds.assessment.service.UnitAssessmentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.service.UnitManageService;
+import com.tree.clouds.assessment.utils.BaseBusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,20 +42,33 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
 
     @Override
     public List<UnitVO> assessmentList(UnitVO unitVO) {
+        if (unitVO.getYear()==null){
+            unitVO.setYear(DateUtil.year(new Date()));
+        }
         QueryWrapper<UnitManage> queryWrapper = new QueryWrapper<>();
         if (StrUtil.isNotBlank(unitVO.getUnitName())) {
             queryWrapper.like(UnitManage.UNIT_NAME, unitVO.getUnitName());
         }
         List<UnitManage> unitManages = unitManageService.list(queryWrapper);
-        return unitManages.stream().map(unitManage -> {
+        List<UnitVO> unitVOS=new ArrayList<>();
+        for (UnitManage unitManage : unitManages) {
             UnitVO unit = BeanUtil.toBean(unitManage, UnitVO.class);
-            unit.setNumber(this.count(new QueryWrapper<UnitAssessment>().eq(UnitAssessment.UNIT_ID, unitManage.getUnitId())));
-            return unit;
-        }).collect(Collectors.toList());
+            unit.setNumber(this.baseMapper.getCountUnit(unitManage.getUnitId(),unitVO.getYear()));
+            unitVOS.add(unit);
+        }
+      return unitVOS;
     }
 
     @Override
+    @Transactional
     public void addAssessment(List<String> ids, String unitId) {
+        if (CollUtil.isEmpty(ids) ){
+            return;
+        }
+        Integer release = this.baseMapper.isRelease(ids.get(0));
+        if (release!=null && release==1){
+            throw new BaseBusinessException(400,"当前年已发布,不许修改分配考核指标");
+        }
         //删除已分配项目
         this.remove(new QueryWrapper<UnitAssessment>().eq(UnitAssessment.UNIT_ID, unitId));
         //重新添加项目
@@ -69,7 +88,7 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
 
     @Override
     public int getCount(String assessmentYear) {
-        return  this.baseMapper.getCount(assessmentYear);
+        return this.baseMapper.getCount(assessmentYear);
     }
 
     @Override
@@ -83,6 +102,12 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
         List<indicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(Integer.valueOf(assessmentYear),1);
 //        this.list()
         return null;
+    }
+
+    @Override
+    public List<UnitAssessment> getByYear(String assessmentYear) {
+
+        return this.baseMapper.getByYear(assessmentYear);
     }
 
 

@@ -13,7 +13,7 @@ import com.tree.clouds.assessment.model.entity.UnitUser;
  */
 public interface UnitUserService extends IService<UnitUser> {
 
-    void saveUnitUser(String userId, String groupId);
+    void saveUnitUser(String userId, String unitId);
 
     void removeUserByUserId(String userId);
 }

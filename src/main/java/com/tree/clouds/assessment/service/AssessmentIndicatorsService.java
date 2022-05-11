@@ -17,9 +17,11 @@ import java.util.List;
  */
 public interface AssessmentIndicatorsService extends IService<AssessmentIndicators> {
 
-    List<indicatorsTreeTreeVO> indicatorsTree(Integer year,Integer type);
+    List<indicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type);
 
     List<indicatorsTreeTreeVO> indicatorsChildrenTree(String id);
+
+    List<indicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer indicatorsStatus);
 
     AssessmentIndicators evaluationStandard(String id);
 
@@ -39,4 +41,9 @@ public interface AssessmentIndicatorsService extends IService<AssessmentIndicato
 
     void updateExpirationDate(String assessmentYear, String expirationDate);
 
+    List<indicatorsTreeTreeVO> getTreeById(String id);
+
+    List<AssessmentIndicators> getGroupByYear(String year);
+
+    List<indicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO);
 }

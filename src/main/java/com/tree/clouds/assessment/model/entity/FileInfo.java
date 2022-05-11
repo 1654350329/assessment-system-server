@@ -41,7 +41,7 @@ public class FileInfo extends BaseEntity implements Serializable {
     @TableField(BIZ_ID)
     private String bizId;
 
-    @ApiModelProperty(value = "资料上报")
+    @ApiModelProperty(value = "文件名称")
     @TableField(FILE_NAME)
     private String fileName;
 

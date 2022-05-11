@@ -2,6 +2,7 @@ package com.tree.clouds.assessment.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.bo.UserManageBO;
+import com.tree.clouds.assessment.model.entity.RoleManage;
 import com.tree.clouds.assessment.model.entity.UserManage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tree.clouds.assessment.model.vo.UpdatePasswordVO;
@@ -44,4 +45,9 @@ public interface UserManageService extends IService<UserManage> {
     void clearUserAuthorityInfoByRoleId(String roleId);
 
     void updatePassword(UpdatePasswordVO updatePasswordVO);
+
+    List<UserManage> getListByRole(String roleId);
+
+    RoleManage getRoleById(String unitId);
+
 }

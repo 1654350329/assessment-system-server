@@ -2,6 +2,7 @@ package com.tree.clouds.assessment.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.bo.UserManageBO;
+import com.tree.clouds.assessment.model.entity.RoleManage;
 import com.tree.clouds.assessment.model.entity.UserManage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tree.clouds.assessment.model.vo.UserManagePageVO;
@@ -25,4 +26,6 @@ public interface UserManageMapper extends BaseMapper<UserManage> {
     UserManage isExist(String account, String phone);
 
     List<UserManage> listByRoleId(@Param("roleId") String roleId);
+
+    RoleManage getRoleById(String userId);
 }

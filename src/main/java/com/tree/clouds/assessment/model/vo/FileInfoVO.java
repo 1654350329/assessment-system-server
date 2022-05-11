@@ -17,6 +17,6 @@ public class FileInfoVO {
     @ApiModelProperty("文件名称")
     private String fileName;
 
-    @ApiModelProperty("业务类型（1工伤决定书 2病例复印件 3鉴定文件 4审签意见 5劳动能力鉴定附件 6结论书,7通知书）")
+    @ApiModelProperty("业务类型 不填")
     private String type;
 }

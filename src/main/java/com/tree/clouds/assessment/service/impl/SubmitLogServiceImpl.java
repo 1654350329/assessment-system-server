@@ -1,6 +1,5 @@
 package com.tree.clouds.assessment.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.mapper.SubmitLogMapper;
@@ -30,10 +29,16 @@ public class SubmitLogServiceImpl extends ServiceImpl<SubmitLogMapper, SubmitLog
     }
 
     @Override
-    public void addLog(AssessmentIndicators indicators, Integer indicatorsStatus, String remark) {
-        SubmitLog submitLog = BeanUtil.toBean(indicators, SubmitLog.class);
+    public void addLog(AssessmentIndicators indicators, String assessmentCriteria, Integer indicatorsStatus, String remark, String unitId, String time) {
+        SubmitLog submitLog =new SubmitLog();
+        submitLog.setAssessmentYear(indicators.getAssessmentYear());
+        submitLog.setAssessmentCriteria(assessmentCriteria);
+        submitLog.setIndicatorsName(indicators.getIndicatorsName());
         submitLog.setIndicatorsStatus(indicatorsStatus);
+        submitLog.setEvaluationMethod(time);
+        submitLog.setExpirationDate(indicators.getExpirationDate());
         submitLog.setRemark(remark);
+        submitLog.setUnitId(unitId);
         this.save(submitLog);
     }
 }

@@ -20,4 +20,9 @@ public interface UnitAssessmentMapper extends BaseMapper<UnitAssessment> {
 
     Integer getDistributeNumber(String unitId);
 
+    Integer getCountUnit(String unitId, Integer year);
+
+    List<UnitAssessment> getByYear(String assessmentYear);
+
+    Integer isRelease(String detailId);
 }

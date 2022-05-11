@@ -24,8 +24,17 @@
     <sql id="Base_Column_List">
         comprehensive_id, comprehensive_year, task_score, innovation_score_sum, positive_score, performance_score, user_score, expert_score, innovation_score, score_sum, evel_name, comprehensive_status, remark, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
-    <select id="performancePage" resultType="com.tree.clouds.assessment.model.vo.PerformanceVO">
-        select * from comprehensive_assessment
+    <select id="performancePage" resultType="com.tree.clouds.assessment.model.entity.ComprehensiveAssessment">
+            select  a.*,b.unit_name,c.evel_name as evelId from comprehensive_assessment a
+        left join unit_manage b on a.unit_id=b.unit_id
+        left join evaluation_evel c on a.evel_id =c.evel_id
+    </select>
+    <select id="getCompleteDate" resultType="com.tree.clouds.assessment.model.vo.AssessmentConditionVO">
+        select a.unit_id,b.illustrate,c.assessment_criteria  ,d.assessment_year,d.indicators_name  from indicator_report a
+        left join score_record b on a.report_id=b.report_id
+        left join assessment_indicators_detail c on c.detail_id=a.detail_id
+        left join assessment_indicators d on d.indicators_id=a.indicators_id
+        where a.unit_id=#{unitId} and d.assessment_year=#{assessmentYear}
     </select>
 
 </mapper>

@@ -9,7 +9,9 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 
 import java.io.Serializable;
+import java.util.List;
 
+import com.tree.clouds.assessment.model.vo.FileInfoVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -70,6 +72,10 @@ public class AssessmentIndicators extends BaseEntity {
     @ApiModelProperty(value = "考评年份")
     @TableField("assessment_year")
     private String assessmentYear;
+
+    @ApiModelProperty(value = "附件")
+    @TableField(exist = false)
+    private List<FileInfoVO> fileInfoVOS;
 
 
 

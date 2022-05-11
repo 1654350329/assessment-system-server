@@ -4,19 +4,18 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail">
-        <id column="detail_id" property="detailId" />
-        <result column="project_id" property="projectId" />
-        <result column="task_id" property="taskId" />
-        <result column="assessment_id" property="assessmentId" />
-        <result column="assessment_criteria" property="assessmentCriteria" />
-        <result column="instructions" property="instructions" />
-        <result column="fraction" property="fraction" />
-        <result column="file_id" property="fileId" />
-        <result column="CREATED_USER" property="createdUser" />
-        <result column="CREATED_TIME" property="createdTime" />
-        <result column="UPDATED_USER" property="updatedUser" />
-        <result column="UPDATED_TIME" property="updatedTime" />
-        <result column="DEL" property="del" />
+        <id column="detail_id" property="detailId"/>
+        <result column="project_id" property="projectId"/>
+        <result column="task_id" property="taskId"/>
+        <result column="assessment_id" property="assessmentId"/>
+        <result column="assessment_criteria" property="assessmentCriteria"/>
+        <result column="instructions" property="instructions"/>
+        <result column="fraction" property="fraction"/>
+        <result column="CREATED_USER" property="createdUser"/>
+        <result column="CREATED_TIME" property="createdTime"/>
+        <result column="UPDATED_USER" property="updatedUser"/>
+        <result column="UPDATED_TIME" property="updatedTime"/>
+        <result column="DEL" property="del"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -24,19 +23,21 @@
         detail_id, project_id, task_id, assessment_id, assessment_criteria, instructions, fraction, file_id, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
     <select id="getScoreByType" resultType="java.lang.Double">
-        select sum(fraction) from assessment_indicators_detail
+        select sum(a.fraction) from assessment_indicators_detail a
+        left join assessment_indicators b on a.indicators_id=b.indicators_id
         <where>
+            b.assessment_year=#{year}
             <if test="type==0">
-                indicators_id=#{id}
+                and a.indicators_id=#{id}
             </if>
             <if test="type==1">
-                project_id=#{id}
+                and a.project_id=#{id}
             </if>
             <if test="type==2">
-                task_id=#{id}
+                and a.task_id=#{id}
             </if>
             <if test="type==3">
-                assessment_id=#{id}
+                and a.assessment_id=#{id}
             </if>
         </where>
     </select>
@@ -45,6 +46,25 @@
         left join assessment_indicators_detail b on a.detail_id=b.detail_id
         <where>
             a.unit_id=#{unitId} and indicators_id=#{id}
+        </where>
+    </select>
+    <select id="getCountByType" resultType="java.lang.Integer">
+        select count(a.detail_id) from assessment_indicators_detail a
+        left join assessment_indicators b on a.indicators_id=b.indicators_id
+        <where>
+            b.assessment_year=#{year}
+            <if test="type==0">
+                and a.indicators_id=#{id}
+            </if>
+            <if test="type==1">
+                and a.project_id=#{id}
+            </if>
+            <if test="type==2">
+                and a.task_id=#{id}
+            </if>
+            <if test="type==3">
+                and a.assessment_id=#{id}
+            </if>
         </where>
     </select>
 

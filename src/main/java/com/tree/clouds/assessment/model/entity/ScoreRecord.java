@@ -1,8 +1,7 @@
 package com.tree.clouds.assessment.model.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,6 +23,7 @@ import lombok.EqualsAndHashCode;
 public class ScoreRecord extends BaseEntity {
     public static final String RECORD_ID = "record_id";
     public static final String DETAIL_ID = "detail_Id";
+    public static final String REPORT_ID = "report_Id";
     public static final String EXPERT_SCORE = "expert_score";
     public static final String ILLUSTRATE = "illustrate";
     public static final String UNIT_ID = "unit_id";
@@ -31,16 +31,20 @@ public class ScoreRecord extends BaseEntity {
 
 
     @ApiModelProperty(value = "记录主键")
-    @TableField("record_id")
+    @TableId(value = "record_id",type = IdType.UUID)
     private String recordId;
 
-    @ApiModelProperty(value = "考核主键")
-    @TableField("detail_Id")
-    private String detailId;
+    @ApiModelProperty(value = "上报主键")
+    @TableField("report_id")
+    private String reportId;
 
-    @ApiModelProperty(value = "评分类型 0初评 1复评")
+    @ApiModelProperty(value = "审核状态  1正常 2驳回")
     @TableField("score_type")
     private Integer scoreType;
+
+    @ApiModelProperty(value = "评分状态 0未评 1已评")
+    @TableField("expert_status")
+    private Integer expertStatus;
 
     @ApiModelProperty(value = "专家评分")
     @TableField("expert_score")
@@ -50,9 +54,12 @@ public class ScoreRecord extends BaseEntity {
     @TableField("illustrate")
     private String illustrate;
 
-    @ApiModelProperty(value = "单位主键")
-    @TableField("unit_Id")
-    private String unitId;
+    @ApiModelProperty(value = "驳回说明")
+    @TableField("remark")
+    private String remark;
+
+
+
 
 
 

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 
 import java.io.Serializable;
+import java.util.List;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -33,6 +34,7 @@ public class IndicatorReport extends BaseEntity {
     public static final String USER_SCORE = "user_score";
     public static final String ILLUSTRATE = "illustrate";
     public static final String REPORT_PROGRESS = "report_Progress";
+    public static final String REPORT_STATUS = "report_status";
 
     @ApiModelProperty(value = "上报数据id")
     @TableId(value = "report_id", type = IdType.UUID)
@@ -63,13 +65,28 @@ public class IndicatorReport extends BaseEntity {
     @TableField("report_status")
     private Integer reportStatus;
 
-    @ApiModelProperty(value = "上报状态进度 0 待上报 1已申报 2已评 3已复评 4已综合评定 5已结果复核 ")
+    @ApiModelProperty(value = "上报状态进度 0 待上报 1已上报 2初审 3已评  4已综合评定 5已结果复核 ")
     @TableField("report_progress")
     private Integer reportProgress;
 
-    @ApiModelProperty(value = "报送材料 逗号分割")
-    @TableField("file_id")
-    private String fileId;
+    @ApiModelProperty(value = "上报时间")
+    @TableField("report_time")
+    private String reportTime;
 
+    @ApiModelProperty(value = "复核说明")
+    @TableField("remark")
+    private String remark;
+
+    @ApiModelProperty(value = "报送材料 逗号分割")
+    @TableField(exist = false)
+    private List<FileInfo> fileInfoVOS;
+
+    @ApiModelProperty(value = "联系电话")
+    @TableField(exist = false)
+    private String phoneNumber;
+
+    @ApiModelProperty(value = "截止日期")
+    @TableField(exist = false)
+    private String expirationDate;
 
 }

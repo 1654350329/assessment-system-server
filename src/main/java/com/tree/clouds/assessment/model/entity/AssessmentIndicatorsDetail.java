@@ -1,12 +1,14 @@
 package com.tree.clouds.assessment.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.tree.clouds.assessment.model.vo.FileInfoVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -61,8 +63,8 @@ public class AssessmentIndicatorsDetail extends BaseEntity {
     private Double fraction;
 
     @ApiModelProperty(value = "附件")
-    @TableField("file_id")
-    private String fileId;
+    @TableField(exist = false)
+    private List<FileInfoVO> fileInfoVOS;
 
 
 }

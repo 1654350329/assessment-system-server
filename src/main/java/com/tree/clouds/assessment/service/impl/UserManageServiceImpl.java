@@ -139,8 +139,8 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         String password = bCryptPasswordEncoder.encode(Base64.decodeStr(userManage.getPassword()));
         userManage.setPassword(password);
         this.save(userManage);
-        //添加分组
-        unitUserService.saveUnitUser(userManage.getUserId(), userManageBO.getGroupId());
+        //添加到单位
+        unitUserService.saveUnitUser(userManage.getUserId(), userManageBO.getUnitId());
         //绑定角色
         roleUserService.addRole(userManageBO.getRoleIds(), userManage.getUserId());
 
@@ -187,6 +187,8 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         });
     }
 
+
+
     @Override
     public void updatePassword(UpdatePasswordVO updatePasswordVO) {
         String password = bCryptPasswordEncoder.encode(Base64.decodeStr(updatePasswordVO.getPassword()));
@@ -194,5 +196,15 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         user.setPassword(password);
         user.setUserId(LoginUserUtil.getUserId());
         this.updateById(user);
+    }
+
+    @Override
+    public List<UserManage> getListByRole(String roleId) {
+        return  this.baseMapper.listByRoleId(roleId);
+    }
+
+    @Override
+    public RoleManage getRoleById(String userId) {
+        return this.baseMapper.getRoleById(userId);
     }
 }

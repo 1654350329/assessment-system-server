@@ -26,4 +26,12 @@ public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicat
     IPage<AssessmentVO> assessmentPage(IPage<AssessmentVO> page, AssessmentPageVO assessmentPageVO);
 
     void updateExpirationDate(String assessmentYear, String expirationDate);
+
+    List<AssessmentIndicators> getGroupByYear(String year);
+
+    int getDistributeNumber(String id, Integer type);
+
+    List<indicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer reportStatus);
+
+    AssessmentIndicators getByName(String indicatorsName,Integer year);
 }

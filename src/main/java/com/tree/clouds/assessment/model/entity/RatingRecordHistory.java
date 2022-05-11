@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 public class RatingRecordHistory extends BaseEntity {
     public static final String HISTORY_ID = "history_id";
     public static final String DETAIL_ID = "detail_id";
+    public static final String REPORT_ID = "report_id";
     public static final String EXPERT_SCORE = "expert_score";
     public static final String ILLUSTRATE = "illustrate";
 
@@ -32,8 +33,8 @@ public class RatingRecordHistory extends BaseEntity {
     private String historyId;
 
     @ApiModelProperty(value = "考核主键")
-    @TableField("detail_id")
-    private String detailId;
+    @TableField("report_id")
+    private String reportId;
 
     @ApiModelProperty(value = "专家评分")
     @TableField("expert_score")

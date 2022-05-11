@@ -32,6 +32,7 @@ public interface FileInfoService extends IService<FileInfo> {
      * @return
      */
     List<FileInfo> getByBizIdsAndType(String id, String type);
+    List<FileInfo> selectByBizIds(List<String> ids);
 
 //    void preview(String bizId, HttpServletResponse response);
 

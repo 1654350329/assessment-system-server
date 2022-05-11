@@ -13,7 +13,9 @@ import com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail;
  */
 public interface AssessmentIndicatorsDetailService extends IService<AssessmentIndicatorsDetail> {
 
-    double getScoreByType(String id, Integer type);
+    double getScoreByType(String id, Integer type,String year);
 
     double getScoreByUnit(String unitId, String id);
+
+    int getCountByType(String id, Integer assessmentType);
 }

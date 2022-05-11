@@ -13,7 +13,9 @@ import com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail;
  */
 public interface AssessmentIndicatorsDetailMapper extends BaseMapper<AssessmentIndicatorsDetail> {
 
-    Double getScoreByType(String id, Integer type);
+    Double getScoreByType(String id, Integer type,String year);
 
     Double getScoreByUnit(String unitId,String id);
+
+    int getCountByType(String id, Integer type,String year);
 }

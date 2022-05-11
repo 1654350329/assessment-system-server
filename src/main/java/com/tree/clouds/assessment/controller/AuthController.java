@@ -78,7 +78,7 @@ public class AuthController {
         Map<String, Object> map = new HashMap<>();
         map.put("roles", roles);
         map.put("name", user.getUserName());
-//        map.put("unitName", unitManageService.getById(LoginUserUtil.getUnitId()).getUnitName());
+        map.put("phoneNumber", user.getPhoneNumber());
 //        map.put("regionId", LoginUserUtil.getUnitId());
 
         return RestResponse.ok(map);

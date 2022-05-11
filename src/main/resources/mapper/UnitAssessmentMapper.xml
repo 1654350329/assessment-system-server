@@ -20,10 +20,27 @@
     </sql>
     <select id="getCount" resultType="java.lang.Integer">
         select count(*) from unit_assessment
-        where indicators_id in (select indicators_id from assessment_indicators where assessment_Year=#{assessmentYear})
+        where detail_id in (select indicators_id from assessment_indicators where assessment_Year=#{assessmentYear})
     </select>
     <select id="getDistributeNumber" resultType="java.lang.Integer">
       select count(*) from unit_assessment where unit_id=#{unitId}
+    </select>
+    <select id="getCountUnit" resultType="java.lang.Integer">
+        select count(*) from unit_assessment a
+        left join assessment_indicators_detail b on a.detail_id=b.detail_id
+        left join assessment_indicators c on c.indicators_id=b.indicators_id
+        where unit_id=#{unitId} and c.assessment_year=#{year}
+    </select>
+    <select id="getByYear" resultType="com.tree.clouds.assessment.model.entity.UnitAssessment">
+        select a.*,c.indicators_id from unit_assessment a
+        left join assessment_indicators_detail b on a.detail_id =b.detail_id
+        left join assessment_indicators c on b.indicators_id=c.indicators_id
+        where c.assessment_year=#{assessmentYear}
+    </select>
+    <select id="isRelease" resultType="java.lang.Integer">
+        select b.indicators_status from assessment_indicators_detail a
+        left join assessment_indicators b on a.indicators_id=b.indicators_id
+        where a.detail_id=#{detailId}
     </select>
 
 

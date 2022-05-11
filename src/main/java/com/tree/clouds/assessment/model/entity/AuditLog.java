@@ -28,7 +28,8 @@ import lombok.EqualsAndHashCode;
 public class AuditLog extends BaseEntity {
     public static final String AUDIT_ID = "audit_id";
 
-    public static final String INDICATORS_ID = "indicators_id";
+    public static final String DETAIL_ID = "detail_Id";
+    public static final String REPORT_ID = "report_Id";
 
     public static final String INDICATORS_STATUS = "indicators_status";
 
@@ -41,10 +42,14 @@ public class AuditLog extends BaseEntity {
     private String auditId;
 
     @ApiModelProperty(value = "考核指标id")
-    @TableField("indicators_id")
-    private String indicatorsId;
+    @TableField("detail_Id")
+    private String detailId;
 
-    @ApiModelProperty(value = "审核状态")
+    @ApiModelProperty(value = "上报id")
+    @TableField("report_Id")
+    private String reportId;
+
+    @ApiModelProperty(value = "审核状态 0未审核 1通过 2驳回")
     @TableField("indicators_status")
     private Integer indicatorsStatus;
 

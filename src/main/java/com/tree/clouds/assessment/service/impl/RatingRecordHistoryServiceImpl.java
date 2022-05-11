@@ -1,10 +1,13 @@
 package com.tree.clouds.assessment.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.mapper.RatingRecordHistoryMapper;
 import com.tree.clouds.assessment.model.entity.RatingRecordHistory;
 import com.tree.clouds.assessment.service.RatingRecordHistoryService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -19,16 +22,23 @@ public class RatingRecordHistoryServiceImpl extends ServiceImpl<RatingRecordHist
 
     /**
      * 添加评分历史
-     * @param detailId
+     *  @param reportId
      * @param expertScore
      * @param illustrate
+     * @param
      */
     @Override
-    public void addRecord(String detailId, Double expertScore, String illustrate) {
+    public void addRecord(String reportId, Double expertScore, String illustrate) {
         RatingRecordHistory ratingRecordHistory = new RatingRecordHistory();
-        ratingRecordHistory.setDetailId(detailId);
+        ratingRecordHistory.setReportId(reportId);
         ratingRecordHistory.setExpertScore(expertScore);
         ratingRecordHistory.setIllustrate(illustrate);
         this.save(ratingRecordHistory);
+    }
+
+    @Override
+    public List<RatingRecordHistory> getHistoryList(String reportId) {
+        return this.list(new QueryWrapper<RatingRecordHistory>().eq(RatingRecordHistory.REPORT_ID, reportId).orderByDesc(RatingRecordHistory.CREATED_TIME));
+
     }
 }

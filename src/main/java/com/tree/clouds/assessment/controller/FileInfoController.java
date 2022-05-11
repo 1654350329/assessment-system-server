@@ -7,6 +7,7 @@ import com.tree.clouds.assessment.common.aop.Log;
 import com.tree.clouds.assessment.model.vo.FileInfoVO;
 import com.tree.clouds.assessment.model.vo.PublicIdsReqVO;
 import com.tree.clouds.assessment.service.FileInfoService;
+import com.tree.clouds.assessment.utils.QiniuUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -31,34 +32,21 @@ import javax.servlet.http.HttpServletResponse;
 public class FileInfoController {
     @Autowired
     private FileInfoService fileInfoService;
+    @Autowired
+    private QiniuUtil qiniuUtil;
 
     /**
-     * 图片上传
+     * 文件上传
      *
-     * @param file
+     * @param
      * @return
      */
-    @PostMapping("/upload-image")
-    @ApiOperation(value = "图片上传")
-    @Log("图片上传")
-    public RestResponse<FileInfoVO> uploadImage(@RequestParam("file") MultipartFile file) {
-        FileInfoVO fileInfo = this.fileInfoService.upload(file);
-        if (ObjectUtil.isEmpty(fileInfo)) {
-            return RestResponse.fail(400, "只允许图片上传!");
-        }
-        return RestResponse.ok(fileInfo);
+    @PostMapping("/getQNToken")
+    @ApiOperation(value = "获取七牛token")
+    @Log("获取七牛token")
+    public RestResponse<String> getQNToken() {
+        return RestResponse.ok(qiniuUtil.getUploadCredential());
     }
-//    @ApiOperation(value = "验证文件是否上传")
-//    @PostMapping(value = "/exist")
-//    public Result exist(@RequestParam("md5") String md5) {
-//        return ResponseEntity.ok(fileInfoService.exist(md5));
-//    }
-
-//    @ApiOperation(value = "上传文件")
-//    @PostMapping(value = "/upload", name = "上传文件")
-//    public ResponseEntity<FileInfoVO> upload(MultipartFile file) {
-//        return ResponseEntity.ok(fileInfoService.upload(file));
-//    }
 
 
     @ApiOperation(value = "删除文件")
@@ -70,12 +58,6 @@ public class FileInfoController {
         }
         return RestResponse.ok(true);
     }
-//
-//    @ApiOperation(value = "预览文件")
-//    @PostMapping(value = "/preview", name = "预览文件")
-//    public void preview(HttpServletResponse response, @RequestParam(value = "bizId") @ApiParam("业务id") String id) {
-//        fileInfoService.preview(id, response);
-//    }
 
     @ApiOperation(value = "下载文件")
     @PostMapping(value = "/downFile", name = "下载文件")

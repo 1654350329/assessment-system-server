@@ -9,9 +9,7 @@
         <result column="indicators_name" property="indicatorsName"/>
         <result column="evaluation_method" property="evaluationMethod"/>
         <result column="user_id" property="userId"/>
-        <result column="assessment_criteria" property="assessmentCriteria"/>
-        <result column="instructions" property="instructions"/>
-        <result column="fraction" property="fraction"/>
+
         <result column="indicators_status" property="indicatorsStatus"/>
         <result column="release_date" property="releaseDate"/>
         <result column="expiration_date" property="expirationDate"/>
@@ -36,16 +34,74 @@
         <if test="type==1">
             and assessment_Type &lt; 2
         </if>
-
+        UNION
+        select detail_id as id ,assessment_id as parent_Id,4,assessment_criteria as title from
+        assessment_indicators_detail
     </select>
+    <select id="getGroupByYear" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
+        select * from assessment_indicators
+        where (indicators_Name ='县（市、区）绩效任务' or indicators_Name ='机制创新'
+        or indicators_Name ='正向激励加分' or indicators_Name ='绩效减分' )
+        <if test="year !=null and year !=''">
+            and assessment_year =#{year}
+        </if>
+        order by assessment_year desc
+    </select>
+
     <select id="assessmentPage" resultType="com.tree.clouds.assessment.model.vo.AssessmentVO">
-        select DISTINCT assessment_year ,indicators_status,release_date,expiration_date,CREATED_USER from assessment_indicators
+        select DISTINCT a.assessment_year ,a.indicators_status,a.release_date,a.expiration_date,b.user_name as
+        createdUser
+        from assessment_indicators a left join user_manage b on a.CREATED_USER=b.user_id
+        <where>
+            <if test="assessmentPageVO.indicatorsStatus !=null and assessmentPageVO.indicatorsStatus !=''">
+                indicators_Status=#{assessmentPageVO.indicatorsStatus}
+            </if>
+            <if test="assessmentPageVO.assessmentYear !=null and assessmentPageVO.assessmentYear !=''">
+                assessment_Year=#{assessmentPageVO.assessmentYear}
+            </if>
+
+        </where>
     </select>
     <select id="getByIndicatorId" resultType="com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO">
            select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
         from assessment_indicators where  assessment_Type > 0
         	UNION
-		select detail_id as id ,assessment_id as parent_Id,4,assessment_criteria as title	from assessment_indicators_detail
+		select detail_id as id ,assessment_id as parent_Id,4,assessment_criteria as title
+		from assessment_indicators_detail
+    </select>
+    <select id="getDistributeNumber" resultType="java.lang.Integer">
+        SELECT count(a.detail_id) from assessment_indicators_detail a left join unit_assessment b on
+        a.detail_id=b.detail_id
+        where b.assessment_id is not null
+        <if test="type==0">
+            and a.indicators_id=#{id}
+        </if>
+        <if test="type==1">
+            and a.project_id=#{id}
+        </if>
+        <if test="type==2">
+            and a.task_id=#{id}
+        </if>
+        <if test="type==3">
+            and a.assessment_id=#{id}
+        </if>
+    </select>
+    <select id="getByReportId" resultType="com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO">
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+        from assessment_indicators where assessment_Type > 0
+        UNION
+        select b.report_id as id ,assessment_id as parent_Id,4,assessment_criteria as title
+        from assessment_indicators_detail a right join indicator_report b on a.detail_id=b.detail_id
+        where b.unit_Id =#{unitId}
+        <if test="reportId!=null">
+            and b.report_id=#{reportId}
+        </if>
+        <if test="reportStatus!=null">
+            and b.report_status=#{reportStatus}
+        </if>
+    </select>
+    <select id="getByName" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
+        select * from assessment_indicators where indicators_Name=#{indicatorsName} and assessment_year=#{year}
     </select>
 
 </mapper>

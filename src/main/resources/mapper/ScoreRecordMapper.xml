@@ -4,21 +4,63 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.ScoreRecord">
-        <result column="record_id" property="recordId" />
-        <result column="indicators_id" property="indicatorsId" />
-        <result column="expert_score" property="expertScore" />
-        <result column="illustrate" property="illustrate" />
-        <result column="unit_name" property="unitName" />
-        <result column="CREATED_USER" property="createdUser" />
-        <result column="CREATED_TIME" property="createdTime" />
-        <result column="UPDATED_USER" property="updatedUser" />
-        <result column="UPDATED_TIME" property="updatedTime" />
-        <result column="DEL" property="del" />
+        <result column="record_id" property="recordId"/>
+        <result column="indicators_id" property="indicatorsId"/>
+        <result column="expert_score" property="expertScore"/>
+        <result column="illustrate" property="illustrate"/>
+        <result column="CREATED_USER" property="createdUser"/>
+        <result column="CREATED_TIME" property="createdTime"/>
+        <result column="UPDATED_USER" property="updatedUser"/>
+        <result column="UPDATED_TIME" property="updatedTime"/>
+        <result column="DEL" property="del"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         record_id, indicators_id, expert_score, illustrate, unit_name, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
+    <update id="updateStatusByYearAndUnit">
+        update score_record set score_type =2 and expert_status =0
+        where report_id in (select a.report_id from indicator_report a
+            left join assessment_indicators b on a.indicators_id=b.indicators_id
+            where a.unit_id=#{unitId} and b.assessment_year=#{assessmentYear})
+    </update>
+    <select id="getExpertRating" resultType="java.lang.Double">
+        select sum(expert_score) from score_record a
+        left join indicator_report b on b.report_id=a.report_id
+        left join assessment_indicators c on b.indicators_id=c.indicators_id
+        where b.unit_id=#{unitId} and c.assessment_year=#{assessmentYear}
+    </select>
+    <select id="getReviewPage" resultType="com.tree.clouds.assessment.model.vo.ReviewVO">
+        select
+        a.report_id,a.expert_Status,d.assessment_Year,f.unit_name,e.user_name as createdUser,e.PHONE_NUMBER,c.project_id as indicatorsId,d.indicators_name,c.assessment_criteria,a.expert_status
+        from score_record a
+        left join indicator_report b on b.report_id=a.report_id
+        left join assessment_indicators_detail c on c.detail_id=b.detail_id
+        left join assessment_indicators d on d.indicators_id=c.indicators_id
+        left join user_manage e on e.user_id=b.CREATED_USER
+        left join unit_manage f on f.unit_id=b.unit_id
+        <where>
+            a.score_type=2
+            <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
+                and c.assessment_criteria like '%'#{reviewPageVO.assessmentCriteria}'%'
+            </if>
+            <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
+                and e.user_name like '%'#{reviewPageVO.unitName}'%'
+            </if>
+            <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
+                and d.assessment_Year = #{reviewPageVO.assessmentYear}
+            </if>
+            <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
+                and a.expert_status = #{reviewPageVO.expertStatus}
+            </if>
+        </where>
+    </select>
+    <select id="getSumByUnitAndYear" resultType="java.lang.Double">
+        select sum(a.expert_score) from score_record a
+        left join indicator_report b on a.report_id=b.report_id
+        left join assessment_indicators c on c.indicators_id=b.indicators_id
+        where unit_id=#{unitId} and c.assessment_year=#{year}
+    </select>
 
 </mapper>

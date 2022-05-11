@@ -40,6 +40,9 @@ public class UnitAssessment extends BaseEntity {
     @ApiModelProperty(value = "单位id")
     @TableField("unit_id")
     private String unitId;
+    @ApiModelProperty(value = "指标主键id")
+    @TableField(exist = false)
+    private String indicatorsId;
 
 
     public static final String ASSESSMENT_ID = "assessment_id";

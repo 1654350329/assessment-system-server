@@ -4,26 +4,26 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.UserManage">
-        <id column="USER_ID" property="userId" />
-        <result column="USER_NAME" property="userName" />
-        <result column="PHONE_NUMBER" property="phoneNumber" />
-        <result column="UNIT" property="unit" />
-        <result column="category" property="category" />
-        <result column="SEX" property="sex" />
-        <result column="JOB" property="job" />
-        <result column="TITLE_GRADE" property="titleGrade" />
-        <result column="ACCOUNT" property="account" />
-        <result column="PASSWORD" property="password" />
-        <result column="salt" property="salt" />
-        <result column="WECHAT_AUTHORIZATION" property="wechatAuthorization" />
-        <result column="RECEIVE_NOTICE_STATUS" property="receiveNoticeStatus" />
-        <result column="ACCOUNT_STATUS" property="accountStatus" />
-        <result column="REMARK" property="remark" />
-        <result column="CREATED_USER" property="createdUser" />
-        <result column="CREATED_TIME" property="createdTime" />
-        <result column="UPDATED_USER" property="updatedUser" />
-        <result column="UPDATED_TIME" property="updatedTime" />
-        <result column="DEL" property="del" />
+        <id column="USER_ID" property="userId"/>
+        <result column="USER_NAME" property="userName"/>
+        <result column="PHONE_NUMBER" property="phoneNumber"/>
+        <result column="UNIT" property="unit"/>
+        <result column="category" property="category"/>
+        <result column="SEX" property="sex"/>
+        <result column="JOB" property="job"/>
+        <result column="TITLE_GRADE" property="titleGrade"/>
+        <result column="ACCOUNT" property="account"/>
+        <result column="PASSWORD" property="password"/>
+        <result column="salt" property="salt"/>
+        <result column="WECHAT_AUTHORIZATION" property="wechatAuthorization"/>
+        <result column="RECEIVE_NOTICE_STATUS" property="receiveNoticeStatus"/>
+        <result column="ACCOUNT_STATUS" property="accountStatus"/>
+        <result column="REMARK" property="remark"/>
+        <result column="CREATED_USER" property="createdUser"/>
+        <result column="CREATED_TIME" property="createdTime"/>
+        <result column="UPDATED_USER" property="updatedUser"/>
+        <result column="UPDATED_TIME" property="updatedTime"/>
+        <result column="DEL" property="del"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -32,15 +32,16 @@
     </sql>
 
     <select id="userManagePage" resultType="com.tree.clouds.assessment.model.bo.UserManageBO">
-        select a.*,b.group_id from user_manage a
-        left join group_user b on a.user_id=b.user_id
+        select a.*,b.unit_id ,c.unit_name from user_manage a
+        left join unit_user b on a.user_id=b.user_id
+        left join unit_manage c on b.unit_id=c.unit_id
         <if test="userManagePageVO.roleName != null and userManagePageVO.roleName != ''">
             left join role_user c on a.user_id=c.user_id
             left join role_manage d on c.role_id=d.role_id
         </if>
         where 1=1 and a.del=0
-        <if test="userManagePageVO.groupId != null and userManagePageVO.groupId != ''">
-            and b.group_id =#{userManagePageVO.groupId}
+        <if test="userManagePageVO.unitId != null and userManagePageVO.unitId != ''">
+            and b.unit_id =#{userManagePageVO.unitId}
         </if>
         <if test="userManagePageVO.account != null and userManagePageVO.account != ''">
             and a.account like "%"#{userManagePageVO.account}"%"
@@ -49,7 +50,7 @@
             and a.user_name like "%"#{userManagePageVO.userName}"%"
         </if>
         <if test="userManagePageVO.roleName != null and userManagePageVO.roleName != ''">
-            and d.role_name like "%"#{userManagePageVO.roleName}"%"
+            and b.role_name like "%"#{userManagePageVO.roleName}"%"
         </if>
 
     </select>
@@ -66,6 +67,11 @@
          select DISTINCT a.* from user_manage a
             LEFT JOIN role_user  b on a.USER_ID=b.USER_ID
             where b.role_id=#{roleId}
+    </select>
+    <select id="getRoleById" resultType="com.tree.clouds.assessment.model.entity.RoleManage">
+        select c.* from role_user a
+        left join role_manage c on c.role_id=a.role_id
+        where a.user_id=#{userId}
     </select>
 
 </mapper>

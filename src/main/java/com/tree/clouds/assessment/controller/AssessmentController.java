@@ -1,5 +1,7 @@
 package com.tree.clouds.assessment.controller;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.common.RestResponse;
 import com.tree.clouds.assessment.common.aop.Log;
@@ -12,6 +14,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -31,7 +35,7 @@ public class AssessmentController {
     @Log("考核指标列表分页查询")
     @PostMapping("/assessmentPage")
     @ApiOperation(value = "考核指标列表分页查询")
-    @PreAuthorize("hasAuthority('user:manage:list')")
+
     public RestResponse<IPage<AssessmentVO>> assessmentPage(@RequestBody AssessmentPageVO assessmentPageVO) {
         IPage<AssessmentVO> page = assessmentIndicatorsService.assessmentPage(assessmentPageVO);
         return RestResponse.ok(page);
@@ -40,8 +44,10 @@ public class AssessmentController {
     @Log("发布考核指标")
     @PostMapping("/releaseAssessment")
     @ApiOperation(value = "发布考核指标")
-    @PreAuthorize("hasAuthority('user:manage:list')")
     public RestResponse<Boolean> releaseAssessment(@RequestBody ReleaseAssessmentVO releaseAssessmentVO) {
+        if (StrUtil.isBlank(releaseAssessmentVO.getAssessmentYear())) {
+            releaseAssessmentVO.setAssessmentYear(String.valueOf(DateUtil.year(new Date())));
+        }
         assessmentIndicatorsService.releaseAssessment(releaseAssessmentVO);
         return RestResponse.ok(true);
     }

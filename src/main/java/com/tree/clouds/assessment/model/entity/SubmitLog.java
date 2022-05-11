@@ -19,14 +19,22 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("submit_log")
-@ApiModel(value="SubmitLog对象", description="报送日志")
+@ApiModel(value = "SubmitLog对象", description = "报送日志")
 public class SubmitLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "报送日志主键")
-      @TableId(value = "submit_id", type = IdType.UUID)
+    @TableId(value = "submit_id", type = IdType.UUID)
     private String submitId;
+
+    @ApiModelProperty(value = "单位主键")
+    @TableField(value = "unit_Id")
+    private String unitId;
+
+    @ApiModelProperty(value = "考评年份")
+    @TableField("assessment_year")
+    private String assessmentYear;
 
     @ApiModelProperty(value = "考核项目")
     @TableField("indicators_Name")
@@ -57,7 +65,7 @@ public class SubmitLog implements Serializable {
     private String createdUser;
 
     @ApiModelProperty(value = "创建时间")
-      @TableField(value = "CREATED_TIME", fill = FieldFill.INSERT)
+    @TableField(value = "CREATED_TIME", fill = FieldFill.INSERT)
     private String createdTime;
 
     @ApiModelProperty(value = "更新人")
@@ -65,7 +73,7 @@ public class SubmitLog implements Serializable {
     private String updatedUser;
 
     @ApiModelProperty(value = "更新时间")
-      @TableField(value = "UPDATED_TIME", fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "UPDATED_TIME", fill = FieldFill.INSERT_UPDATE)
     private String updatedTime;
 
     @ApiModelProperty(value = "删除")

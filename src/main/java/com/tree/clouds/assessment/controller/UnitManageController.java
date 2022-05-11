@@ -37,7 +37,7 @@ public class UnitManageController {
     @PostMapping("/groupManagePage")
     @ApiOperation(value = "单位管理模块分页查询")
     @Log("单位管理模块分页查询")
-    @PreAuthorize("hasAuthority('group:manage:list')")
+
     public RestResponse<IPage<UnitManage>> groupManagePage(@RequestBody UnitManagePageVO unitManagePageVO) {
         IPage<UnitManage> page = unitManageService.groupManagePage(unitManagePageVO);
         return RestResponse.ok(page);
@@ -46,7 +46,6 @@ public class UnitManageController {
     @PostMapping("/addGroupRole")
     @ApiOperation(value = "添加单位")
     @Log("添加单位")
-    @PreAuthorize("hasAuthority('group:manage:add')")
     public RestResponse<Boolean> addGroupRole(@RequestBody UnitManage groupRole) {
         unitManageService.save(groupRole);
         return RestResponse.ok(true);
@@ -55,7 +54,7 @@ public class UnitManageController {
     @PostMapping("/updateGroupRole")
     @ApiOperation(value = "修改单位")
     @Log("修改单位")
-    @PreAuthorize("hasAuthority('group:manage:update')")
+
     public RestResponse<Boolean> updateGroupRole(@RequestBody UnitManage groupRole) {
         unitManageService.updateById(groupRole);
         return RestResponse.ok(true);
@@ -64,7 +63,7 @@ public class UnitManageController {
     @PostMapping("/deleteGroupRole")
     @ApiOperation(value = "刪除单位")
     @Log("刪除单位")
-    @PreAuthorize("hasAuthority('group:manage:delete')")
+
     public RestResponse<Boolean> deleteGroupRole(@Validated @RequestBody PublicIdsReqVO publicIdReqVO) {
         unitManageService.deleteGroupRole(publicIdReqVO.getIds());
         return RestResponse.ok(true);

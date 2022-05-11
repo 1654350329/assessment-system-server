@@ -28,7 +28,7 @@ import lombok.EqualsAndHashCode;
 public class ComprehensiveAssessment extends BaseEntity {
 
     public static final String COMPREHENSIVE_ID = "comprehensive_id";
-    public static final String COMPREHENSIVE_YEAR = "comprehensive_year";
+    public static final String ASSESSMENT_YEAR = "assessment_year";
     public static final String TASK_SCORE = "task_score";
     public static final String INNOVATION_SCORE_SUM = "innovation_score_sum";
     public static final String POSITIVE_SCORE = "positive_score";
@@ -40,6 +40,7 @@ public class ComprehensiveAssessment extends BaseEntity {
     public static final String EVEL_NAME = "evel_name";
     public static final String COMPREHENSIVE_STATUS = "comprehensive_status";
     public static final String REMARK = "remark";
+    public static final String UNIT_ID = "unit_Id";
 
     @ApiModelProperty(value = "综合评定表主键")
     @TableId(value = "comprehensive_id", type = IdType.UUID)
@@ -53,37 +54,41 @@ public class ComprehensiveAssessment extends BaseEntity {
     @TableField("unit_Id")
     private String unitId;
 
+    @ApiModelProperty(value = "指标主键")
+    @TableField("indicators_id")
+    private String indicatorsId;
+
     @ApiModelProperty(value = "绩效任务总分值")
     @TableField("task_score")
-    private Double taskScore;
+    private String taskScore;
 
     @ApiModelProperty(value = "机制创新总分值")
     @TableField("innovation_score_sum")
-    private Double innovationScoreSum;
+    private String innovationScoreSum;
 
     @ApiModelProperty(value = "正向激励总分值")
     @TableField("positive_score")
-    private Double positiveIncentiveSum;
+    private String positiveScore;
 
     @ApiModelProperty(value = "绩效减分总分值")
     @TableField("performance_score")
-    private Double performanceScore;
+    private String performanceScore;
 
     @ApiModelProperty(value = "自评总分")
     @TableField("user_score")
-    private Double userScore;
+    private String userScore;
 
-    @ApiModelProperty(value = "专家评分")
+    @ApiModelProperty(value = "专家总评分")
     @TableField("expert_Rating")
-    private Double expertRating;
+    private String expertRating;
 
     @ApiModelProperty(value = "机制创新分")
     @TableField("innovation_score")
-    private Double innovationScore;
+    private String innovationScore;
 
     @ApiModelProperty(value = "综合得分")
     @TableField("score_sum")
-    private Double scoreSum;
+    private String scoreSum;
 
     @ApiModelProperty(value = "评价等级")
     @TableField("evel_Id")
@@ -97,9 +102,13 @@ public class ComprehensiveAssessment extends BaseEntity {
     @TableField("comprehensive_progress")
     private Integer comprehensiveProgress;
 
-    @ApiModelProperty(value = "专家复核说明")
-    @TableField("remark")
-    private String remark;
+    @ApiModelProperty(value = "单位名称")
+    @TableField(exist = false)
+    private String unitName;
+
+    @ApiModelProperty(value = "评价等次")
+    @TableField(exist = false)
+    private String evelName;
 
 
 

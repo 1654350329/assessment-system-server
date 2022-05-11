@@ -15,5 +15,5 @@ public class ReviewPageVO extends PageParam{
     private String assessmentYear;
 
     @ApiModelProperty(value = "复评状态 0待复评 1已复评")
-    private Integer reviewStatus;
+    private String reviewStatus;
 }

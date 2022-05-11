@@ -5,11 +5,15 @@ import lombok.Data;
 
 @Data
 public class AssessmentErrorVO {
+    @ApiModelProperty(value = "报送主键")
+    private String reportId;
+
+
     @ApiModelProperty(value = "报送时间")
     private String AssessmentDate;
 
     @ApiModelProperty(value = "截止时间")
-    private String expiration_date;
+    private String expirationDate;
 
     @ApiModelProperty(value = "考评年份")
     private String assessmentYear;
@@ -25,9 +29,11 @@ public class AssessmentErrorVO {
 
     @ApiModelProperty(value = "考核项目")
     private String indicatorsName;
+    @ApiModelProperty(value = "考核项目")
+    private String indicatorsId;
 
     @ApiModelProperty(value = "考核标准")
     private String assessmentCriteria;
     @ApiModelProperty(value = "状态")
-    private String status;
+    private Integer status;
 }

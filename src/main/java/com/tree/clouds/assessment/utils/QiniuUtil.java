@@ -30,9 +30,7 @@ public class QiniuUtil {
      */
     public String getUploadCredential() {
         Auth auth = Auth.create(accessKey, secretKey);
-        String upToken = auth.uploadToken(bucket);
-        System.out.println(upToken);
-        return upToken;
+        return auth.uploadToken(bucket);
     }
 
     //密钥配置

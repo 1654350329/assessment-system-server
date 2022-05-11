@@ -11,6 +11,9 @@ public class IndicatorReportVO {
     @ApiModelProperty(value = "发布日期")
     private String releaseDate;
 
+    @ApiModelProperty(value = "指派日期")
+    private String assignDate;
+
     @ApiModelProperty(value = "截止日期")
     private String expirationDate;
 
@@ -32,12 +35,15 @@ public class IndicatorReportVO {
     @ApiModelProperty(value = "责任单位")
     private String unitName;
 
-    @ApiModelProperty(value = "责任单位")
+    @ApiModelProperty(value = "责任单位id")
     private String unitId;
 
     @ApiModelProperty(value = "已评")
     private Integer ReviewedNumber;
     @ApiModelProperty(value = "未评")
     private Integer unReviewedNumber;
+
+    @ApiModelProperty(value = "填报状态")
+    private Integer completeStatus;
 
 }

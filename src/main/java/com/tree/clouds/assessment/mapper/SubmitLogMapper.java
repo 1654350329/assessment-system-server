@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.entity.SubmitLog;
 import com.tree.clouds.assessment.model.vo.SubmitLogPageVO;
 import com.tree.clouds.assessment.model.vo.SubmitLogVO;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -16,6 +17,6 @@ import com.tree.clouds.assessment.model.vo.SubmitLogVO;
  */
 public interface SubmitLogMapper extends BaseMapper<SubmitLog> {
 
-    IPage<SubmitLogVO> submitLogPage(IPage<SubmitLogVO> page, SubmitLogPageVO submitLogPageVO);
+    IPage<SubmitLogVO> submitLogPage(IPage<SubmitLogVO> page,@Param("submitLogPageVO") SubmitLogPageVO submitLogPageVO);
 
 }

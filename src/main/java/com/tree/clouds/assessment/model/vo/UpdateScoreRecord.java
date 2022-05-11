@@ -10,7 +10,7 @@ public class UpdateScoreRecord {
     private String id;
 
     @ApiModelProperty(value = "专家评分")
-    private String expertScore;
+    private Double expertScore;
 
     @ApiModelProperty(value = "得分说明")
     private String illustrate;

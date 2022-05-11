@@ -11,4 +11,6 @@ public class UnitVO extends PageParam {
     private String unitName;
     @ApiModelProperty("分配数")
     private Integer number;
+    @ApiModelProperty("年份")
+    private Integer year;
 }

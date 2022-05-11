@@ -1,5 +1,6 @@
 package com.tree.clouds.assessment.model.vo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -14,20 +15,27 @@ public class PerformanceVO {
     @ApiModelProperty(value = "责任单位主键")
     private String unitId;
     @ApiModelProperty(value = "绩效任务总分值")
-    private Double taskScore;
+    private String taskScore;
     @ApiModelProperty(value = "机制创新总分值")
-    private Double innovationScoreSum;
+    private String innovationScoreSum;
     @ApiModelProperty(value = "正向激励加分总分值")
-    private Double positiveIncentiveSum;
+    private String positiveIncentiveSum;
     @ApiModelProperty(value = "绩效减分总分值")
-    private Double performanceScore;
+    private String performanceScore;
     @ApiModelProperty(value = "自评总分")
-    private Double userScore;
+    private String userScore;
     @ApiModelProperty(value = "专家评分（线上）")
-    private Double expertRating;
+    private String expertRating;
     @ApiModelProperty(value = "机制创新分")
-    private Double innovationScore;
+    private String innovationScore;
+    @ApiModelProperty(value = "综合得分")
+    private String scoreSum;
     @ApiModelProperty(value = "评价等级")
     private String evelName;
+    @ApiModelProperty(value = "综合评分状态 0待评定 1通过 2驳回")
+    private Integer comprehensiveStatus;
+
+    @ApiModelProperty(value = "综合评分进度 0待评定 1已评 2复核")
+    private Integer comprehensiveProgress;
 
 }

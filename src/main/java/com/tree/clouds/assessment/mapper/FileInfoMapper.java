@@ -39,6 +39,12 @@ public interface FileInfoMapper extends BaseMapper<FileInfo> {
         return this.selectList(wrapper);
     }
 
+    default List<FileInfo> selectByBizIds(List<String> bizIds) {
+        QueryWrapper<FileInfo> wrapper = new QueryWrapper<>();
+        wrapper.in(FileInfo.BIZ_ID, bizIds);
+        return this.selectList(wrapper);
+    }
+
     default void deleteByBizIds(String bizId) {
         QueryWrapper<FileInfo> wrapper = new QueryWrapper<>();
         wrapper.eq(FileInfo.BIZ_ID, bizId);

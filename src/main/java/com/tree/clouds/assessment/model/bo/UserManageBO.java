@@ -12,9 +12,12 @@ public class UserManageBO extends UserManage {
     @ApiModelProperty("角色id")
     @NotNull(message = "至少绑定一种角色")
     private List<String> roleIds;
-    @ApiModelProperty("分组Id")
-    @NotNull(message = "至少绑定一个分组")
-    private String groupId;
+    @ApiModelProperty("单位Id")
+    @NotNull(message = "至少绑定一个单位")
+    private String unitId;
+
+    @ApiModelProperty("单位名称")
+    private String unitName;
 
     @ApiModelProperty(value = "角色名称")
     private String roleName;

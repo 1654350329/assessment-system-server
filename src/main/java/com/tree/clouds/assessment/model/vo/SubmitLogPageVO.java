@@ -13,4 +13,10 @@ public class SubmitLogPageVO extends PageParam{
     @ApiModelProperty("状态 0待审核 1通过 2驳回")
     private Integer status;
 
+    @ApiModelProperty("考评年份 必传")
+    private String assessmentYear;
+
+    @ApiModelProperty("单位主键 必传")
+    private String unitId;
+
 }

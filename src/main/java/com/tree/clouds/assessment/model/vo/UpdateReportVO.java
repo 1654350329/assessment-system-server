@@ -26,5 +26,5 @@ public class UpdateReportVO {
     @ApiModelProperty(value = "联系电话")
     private String phoneNumber;
     @ApiModelProperty(value = "报送材料")
-    private List<String> filePaths;
+    private List<FileInfoVO> fileInfoVOS;
 }

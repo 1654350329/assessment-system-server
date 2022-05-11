@@ -3,10 +3,9 @@ package com.tree.clouds.assessment.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.entity.ComprehensiveAssessment;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.tree.clouds.assessment.model.vo.ComprehensiveAssessmentVO;
-import com.tree.clouds.assessment.model.vo.PerformancePageVO;
-import com.tree.clouds.assessment.model.vo.PerformanceVO;
-import com.tree.clouds.assessment.model.vo.ReEvaluationVO;
+import com.tree.clouds.assessment.model.vo.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -18,10 +17,18 @@ import com.tree.clouds.assessment.model.vo.ReEvaluationVO;
  */
 public interface ComprehensiveAssessmentService extends IService<ComprehensiveAssessment> {
 
-    IPage<PerformanceVO> performancePage(PerformancePageVO performancePageVO);
+    IPage<ComprehensiveAssessment> performancePage(PerformancePageVO performancePageVO);
 
     void assessment(ComprehensiveAssessmentVO assessmentVO);
 
-    void reEvaluation(ReEvaluationVO evaluationVO);
 
+    ComprehensiveAssessment getAssessmentByUnitAndYear(String unitId, String assessmentYear);
+
+
+    void assessmentComplete(AssessmentCompleteVO assessmentCompleteVO);
+
+
+    void reAssessment(ReAssessmentVO reAssessmentVO);
+
+    ComprehensiveAssessment getByYearAndUnitId(int year, String unitId);
 }

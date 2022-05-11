@@ -15,6 +15,17 @@ public class PublicIdReqVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "主键", required = true)
-    @NotEmpty(message = "主键不能为空")
     private String id;
+
+    @ApiModelProperty(value = "单位主键")
+    private String unitId;
+
+    @ApiModelProperty(value = "内容指标关键字")
+    private String content;
+
+    @ApiModelProperty(value = "审核状态")
+    private String indicatorsStatus;
+
+    @ApiModelProperty(value = "上报主键")
+    private String reportId;
 }

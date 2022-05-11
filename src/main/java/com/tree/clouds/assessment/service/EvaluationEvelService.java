@@ -1,7 +1,11 @@
 package com.tree.clouds.assessment.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.entity.EvaluationEvel;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tree.clouds.assessment.model.vo.EvaluationEvelVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface EvaluationEvelService extends IService<EvaluationEvel> {
 
+    IPage<EvaluationEvel> evaluationEvelPage(EvaluationEvelVO pageVO);
+
+    void deleteEvaluation(List<String> ids);
 }

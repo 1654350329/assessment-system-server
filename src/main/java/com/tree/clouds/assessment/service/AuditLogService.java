@@ -18,4 +18,7 @@ public interface AuditLogService extends IService<AuditLog> {
     void updateAudit(UpdateAuditVO updateAuditVO);
 
 
+    AuditLog getAudit(String id);
+
+    AuditLog getByReportId(String id);
 }

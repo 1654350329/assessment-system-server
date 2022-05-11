@@ -37,11 +37,10 @@ public class UserManageController {
     @Autowired
     private UserManageService userManageservice;
 
-
     @Log("用户模块分页查询")
     @PostMapping("/userManagePage")
     @ApiOperation(value = "用户模块分页查询")
-    @PreAuthorize("hasAuthority('user:manage:list')")
+
     public RestResponse<IPage<UserManageBO>> userManagePage(@Validated @RequestBody UserManagePageVO userManagePageVO) {
         IPage<UserManageBO> page = userManageservice.userManagePage(userManagePageVO);
         return RestResponse.ok(page);
@@ -50,7 +49,6 @@ public class UserManageController {
     @PostMapping("/addUserManage")
     @ApiOperation(value = "添加用户")
     @Log("添加用户")
-    @PreAuthorize("hasAuthority('user:manage:add')")
     public RestResponse<Boolean> addUserManage(@Validated @RequestBody UserManageBO userManageBO) {
         userManageservice.addUserManage(userManageBO);
         return RestResponse.ok(true);
@@ -59,7 +57,6 @@ public class UserManageController {
     @PostMapping("/updateUserManage")
     @ApiOperation(value = "修改用户")
     @Log("修改用户")
-    @PreAuthorize("hasAuthority('user:manage:update')")
     public RestResponse<Boolean> updateUserManage(@Validated @RequestBody UserManageBO userManageBO) {
         userManageservice.updateUserManage(userManageBO);
         return RestResponse.ok(true);
@@ -68,7 +65,6 @@ public class UserManageController {
     @PostMapping("/deleteUserManage")
     @ApiOperation(value = "刪除用户")
     @Log("刪除用户")
-    @PreAuthorize("hasAuthority('user:manage:delete')")
     public RestResponse<Boolean> deleteUserManage(@Validated @RequestBody PublicIdsReqVO publicIdReqVO) {
         for (String id : publicIdReqVO.getIds()) {
             userManageservice.deleteUserManage(id);
@@ -79,7 +75,6 @@ public class UserManageController {
     @PostMapping("/rebuildPassword")
     @ApiOperation(value = "重置密码")
     @Log("重置密码")
-    @PreAuthorize("hasAuthority('user:manage:rebuild')")
     public RestResponse<Boolean> rebuildPassword(@RequestBody PublicIdsReqVO publicIdsReqVO) {
         userManageservice.rebuildPassword(publicIdsReqVO.getIds());
         return RestResponse.ok(true);
@@ -88,7 +83,6 @@ public class UserManageController {
     @PostMapping("/userStatus")
     @ApiOperation(value = "启用或停用用户")
     @Log("启用或停用用户")
-    @PreAuthorize("hasAuthority('user:manage:status')")
     public RestResponse<Boolean> userStatus(@Validated @RequestBody UserStatusVO userStatusVO) {
         userManageservice.userStatus(userStatusVO.getIds(), userStatusVO.getStatus());
         return RestResponse.ok(true);

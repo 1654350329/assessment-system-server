@@ -4,18 +4,33 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.EvaluationEvel">
-        <id column="evel_id" property="evelId" />
-        <result column="evel_name" property="evelName" />
-        <result column="CREATED_USER" property="createdUser" />
-        <result column="CREATED_TIME" property="createdTime" />
-        <result column="UPDATED_USER" property="updatedUser" />
-        <result column="UPDATED_TIME" property="updatedTime" />
-        <result column="DEL" property="del" />
+        <id column="evel_id" property="evelId"/>
+        <result column="evel_name" property="evelName"/>
+        <result column="CREATED_USER" property="createdUser"/>
+        <result column="CREATED_TIME" property="createdTime"/>
+        <result column="UPDATED_USER" property="updatedUser"/>
+        <result column="UPDATED_TIME" property="updatedTime"/>
+        <result column="DEL" property="del"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         evel_id, evel_name, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
+    <delete id="deleteEvaluation">
+        update evaluation_evel set del =1 where evel_id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="evaluationEvelPage" resultType="com.tree.clouds.assessment.model.entity.EvaluationEvel">
+        select * from evaluation_evel
+        <where>
+            del=0
+            <if test="pageVO.evelName!=null and pageVO.evelName!=''">
+                and evel_Name like '%'#{pageVO.evelName}'%'
+            </if>
+        </where>
+    </select>
 
 </mapper>
