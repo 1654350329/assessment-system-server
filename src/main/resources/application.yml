@@ -28,11 +28,12 @@ spring:
     time-zone: GMT+8
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/graded?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
-#    username: root
-#    password: 123456
-    username: graded
-    password: root
+    url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
+    #    url: jdbc:mysql://localhost:3306/graded?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
+#    username: graded
+#    password: root
 
 #    password: root
 # mybatis-plus 配置
@@ -42,12 +43,6 @@ mybatis-plus:
     auto-mapping-behavior: full
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath*:mapper/*Mapper.xml
-
-fdfs:
-  so-timeout: 1501 # 超时时间
-  connect-timeout: 601 # 连接超时时间
-  tracker-list: # tracker地址：你的虚拟机服务器地址+端口（默认是22122）
-    - 192.168.110.31:22122
 
 
 markerhub:

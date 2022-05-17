@@ -25,10 +25,10 @@
 
     <select id="getStatusNumber" resultType="java.lang.Integer">
         select count(*) from audit_log a
-        left join  indicator_report b on a.report_id=b.report_id
+        left join indicator_report b on a.report_id=b.report_id
         where a.indicators_status=#{status} and unit_id=#{unitId}
         <if test="progress!=null">
-          and  report_progress=#{progress}
+            and report_progress=#{progress}
         </if>
     </select>
     <select id="getErrorList" resultType="com.tree.clouds.assessment.model.entity.IndicatorReport">
@@ -71,18 +71,38 @@
 				where a.unit_id=#{unitId}
     </select>
     <select id="getReviewedNumber" resultType="java.lang.Integer">
-        select count(*) from score_record a
-        left join indicator_report b on a.report_id=b.report_id
+        select count(*) from  indicator_report b
         left join assessment_indicators c on c.indicators_id=b.indicators_id
-        where b.unit_id=#{unitId} and c.assessment_year=#{year} and a.expert_status=#{type}
-
+        left join score_record d on b.report_id=d.report_id
+        where b.unit_id=#{unitId} and c.assessment_year=#{year}
+        <if test="type==0">
+            and d.expert_status=0
+        </if>
+        <if test="type==1">
+            and d.expert_status=1
+        </if>
+        <if test="type==2">
+            and b.report_progress=2
+        </if>
     </select>
     <select id="getDistributeSum" resultType="java.lang.Integer">
         select sum(b.fraction) from indicator_report a
         left join assessment_indicators_detail b on a.detail_id=b.detail_id
         left join assessment_indicators c on c.indicators_id=b.indicators_id
         where a.unit_id=#{unitId} and c.assessment_year=#{year}
-
+    </select>
+    <select id="getAssessmentIndicatorsByReportId"
+            resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
+        select c.* from  indicator_report a
+        left join assessment_indicators_detail b on a.detail_id=b.detail_id
+        left join assessment_indicators c on c.indicators_id=b.indicators_id
+        where a.report_id =#{reportId}
+    </select>
+    <select id="getAuditNumber" resultType="java.lang.Integer">
+        select count(*) from  indicator_report a
+        left join assessment_indicators b on b.indicators_id=a.indicators_id
+        left join audit_log c on c.report_id=a.report_id
+        where b.assessment_year =#{year} and a.unit_id=#{unitId} and  c.indicators_status=1
     </select>
 
 </mapper>

@@ -24,7 +24,7 @@ public class PublicIdReqVO implements Serializable {
     private String content;
 
     @ApiModelProperty(value = "审核状态")
-    private String indicatorsStatus;
+    private String reportStatus;
 
     @ApiModelProperty(value = "上报主键")
     private String reportId;

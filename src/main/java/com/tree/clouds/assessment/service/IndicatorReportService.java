@@ -31,7 +31,7 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
 
     double getUserScore(String unitId, String assessmentYear);
 
-    List<indicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId,Integer indicatorsStatus);
+    List<IndicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId, Integer indicatorsStatus, String content);
 
 
     int getMaterial(Integer type, String unitId);
@@ -41,4 +41,6 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
     Map<String, Object> getData(GetDataVO getDataVO);
 
     Double getUserScoreByUnit(String unitId, int year);
+
+    Integer getAuditNumber(String unitId, int year);
 }

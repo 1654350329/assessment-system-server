@@ -55,7 +55,7 @@ public class UserManage extends BaseEntity {
     private String phoneNumber;
 
     @ApiModelProperty(value = "工作单位主键")
-    @TableField("UNIT_Id")
+    @TableField(exist = false)
     private String unitId;
 
     @ApiModelProperty(value = "科别")
@@ -93,6 +93,11 @@ public class UserManage extends BaseEntity {
     @ApiModelProperty(value = "备注")
     @TableField("REMARK")
     private String remark;
+
+    @ApiModelProperty(value = "初审权限")
+    @TableField("RECEIVE_STATUS")
+    private Integer receiveStatus;
+
 
 
 }

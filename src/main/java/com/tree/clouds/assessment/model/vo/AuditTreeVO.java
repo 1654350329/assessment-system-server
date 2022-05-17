@@ -15,4 +15,6 @@ public class AuditTreeVO {
     private String id;
     @ApiModelProperty(value = "reportId 复评 查看具体复评")
     private String reportId;
+    @ApiModelProperty(value = "内容")
+    private String content;
 }

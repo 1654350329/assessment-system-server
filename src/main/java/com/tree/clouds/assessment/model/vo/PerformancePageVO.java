@@ -10,7 +10,7 @@ public class PerformancePageVO extends PageParam{
     @ApiModelProperty(value = "考评年度")
     private String assessmentYear;
     @ApiModelProperty(value = "评价等级")
-    private String evelName;
-    @ApiModelProperty(value = "状态(进度)")
-    private String reportProgress;
+    private String evelId;
+    @ApiModelProperty(value = "状态(进度) 0待评定 1待复核 2已完成")
+    private String comprehensiveProgress;
 }

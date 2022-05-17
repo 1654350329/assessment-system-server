@@ -89,4 +89,7 @@ public class IndicatorReport extends BaseEntity {
     @TableField(exist = false)
     private String expirationDate;
 
+    @ApiModelProperty(value = "报送类型")
+    @TableField(exist = false)
+    private Integer reportType;
 }

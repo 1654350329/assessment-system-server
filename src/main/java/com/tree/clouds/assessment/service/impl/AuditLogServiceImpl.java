@@ -1,5 +1,6 @@
 package com.tree.clouds.assessment.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tree.clouds.assessment.model.entity.*;
@@ -10,6 +11,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -32,24 +37,35 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
     private ScoreRecordService scoreRecordService;
     @Autowired
     private AssessmentIndicatorsDetailService detailService;
+    @Autowired
+    private ComprehensiveAssessmentService comprehensiveAssessmentService;
+    @Autowired
+    private UnitAssessmentService unitAssessmentService;
 
     @Override
+    @Transactional
     public void updateAudit(UpdateAuditVO updateAuditVO) {
         //修改审核状态
         IndicatorReport indicatorReport = indicatorReportService.getById(updateAuditVO.getId());
         indicatorReport.setReportStatus(updateAuditVO.getIndicatorsStatus());
-        indicatorReport.setReportProgress(2);
+
+        indicatorReport.setReportProgress(1);
         //修改截止日期
         AssessmentIndicators indicators = assessmentIndicatorsService.getById(indicatorReport.getIndicatorsId());
+        if (indicators.getIndicatorsName().equals("机制创新")&& updateAuditVO.getIndicatorsStatus() == 1){
+            indicatorReport.setReportProgress(2);
+        }
+        if (updateAuditVO.getIndicatorsStatus() == 0){
+            indicatorReport.setReportProgress(0);
+        }
         AssessmentIndicatorsDetail detail = detailService.getById(indicatorReport.getDetailId());
         if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate())) {
             assessmentIndicatorsService.updateExpirationDate(indicators.getAssessmentYear(), updateAuditVO.getExpirationDate());
         }
         //新增报送历史日志
-        submitLogService.addLog(indicators, detail.getAssessmentCriteria(), updateAuditVO.getIndicatorsStatus(), updateAuditVO.getRemark(), LoginUserUtil.getUnitId(), indicatorReport.getReportTime());
+        submitLogService.addLog(indicators, detail.getAssessmentCriteria(), updateAuditVO.getIndicatorsStatus(), updateAuditVO.getRemark(), LoginUserUtil.getUnitId(), indicatorReport.getReportTime(), indicatorReport.getReportId());
         //修改上报进度
         indicatorReportService.updateById(indicatorReport);
-//        indicatorReportService.updateProgress(indicatorReport.getReportId(), 2);
         //修改审核记录
         AuditLog auditLog = this.getByReportId(indicatorReport.getReportId());
         if (auditLog == null) {
@@ -61,14 +77,19 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
         auditLog.setExpirationDate(updateAuditVO.getExpirationDate());
         auditLog.setIndicatorsStatus(updateAuditVO.getIndicatorsStatus());
         this.saveOrUpdate(auditLog, new QueryWrapper<AuditLog>().eq(AuditLog.REPORT_ID, indicatorReport.getReportId()));
-        if (updateAuditVO.getIndicatorsStatus() == 1) {
-            ScoreRecord scoreRecord = new ScoreRecord();
-            scoreRecord.setReportId(updateAuditVO.getId());
-            scoreRecord.setScoreType(0);
-            scoreRecord.setExpertStatus(0);
-            scoreRecordService.save(scoreRecord);
+        if ( updateAuditVO.getIndicatorsStatus() == 1) {
+            if (!indicators.getIndicatorsName().equals("机制创新")){
+                ScoreRecord scoreRecord = new ScoreRecord();
+                scoreRecord.setReportId(updateAuditVO.getId());
+                scoreRecord.setScoreType(0);
+                scoreRecord.setExpertStatus(0);
+                scoreRecordService.saveOrUpdate(scoreRecord,new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID,updateAuditVO.getId()));
+            }
+
         }
+
     }
+
 
     @Override
     public AuditLog getAudit(String id) {

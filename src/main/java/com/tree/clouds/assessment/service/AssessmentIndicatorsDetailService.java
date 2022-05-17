@@ -2,6 +2,9 @@ package com.tree.clouds.assessment.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail;
+import com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -18,4 +21,11 @@ public interface AssessmentIndicatorsDetailService extends IService<AssessmentIn
     double getScoreByUnit(String unitId, String id);
 
     int getCountByType(String id, Integer assessmentType);
+
+    AssessmentIndicatorsDetail getByNameAndPid(String indicatorsName, String parentId);
+
+    AssessmentIndicatorsDetail getByReportId(String reportId);
+
+    List<IndicatorsTreeTreeVO> getByParentId(String id,String unitId);
+
 }

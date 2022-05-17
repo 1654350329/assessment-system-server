@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.model.entity.*;
@@ -8,6 +9,7 @@ import com.tree.clouds.assessment.mapper.ScoreRecordMapper;
 import com.tree.clouds.assessment.model.vo.*;
 import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tree.clouds.assessment.utils.BaseBusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +53,10 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     @Override
     @Transactional
     public void updateScore(UpdateScoreRecord updateScoreRecord) {
+        AssessmentIndicatorsDetail detail = detailService.getByReportId(updateScoreRecord.getId());
+        if (updateScoreRecord.getExpertScore()>detail.getFraction()){
+            throw new BaseBusinessException(400,"评分不能超过当前考核标准分数!");
+        }
         ScoreRecord one = this.getOne(new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateScoreRecord.getId()));
         if (one == null) {
             one = new ScoreRecord();
@@ -63,7 +69,7 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
         this.saveOrUpdate(one, new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateScoreRecord.getId()));
         //更新上报进度
         IndicatorReport indicatorReport = indicatorReportService.getByReportIdAndUnitId(updateScoreRecord.getId(), null);
-        indicatorReportService.updateProgress(indicatorReport.getReportId(), 3);
+        indicatorReportService.updateProgress(indicatorReport.getReportId(), 2);
         //添加评分历史
         ratingRecordHistoryService.addRecord(one.getReportId(), one.getExpertScore(), one.getIllustrate());
         //添加到成绩管理
@@ -72,12 +78,11 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
             List<AssessmentIndicators> assessmentIndicators = assessmentIndicatorsService.getGroupByYear(String.valueOf(DateUtil.year(new Date())));
             ComprehensiveAssessment assessment = new ComprehensiveAssessment();
             assessment.setUnitId(updateScoreRecord.getUnitId());
-            assessment.setIndicatorsId(indicatorReport.getIndicatorsId());
             assessment.setComprehensiveProgress(0);//初审为0
             //自评总分
-            Double UserScore = this.indicatorReportService.getUserScoreByUnit(updateScoreRecord.getUnitId(), DateUtil.year(new Date()));
+            Double UserScore = this.indicatorReportService.getUserScoreByUnit(updateScoreRecord.getUnitId(), Integer.parseInt(assessmentIndicators.get(0).getAssessmentYear()));
             //专家评分
-            Double sum = this.baseMapper.getExpertRating(updateScoreRecord.getUnitId(), String.valueOf(DateUtil.year(new Date())));
+            Double sum = this.baseMapper.getExpertRating(updateScoreRecord.getUnitId(),  assessmentIndicators.get(0).getAssessmentYear());
             assessment.setUserScore(String.valueOf(UserScore));
             assessment.setExpertRating(String.valueOf(sum));
             for (AssessmentIndicators assessmentIndicator : assessmentIndicators) {
@@ -98,11 +103,16 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
             }
             comprehensiveAssessmentService.save(assessment);
         }
+        if (byYearAndUnitId!=null){
+            Double sum = this.baseMapper.getExpertRating(updateScoreRecord.getUnitId(), byYearAndUnitId.getAssessmentYear());
+            byYearAndUnitId.setExpertRating(String.valueOf(sum));
+            comprehensiveAssessmentService.updateById(byYearAndUnitId);
+        }
 
     }
 
     public Boolean isComplete(String unitId, Integer year) {
-        Integer reviewedNumber = this.indicatorReportService.getReviewedNumber(unitId, 1, year);
+        Integer reviewedNumber = this.indicatorReportService.getReviewedNumber(unitId, 2, year);
         Integer distributeNumber = unitAssessmentService.getDistributeNumber(unitId);
         return reviewedNumber.equals(distributeNumber);
     }
@@ -137,8 +147,14 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     }
 
     @Override
-    public List<indicatorsTreeTreeVO> scoreTree(AuditTreeVO auditTreeVO) {
-        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), 1);
+    public List<IndicatorsTreeTreeVO> scoreTree(AuditTreeVO auditTreeVO) {
+        int status=1;
+        if (StrUtil.isNotBlank(auditTreeVO.getReportStatus())){
+            //0未评 1已评 对应上报进度 1 跟2
+            int i = Integer.parseInt(auditTreeVO.getReportStatus());
+            status=i+1;
+        }
+        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent());
     }
 
     @Override
@@ -149,5 +165,10 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     @Override
     public void updateStatusByYearAndUnit(String assessmentYear, String unitId) {
         this.baseMapper.updateStatusByYearAndUnit(assessmentYear,unitId);
+    }
+
+    @Override
+    public List<ScoreRecord> getByTypeAndUnitIdAndYear(String unitId, String assessmentYear,Integer type) {
+        return  this.baseMapper.getByTypeAndUnitIdAndYear(assessmentYear,unitId,type);
     }
 }

@@ -3,6 +3,8 @@ package com.tree.clouds.assessment.model.vo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UserManagePageVO extends PageParam {
     @ApiModelProperty(value = "账号")
@@ -14,5 +16,5 @@ public class UserManagePageVO extends PageParam {
     private String unitId;
 
     @ApiModelProperty(value = "角色名称")
-    private String roleName;
+    private List<String> roleIds;
 }

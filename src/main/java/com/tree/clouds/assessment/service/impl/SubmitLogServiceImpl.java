@@ -29,7 +29,7 @@ public class SubmitLogServiceImpl extends ServiceImpl<SubmitLogMapper, SubmitLog
     }
 
     @Override
-    public void addLog(AssessmentIndicators indicators, String assessmentCriteria, Integer indicatorsStatus, String remark, String unitId, String time) {
+    public void addLog(AssessmentIndicators indicators, String assessmentCriteria, Integer indicatorsStatus, String remark, String unitId, String time,String reportId) {
         SubmitLog submitLog =new SubmitLog();
         submitLog.setAssessmentYear(indicators.getAssessmentYear());
         submitLog.setAssessmentCriteria(assessmentCriteria);
@@ -39,6 +39,7 @@ public class SubmitLogServiceImpl extends ServiceImpl<SubmitLogMapper, SubmitLog
         submitLog.setExpirationDate(indicators.getExpirationDate());
         submitLog.setRemark(remark);
         submitLog.setUnitId(unitId);
+        submitLog.setReportId(reportId);
         this.save(submitLog);
     }
 }

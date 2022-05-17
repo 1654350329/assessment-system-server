@@ -20,7 +20,7 @@
         record_id, indicators_id, expert_score, illustrate, unit_name, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
     <update id="updateStatusByYearAndUnit">
-        update score_record set score_type =2 and expert_status =0
+        update score_record set score_type =1 , expert_status =0
         where report_id in (select a.report_id from indicator_report a
             left join assessment_indicators b on a.indicators_id=b.indicators_id
             where a.unit_id=#{unitId} and b.assessment_year=#{assessmentYear})
@@ -61,6 +61,13 @@
         left join indicator_report b on a.report_id=b.report_id
         left join assessment_indicators c on c.indicators_id=b.indicators_id
         where unit_id=#{unitId} and c.assessment_year=#{year}
+    </select>
+    <select id="getByTypeAndUnitIdAndYear" resultType="com.tree.clouds.assessment.model.entity.ScoreRecord">
+        select a.* from score_record a
+        left join indicator_report b on a.report_id=b.report_id
+         left join assessment_indicators c on c.indicators_id=b.indicators_id
+        where b.unit_id=#{unitId} and c.assessment_year=#{assessmentYear} and a.score_type=#{type}
+
     </select>
 
 </mapper>

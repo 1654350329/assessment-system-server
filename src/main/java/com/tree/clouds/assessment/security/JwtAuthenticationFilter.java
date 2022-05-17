@@ -1,7 +1,10 @@
 package com.tree.clouds.assessment.security;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.tree.clouds.assessment.model.entity.UnitUser;
 import com.tree.clouds.assessment.model.entity.UserManage;
+import com.tree.clouds.assessment.service.UnitUserService;
 import com.tree.clouds.assessment.service.UserManageService;
 import com.tree.clouds.assessment.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
@@ -20,8 +23,7 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
-    // 定义一个线程域，存放登录用户
-    private static final ThreadLocal<UserManage> tl = new ThreadLocal<>();
+
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -30,14 +32,14 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Autowired
     private UserManageService userManageService;
+    @Autowired
+    private UnitUserService unitUserService;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
 
-    public static UserManage getLoginUser() {
-        return tl.get();
-    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -59,9 +61,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String account = claim.getSubject();
         // 获取用户的权限等信息
         UserManage userManage = userManageService.getUserByAccount(account);
-        tl.set(userManage);
+        UnitUser one = unitUserService.getOne(new QueryWrapper<UnitUser>().eq(UnitUser.USER_ID, userManage.getUserId()));
+        userManage.setUnitId(one.getUnitId());
         UsernamePasswordAuthenticationToken token
-                = new UsernamePasswordAuthenticationToken(userManage.getUserName(), null, userDetailService.getUserAuthority(userManage.getUserId()));
+                = new UsernamePasswordAuthenticationToken(userManage.getUserName(), userManage, userDetailService.getUserAuthority(userManage.getUserId()));
 
         SecurityContextHolder.getContext().setAuthentication(token);
         //重新签发token

@@ -3,8 +3,12 @@ package com.tree.clouds.assessment.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.poi.word.Word07Writer;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.tree.clouds.assessment.common.Constants;
 import com.tree.clouds.assessment.model.entity.*;
 import com.tree.clouds.assessment.mapper.AssessmentIndicatorsMapper;
 import com.tree.clouds.assessment.model.vo.*;
@@ -12,11 +16,15 @@ import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.utils.BaseBusinessException;
 import com.tree.clouds.assessment.utils.ConvertUtil;
+import com.tree.clouds.assessment.utils.DownloadFile;
+import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.io.File;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,13 +53,13 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     private IndicatorReportService indicatorReportService;
 
     @Override
-    public List<indicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type) {
+    public List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type) {
         if (year == null) {
             year = DateUtil.year(new Date());
         }
-        List<indicatorsTreeTreeVO> list = this.baseMapper.getByYear(year, type);
+        List<IndicatorsTreeTreeVO> list = this.baseMapper.getByYear(year, type);
 
-        for (indicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
+        for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
             if (indicatorsTreeTreeVO.getAssessmentType() == 1 && type == 1) {
                 indicatorsTreeTreeVO.setFile("文件");
             } else if (indicatorsTreeTreeVO.getAssessmentType() == 4 && type == 2) {
@@ -72,6 +80,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             indicatorsTreeTreeVO.setUnallocated(un);
             indicatorsTreeTreeVO.setAllocated(number);
             indicatorsTreeTreeVO.setTotal(sum);
+            indicatorsTreeTreeVO.setFraction(this.detailService.getScoreByType(indicatorsTreeTreeVO.getId(), indicatorsTreeTreeVO.getAssessmentType(), String.valueOf(year)));
         }
         return ConvertUtil.convertTree(list, treeVO -> "0".equals(treeVO.getParentId()));
     }
@@ -83,16 +92,85 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
      * @param unitId
      * @param reportId
      * @param reportStatus
+     * @param content
      * @return
      */
-    public List<indicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer reportStatus) {
-        return this.baseMapper.getByReportId(id, unitId, reportId, reportStatus);
+    public List<IndicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer reportStatus, String content) {
+        List<IndicatorsTreeTreeVO> treeTreeVOS = this.baseMapper.getByReportId(id, unitId, reportId, reportStatus, content);
+        Set<IndicatorsTreeTreeVO> all = new LinkedHashSet<>();
+        if (StrUtil.isNotBlank(content)) {
+            for (IndicatorsTreeTreeVO treeTreeVO : treeTreeVOS) {
+                all.add(treeTreeVO);
+                Set<IndicatorsTreeTreeVO> prentById = getPrentById(treeTreeVO.getParentId());
+                if (prentById != null) {
+                    all.addAll(prentById);
+                }
+                Set<IndicatorsTreeTreeVO> children = getChildrenById(treeTreeVO.getId());
+                all.addAll(children);
+            }
+        }else {
+           return treeTreeVOS;
+        }
+        return new ArrayList<>(all);
+    }
+
+    /**
+     * 获取所有父级
+     *
+     * @param id
+     * @return
+     */
+    public Set<IndicatorsTreeTreeVO> getPrentById(String id) {
+        Set<IndicatorsTreeTreeVO> set = new LinkedHashSet<>();
+        IndicatorsTreeTreeVO tree = this.baseMapper.getIndicatorsTreeTreeVOById(id);
+        if (tree.getAssessmentType() == 0) {
+            return null;
+        }
+        set.add(tree);
+        while (tree.getAssessmentType() != 1) {
+            tree = this.baseMapper.getIndicatorsTreeTreeVOById(tree.getParentId());
+            set.add(tree);
+        }
+        return set;
+    }
+
+    /**
+     * 获取所有子级
+     *
+     * @param id
+     * @return
+     */
+    public Set<IndicatorsTreeTreeVO> getChildrenById(String id) {
+        Set<IndicatorsTreeTreeVO> set = new LinkedHashSet<>();
+        //获得子集
+        List<IndicatorsTreeTreeVO> tree2 = this.baseMapper.getIndicatorsTreeTreeVOByPId(id);
+        for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : tree2) {
+            set.add(indicatorsTreeTreeVO);
+            List<IndicatorsTreeTreeVO> VOByPId3 = this.baseMapper.getIndicatorsTreeTreeVOByPId(indicatorsTreeTreeVO.getId());
+            if (CollUtil.isNotEmpty(VOByPId3)) {
+                for (IndicatorsTreeTreeVO treeTreeVO : VOByPId3) {
+                    set.add(treeTreeVO);
+                    if (treeTreeVO.getAssessmentType()==3){
+                        List<IndicatorsTreeTreeVO> VOByPId4 = this.detailService.getByParentId(treeTreeVO.getId(), LoginUserUtil.getUnitId());
+                        set.addAll(VOByPId4);
+                    }else {
+                        List<IndicatorsTreeTreeVO> tree3 = this.baseMapper.getIndicatorsTreeTreeVOByPId(treeTreeVO.getId());
+                        for (IndicatorsTreeTreeVO treeVO : tree3) {
+                            set.add(treeVO);
+                            List<IndicatorsTreeTreeVO> VOByPId4 = this.detailService.getByParentId(treeVO.getId(),LoginUserUtil.getUnitId());
+                            set.addAll(VOByPId4);
+                        }
+                    }
+                }
+            }
+        }
+        return set;
     }
 
     @Override
-    public List<indicatorsTreeTreeVO> indicatorsChildrenTree(String id) {
-        List<indicatorsTreeTreeVO> list = this.baseMapper.getByIndicatorId(id);
-        for (indicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
+    public List<IndicatorsTreeTreeVO> indicatorsChildrenTree(String id) {
+        List<IndicatorsTreeTreeVO> list = this.baseMapper.getByIndicatorId(id);
+        for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
             if (indicatorsTreeTreeVO.getAssessmentType() == 1) {
                 indicatorsTreeTreeVO.setParentId("0");
             }
@@ -111,8 +189,8 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             }
             indicatorsTreeTreeVO.setFraction(this.detailService.getScoreByType(indicatorsTreeTreeVO.getId(), indicatorsTreeTreeVO.getAssessmentType(), String.valueOf(DateUtil.year(new Date()))));
         }
-        List<indicatorsTreeTreeVO> indicatorsTreeTreeVOS = ConvertUtil.convertTree(list, treeVO -> "0".equals(treeVO.getParentId()));
-        return indicatorsTreeTreeVOS.stream().filter(indicatorsTreeTreeVO -> indicatorsTreeTreeVO.getId().equals(id)).collect(Collectors.toList());
+        List<IndicatorsTreeTreeVO> IndicatorsTreeTreeVOS = ConvertUtil.convertTree(list, treeVO -> "0".equals(treeVO.getParentId()));
+        return IndicatorsTreeTreeVOS.stream().filter(indicatorsTreeTreeVO -> indicatorsTreeTreeVO.getId().equals(id)).collect(Collectors.toList());
     }
 
     @Override
@@ -165,14 +243,18 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             throw new BaseBusinessException(400, "当前年已发布,不许添加新的考核指标");
         }
         if (updateTaskVO.getAssessmentType() != 4) {
-//            AssessmentIndicators name = this.baseMapper.getByName(updateTaskVO.getIndicatorsName(), DateUtil.year(new Date()));
-//            if (name!=null){
-//                throw new BaseBusinessException(400,"指标已存在,请重新");
-//            }
+            AssessmentIndicators name = this.baseMapper.getByNameAndPid(updateTaskVO.getIndicatorsName(), updateTaskVO.getParentId());
+            if (name != null) {
+                throw new BaseBusinessException(400, "指标已存在,不许添加!");
+            }
             AssessmentIndicators assessmentIndicators = BeanUtil.toBean(updateTaskVO, AssessmentIndicators.class);
             assessmentIndicators.setAssessmentYear(String.valueOf(DateUtil.year(new Date())));
             this.save(assessmentIndicators);
         } else {
+            AssessmentIndicatorsDetail detail = this.detailService.getByNameAndPid(updateTaskVO.getIndicatorsName(), updateTaskVO.getParentId());
+            if (detail != null) {
+                throw new BaseBusinessException(400, "考核指标已存在,不许添加!");
+            }
             AssessmentIndicatorsDetail indicatorsDetail = this.getDetail(updateTaskVO.getParentId());
             indicatorsDetail.setFraction(updateTaskVO.getFraction());
             indicatorsDetail.setInstructions(updateTaskVO.getInstructions());
@@ -212,6 +294,9 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                 throw new BaseBusinessException(400, "已发布不可再发布!");
             }
         }
+        if (new Date().getTime() > DateUtil.parseDateTime(releaseAssessmentVO.getExpirationDate()).getTime()) {
+            throw new BaseBusinessException(400, "截止时间必须大于当前时间!");
+        }
         AssessmentIndicators assessmentIndicators = new AssessmentIndicators();
         assessmentIndicators.setIndicatorsStatus(1);
         assessmentIndicators.setExpirationDate(releaseAssessmentVO.getExpirationDate());
@@ -238,11 +323,12 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     public IPage<AssessmentVO> assessmentPage(AssessmentPageVO assessmentPageVO) {
         IPage<AssessmentVO> page = assessmentPageVO.getPage();
         page = this.baseMapper.assessmentPage(page, assessmentPageVO);
-        List<String> year=new ArrayList<>();
-        List<AssessmentVO> AssessmentVOs=new ArrayList<>();
+        List<String> year = new ArrayList<>();
+        List<AssessmentVO> AssessmentVOs = new ArrayList<>();
         for (AssessmentVO record : page.getRecords()) {
-            record.setUnitNumber(unitManageService.list().size());
-            if (!year.contains( record.getAssessmentYear())){
+            Integer number = this.baseMapper.getUnitNumberByYear(record.getAssessmentYear());
+            record.setUnitNumber(number);
+            if (!year.contains(record.getAssessmentYear())) {
                 AssessmentVOs.add(record);
                 year.add(record.getAssessmentYear());
             }
@@ -257,12 +343,12 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     }
 
     @Override
-    public List<indicatorsTreeTreeVO> getTreeById(String id) {
+    public List<IndicatorsTreeTreeVO> getTreeById(String id) {
         AssessmentIndicatorsDetail detail = detailService.getById(id);
-        List<indicatorsTreeTreeVO> tree = new ArrayList<>();
+        List<IndicatorsTreeTreeVO> tree = new ArrayList<>();
         //新增项目
         AssessmentIndicators indicators = this.getById(detail.getProjectId());
-        indicatorsTreeTreeVO indicatorsTreeTreeVO = new indicatorsTreeTreeVO();
+        IndicatorsTreeTreeVO indicatorsTreeTreeVO = new IndicatorsTreeTreeVO();
         indicatorsTreeTreeVO.setId(indicators.getIndicatorsId());
         indicatorsTreeTreeVO.setParentId("0");
         indicatorsTreeTreeVO.setAssessmentType(1);
@@ -272,7 +358,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         //新增任务
         if (detail.getTaskId() != null) {
             indicators = this.getById(detail.getTaskId());
-            indicatorsTreeTreeVO = new indicatorsTreeTreeVO();
+            indicatorsTreeTreeVO = new IndicatorsTreeTreeVO();
             indicatorsTreeTreeVO.setId(indicators.getIndicatorsId());
             indicatorsTreeTreeVO.setParentId(detail.getProjectId());
             indicatorsTreeTreeVO.setAssessmentType(2);
@@ -280,7 +366,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             indicatorsTreeTreeVO.setFile("文件夹");
             tree.add(indicatorsTreeTreeVO);
             indicators = this.getById(detail.getAssessmentId());
-            indicatorsTreeTreeVO = new indicatorsTreeTreeVO();
+            indicatorsTreeTreeVO = new IndicatorsTreeTreeVO();
             indicatorsTreeTreeVO.setId(indicators.getIndicatorsId());
             indicatorsTreeTreeVO.setParentId(indicators.getIndicatorsId());
             indicatorsTreeTreeVO.setAssessmentType(3);
@@ -289,7 +375,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             tree.add(indicatorsTreeTreeVO);
         } else {
             indicators = this.getById(detail.getAssessmentId());
-            indicatorsTreeTreeVO = new indicatorsTreeTreeVO();
+            indicatorsTreeTreeVO = new IndicatorsTreeTreeVO();
             indicatorsTreeTreeVO.setId(indicators.getIndicatorsId());
             indicatorsTreeTreeVO.setParentId(detail.getProjectId());
             indicatorsTreeTreeVO.setAssessmentType(3);
@@ -297,7 +383,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             indicatorsTreeTreeVO.setFile("文件夹");
             tree.add(indicatorsTreeTreeVO);
         }
-        indicatorsTreeTreeVO = new indicatorsTreeTreeVO();
+        indicatorsTreeTreeVO = new IndicatorsTreeTreeVO();
         indicatorsTreeTreeVO.setId(detail.getDetailId());
         indicatorsTreeTreeVO.setParentId(detail.getAssessmentId());
         indicatorsTreeTreeVO.setAssessmentType(4);
@@ -315,8 +401,127 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     }
 
     @Override
-    public List<indicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO) {
-        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), null);
+    public List<IndicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO) {
+        Integer status=null;
+        if (StrUtil.isNotBlank(auditTreeVO.getReportStatus())){
+            status=Integer.parseInt(auditTreeVO.getReportStatus());
+            if (status==2){
+                status=7;
+            }
+        }
+        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(),status , auditTreeVO.getContent());
+    }
+
+
+    @Override
+    public void copyTask(Integer year) {
+        int nowYear = DateUtil.year(new Date());
+        if (nowYear == year) {
+            throw new BaseBusinessException(400, "不许复制当前年指标");
+        }
+        List<IndicatorsTreeTreeVO> treeTreeVOList = this.baseMapper.getByYear(year, 0);
+        List<AssessmentIndicators> assessmentIndicators = new ArrayList<>();
+        List<AssessmentIndicatorsDetail> details = new ArrayList<>();
+        //key旧id value新id
+        Map<String, String> idMap = new LinkedHashMap<>();
+        for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : treeTreeVOList) {
+            String newId = UUID.randomUUID().toString();
+            //存放
+            idMap.put(indicatorsTreeTreeVO.getId(), newId);
+            treeTreeVOList.stream().filter(vo -> vo.getParentId().equals(indicatorsTreeTreeVO.getId())).forEach(vo -> vo.setParentId(newId));
+            indicatorsTreeTreeVO.setId(newId);
+            if (indicatorsTreeTreeVO.getAssessmentType() == 4) {
+                AssessmentIndicatorsDetail indicatorsDetail = this.getDetail(indicatorsTreeTreeVO.getParentId());
+                AssessmentIndicatorsDetail detail = BeanUtil.toBean(indicatorsTreeTreeVO, AssessmentIndicatorsDetail.class);
+                detail.setIndicatorsId(idMap.get(indicatorsDetail.getInstructions()));
+                detail.setProjectId(idMap.get(indicatorsDetail.getProjectId()));
+                detail.setTaskId(idMap.get(indicatorsDetail.getTaskId()));
+                detail.setAssessmentId(idMap.get(indicatorsDetail.getAssessmentId()));
+                details.add(detail);
+            } else {
+                AssessmentIndicators indicators = BeanUtil.toBean(indicatorsTreeTreeVO, AssessmentIndicators.class);
+                indicators.setAssessmentYear(String.valueOf(nowYear));
+                assessmentIndicators.add(indicators);
+            }
+        }
+        this.saveBatch(assessmentIndicators);
+        this.detailService.saveBatch(details);
+
+    }
+
+    @Override
+    public int getScoreSum(Integer year) {
+        Integer scoreSumByYear = this.baseMapper.getScoreSumByYear(year);
+        return scoreSumByYear == null ? 0 : scoreSumByYear;
+    }
+
+    @Override
+    public void export(Integer year, HttpServletResponse response) {
+        List<IndicatorsTreeTreeVO> tree = this.indicatorsTree(year, 2);
+
+        Word07Writer writer = new Word07Writer();
+        writer.addText(new Font("方正小标宋简体", Font.PLAIN, 20), "               ", year + "年指标方案");
+        int i = 0;
+        for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : tree) {
+            i++;
+            // 添加段落（分组）
+            writer.addText(new Font("方正小标宋简体", Font.PLAIN, 10), i + "", indicatorsTreeTreeVO.getTitle(), "   分数:" + indicatorsTreeTreeVO.getFraction());
+            int j = 0;
+            for (IndicatorsTreeTreeVO child : indicatorsTreeTreeVO.getChildren()) {
+                j++;
+                // 添加段落（项目）
+                writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j, child.getTitle(), "   分数:" + child.getFraction());
+                if (child.getChildren() == null) {
+                    continue;
+                }
+                int k = 0;
+                for (IndicatorsTreeTreeVO childChild : child.getChildren()) {
+                    k++;
+                    // 添加段落（任务）
+                    writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k, childChild.getTitle(), "   分数:" + childChild.getFraction());
+                    if (childChild.getChildren() == null) {
+                        continue;
+                    }
+                    int l = 0;
+                    for (IndicatorsTreeTreeVO childChildChild : childChild.getChildren()) {
+                        l++;
+                        // 添加段落（考核指标）
+                        if (childChildChild.getAssessmentType() == 4) {
+                            childChildChild.setTitle("考核标准:" + childChildChild.getTitle());
+                        }
+                        writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k + "-" + l, childChildChild.getTitle(), "   分数:" + childChildChild.getFraction());
+                        if (childChildChild.getAssessmentType() == 4) {
+                            writer.addText(new Font("宋体", Font.PLAIN, 10), "申报填报说明:" + childChildChild.getInstructions());
+                        }
+                        if (childChildChild.getChildren() == null) {
+                            continue;
+                        }
+                        int m = 0;
+                        for (IndicatorsTreeTreeVO childChildChildChild : childChildChild.getChildren()) {
+                            m++;
+                            // 添加段落（考核指标）
+                            if (childChildChild.getAssessmentType() == 4) {
+                                childChildChild.setTitle("考核标准:" + childChildChild.getTitle());
+                            }
+                            // 添加段落（考核标准）
+                            writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k + "-" + l + "-" + m, childChildChildChild.getTitle(), "   分数:" + childChildChildChild.getFraction());
+                            if (childChildChild.getAssessmentType() == 4) {
+                                writer.addText(new Font("宋体", Font.PLAIN, 10), "申报填报说明:" + childChildChildChild.getInstructions());
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        String fileName = year + "年指标方案.docx";
+        File file = FileUtil.file(Constants.TMP_HOME + fileName);
+        // 写出到文件
+        writer.flush(file);
+        // 关闭
+        writer.close();
+        byte[] bytes = DownloadFile.File2byte(file);
+        DownloadFile.downloadFile(bytes, fileName, response, false);
     }
 
 }

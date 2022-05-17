@@ -14,10 +14,10 @@ import com.tree.clouds.assessment.service.FileInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,18 +44,16 @@ public class AssessmentIndicatorsController {
     @Log("考核指标配置目录树")
     @PostMapping("/indicatorsTree/{year}")
     @ApiOperation(value = "考核指标配置目录树")
-
-    public RestResponse<List<indicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year) {
-        List<indicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year,1);
+    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year) {
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year, 1);
         return RestResponse.ok(tree);
     }
 
     @Log("考核指标配置子集目录树")
     @PostMapping("/indicatorsChildrenTree/{id}")
     @ApiOperation(value = "考核指标配置子集目录树")
-
-    public RestResponse<List<indicatorsTreeTreeVO>> indicatorsChildrenTree(@PathVariable String id) {
-        List<indicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsChildrenTree(id);
+    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsChildrenTree(@PathVariable String id) {
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsChildrenTree(id);
         return RestResponse.ok(tree);
     }
 
@@ -63,8 +61,8 @@ public class AssessmentIndicatorsController {
     @PostMapping("/getTreeById/{id}")
     @ApiOperation(value = "根据考核标准查询目录树")
 
-    public RestResponse<List<indicatorsTreeTreeVO>> getTreeById(@PathVariable String id) {
-        List<indicatorsTreeTreeVO> tree = assessmentIndicatorsService.getTreeById(id);
+    public RestResponse<List<IndicatorsTreeTreeVO>> getTreeById(@PathVariable String id) {
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.getTreeById(id);
         return RestResponse.ok(tree);
     }
 
@@ -104,6 +102,7 @@ public class AssessmentIndicatorsController {
         assessmentIndicatorsService.deleteIndicators(publicIdsReqVO.getIds());
         return RestResponse.ok(true);
     }
+
     @Log("删除考核标准")
     @PostMapping("/deleteAssessment")
     @ApiOperation(value = "删除考核标准")
@@ -136,10 +135,32 @@ public class AssessmentIndicatorsController {
     public RestResponse<AssessmentIndicatorsDetail> getAssessmentIndicators(@PathVariable String id) {
         AssessmentIndicatorsDetail assessmentIndicators = assessmentIndicatorsDetailService.getById(id);
         List<FileInfo> fileInfos = fileInfoService.getByBizIdsAndType(assessmentIndicators.getDetailId(), null);
-        List<FileInfoVO> collect = fileInfos.stream().map(fileInfo -> BeanUtil.toBean(fileInfo, FileInfoVO.class)).collect(Collectors.toList());
-        assessmentIndicators.setFileInfoVOS(collect);
+//        List<FileInfoVO> collect = fileInfos.stream().map(fileInfo -> BeanUtil.toBean(fileInfo, FileInfoVO.class)).collect(Collectors.toList());
+        assessmentIndicators.setFileInfoVOS(fileInfos);
         return RestResponse.ok(assessmentIndicators);
     }
 
+    @Log("复制项目")
+    @PostMapping("/copyTask/{year}")
+    @ApiOperation(value = "复制项目根据年份")
+    public RestResponse<Boolean> copyTask(@PathVariable Integer year) {
+        assessmentIndicatorsService.copyTask(year);
+        return RestResponse.ok(true);
+    }
+
+    @Log("导出项目")
+    @GetMapping("/export/{year}")
+    @ApiOperation(value = "导出项目根据年份")
+    public void export(@PathVariable Integer year, HttpServletResponse response) {
+        assessmentIndicatorsService.export(year,response);
+    }
+
+    @Log("配置总分值 总分值")
+    @PostMapping("/getScoreSum/{year}")
+    @ApiOperation(value = "配置总分值")
+    public RestResponse<Integer> getScoreSum(@PathVariable Integer year) {
+        int score = assessmentIndicatorsService.getScoreSum(year);
+        return RestResponse.ok(score);
+    }
 }
 

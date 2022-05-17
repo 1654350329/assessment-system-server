@@ -26,9 +26,11 @@ public interface ScoreRecordService extends IService<ScoreRecord> {
 
     double getExpertRating(String unitId, String assessmentYear);
 
-    List<indicatorsTreeTreeVO> scoreTree(AuditTreeVO auditTreeVO);
+    List<IndicatorsTreeTreeVO> scoreTree(AuditTreeVO auditTreeVO);
 
     ScoreRecord getByReportId(String id);
 
     void updateStatusByYearAndUnit(String assessmentYear, String unitId);
+
+    List<ScoreRecord> getByTypeAndUnitIdAndYear(String unitId, String assessmentYear,Integer type);
 }

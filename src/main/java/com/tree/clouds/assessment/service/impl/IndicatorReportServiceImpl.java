@@ -1,7 +1,6 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,6 +11,7 @@ import com.tree.clouds.assessment.mapper.IndicatorReportMapper;
 import com.tree.clouds.assessment.model.vo.*;
 import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tree.clouds.assessment.utils.BaseBusinessException;
 import com.tree.clouds.assessment.utils.ConvertUtil;
 import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +68,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     //获取分配指标数
                     indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(unitManage.getUnitId()));
                     //获取提交材料数
-                   Integer ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId());
+                    Integer ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId());
                     indicatorReportVO.setSubmitNumber(ids);
                     //获取通过审核数
                     indicatorReportVO.setPassNumber(this.baseMapper.getStatusNumber(unitManage.getUnitId(), 1, null));
@@ -83,8 +83,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     indicatorReportVO.setUnitName(unitManage.getUnitName());
                     indicatorReportVO.setUnitId(unitManage.getUnitId());
                     //已评数
-                    indicatorReportVO.setReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 1, DateUtil.year(new Date())));
-                    indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0, DateUtil.year(new Date())));
+                    indicatorReportVO.setReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 1, Integer.parseInt(record.getAssessmentYear())));
+                    indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0, Integer.parseInt(record.getAssessmentYear())));
                     //是否完成填报
                     return indicatorReportVO;
                 }).collect(Collectors.toList());
@@ -149,7 +149,18 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     @Override
     @Transactional
     public void updateReport(UpdateReportVO updateReportVO, int progress) {
+        //判断填报时间是否截止
         IndicatorReport one = this.getById(updateReportVO.getReportId());
+        AssessmentIndicators assessmentIndicators = assessmentIndicatorsService.getById(one.getIndicatorsId());
+        if (new Date().getTime() > DateUtil.parseDateTime(assessmentIndicators.getExpirationDate()).getTime()) {
+            throw new BaseBusinessException(400, "填报时间已截止!");
+        }
+
+        AssessmentIndicatorsDetail detail = detailService.getById(one.getDetailId());
+        if (StrUtil.isNotBlank(updateReportVO.getUserScore()) && Double.parseDouble(updateReportVO.getUserScore()) > detail.getFraction()) {
+            throw new BaseBusinessException(400, "自评分数不许大于考核指标分数");
+        }
+
         one.setUserScore(updateReportVO.getUserScore());
         one.setIllustrate(updateReportVO.getIllustrate());
         one.setCreatedUser(LoginUserUtil.getUserId());
@@ -162,11 +173,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         fileInfoService.deleteByBizId(one.getReportId());
         fileInfoService.saveFileInfo(updateReportVO.getFileInfoVOS(), one.getReportId());
         //新增报送历史日志
-        AssessmentIndicators assessmentIndicators = assessmentIndicatorsService.getById(one.getIndicatorsId());
-        AssessmentIndicatorsDetail detail = detailService.getById(one.getDetailId());
-        submitLogService.addLog(assessmentIndicators, detail.getAssessmentCriteria(), null, null, LoginUserUtil.getUnitId(), one.getReportTime());
+        submitLogService.addLog(assessmentIndicators, detail.getAssessmentCriteria(), 0, null, LoginUserUtil.getUnitId(), one.getReportTime(), one.getReportId());
         //新增到初审
-
         AuditLog auditLog = new AuditLog();
         auditLog.setDetailId(one.getDetailId());
         auditLog.setReportId(one.getReportId());
@@ -236,15 +244,16 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
      * @param id
      * @param unitId
      * @param reportId
+     * @param content
      * @return
      */
     @Override
-    public List<indicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId, Integer indicatorsStatus) {
-        if (unitId == null) {
+    public List<IndicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId, Integer indicatorsStatus, String content) {
+        if (StrUtil.isBlank(unitId)) {
             unitId = LoginUserUtil.getUnitId();
         }
-        List<indicatorsTreeTreeVO> list = this.assessmentIndicatorsService.getByReportId(id, unitId, reportId, indicatorsStatus);
-        for (indicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
+        List<IndicatorsTreeTreeVO> list = this.assessmentIndicatorsService.getByReportId(id, unitId, reportId, indicatorsStatus, content);
+        for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
             if (indicatorsTreeTreeVO.getAssessmentType() == 1) {
                 indicatorsTreeTreeVO.setParentId("0");
             }
@@ -257,16 +266,22 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 if (one == null) {
                     continue;
                 }
+
                 AssessmentIndicators indicators = assessmentIndicatorsService.getById(one.getIndicatorsId());
                 one.setExpirationDate(indicators.getExpirationDate());
+
                 UserManage userManage = userManageService.getById(one.getCreatedUser());
                 one.setCreatedUser(userManage.getUserName());
                 one.setPhoneNumber(userManage.getPhoneNumber());
-                List<FileInfo> reportFileInfo = fileInfoService.getByBizIdsAndType(one.getDetailId(), null);
-                one.setFileInfoVOS(reportFileInfo);
-
                 //获取考核指标信息
                 AssessmentIndicatorsDetail detail = this.detailService.getById(one.getDetailId());
+                List<FileInfo> detailFileInfo = fileInfoService.getByBizIdsAndType(detail.getDetailId(), null);
+                detail.setFileInfoVOS(detailFileInfo);
+                AssessmentIndicators project = assessmentIndicatorsService.getById(detail.getProjectId());
+                one.setReportType(StrUtil.contains(project.getEvaluationMethod(), "线上自评") ? 0 : 1);
+                List<FileInfo> reportFileInfo = fileInfoService.getByBizIdsAndType(one.getReportId(), null);
+                one.setFileInfoVOS(reportFileInfo);
+
                 indicatorsTreeTreeVO.setInstructions(detail.getInstructions());
                 List<FileInfo> fileInfos = fileInfoService.getByBizIdsAndType(detail.getDetailId(), null);
                 List<FileInfoVO> collect = fileInfos.stream().map(fileInfo -> BeanUtil.toBean(fileInfo, FileInfoVO.class)).collect(Collectors.toList());
@@ -292,8 +307,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
             }
             indicatorsTreeTreeVO.setFraction(this.detailService.getScoreByType(indicatorsTreeTreeVO.getId(), indicatorsTreeTreeVO.getAssessmentType(), String.valueOf(DateUtil.year(new Date()))));
         }
-        List<indicatorsTreeTreeVO> indicatorsTreeTreeVOS = ConvertUtil.convertTree(list, treeVO -> "0".equals(treeVO.getParentId()));
-        return indicatorsTreeTreeVOS.stream().filter(indicatorsTreeTreeVO -> indicatorsTreeTreeVO.getId().equals(id)).collect(Collectors.toList());
+        List<IndicatorsTreeTreeVO> IndicatorsTreeTreeVOS = ConvertUtil.convertTree(list, treeVO -> "0".equals(treeVO.getParentId()));
+        return IndicatorsTreeTreeVOS.stream().filter(indicatorsTreeTreeVO -> indicatorsTreeTreeVO.getId().equals(id)).collect(Collectors.toList());
     }
 
     @Override
@@ -303,7 +318,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
 
     @Override
     public Integer getReviewedNumber(String unitId, int type, Integer year) {
-        return this.baseMapper.getReviewedNumber(unitId, 1, DateUtil.year(new Date()));
+        return this.baseMapper.getReviewedNumber(unitId, type, year);
     }
 
     @Override
@@ -320,6 +335,12 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     public Double getUserScoreByUnit(String unitId, int year) {
         Double UserScore = this.baseMapper.getUserScoreByUnit(unitId, String.valueOf(year));
         return UserScore == null ? 0 : UserScore;
+    }
+
+    @Override
+    public Integer getAuditNumber(String unitId, int year) {
+        Integer number = this.baseMapper.getAuditNumber(unitId, year);
+        return number == null ? 0 : number;
     }
 
 

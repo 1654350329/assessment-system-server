@@ -39,13 +39,16 @@
             <if test="type==3">
                 and a.assessment_id=#{id}
             </if>
+            <if test="type==4">
+                and a.detail_id=#{id}
+            </if>
         </where>
     </select>
     <select id="getScoreByUnit" resultType="java.lang.Double">
         select sum(fraction) from unit_assessment a
         left join assessment_indicators_detail b on a.detail_id=b.detail_id
         <where>
-            a.unit_id=#{unitId} and indicators_id=#{id}
+            a.unit_id=#{unitId} and b.indicators_id=#{id}
         </where>
     </select>
     <select id="getCountByType" resultType="java.lang.Integer">
@@ -66,6 +69,20 @@
                 and a.assessment_id=#{id}
             </if>
         </where>
+    </select>
+    <select id="getByNameAndPid"
+            resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail">
+        select * from assessment_indicators_detail where  assessment_id=#{parentId} and assessment_criteria=#{name}
+    </select>
+    <select id="getByReportId" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail">
+        select b.* from indicator_report a left join assessment_indicators_detail b on a.detail_id =b.detail_id
+        where a.report_id=#{reportId}
+    </select>
+    <select id="getByParentId" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
+         select report_id as id ,assessment_id as parent_Id,4 as assessment_type,assessment_criteria as title
+        from indicator_report a
+        left join assessment_indicators_detail b on a.detail_id =b.detail_id
+        where b.assessment_id=#{id} and a.unit_id=#{unitId}
     </select>
 
 </mapper>

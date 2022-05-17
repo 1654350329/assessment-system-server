@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tree.clouds.assessment.model.vo.ReviewPageVO;
 import com.tree.clouds.assessment.model.vo.ReviewVO;
 
+import java.util.List;
+
 /**
  * <p>
  * 评分记录表 Mapper 接口
@@ -24,4 +26,5 @@ public interface ScoreRecordMapper extends BaseMapper<ScoreRecord> {
 
     void updateStatusByYearAndUnit(String assessmentYear, String unitId);
 
+    List<ScoreRecord> getByTypeAndUnitIdAndYear(String assessmentYear, String unitId, Integer type);
 }

@@ -4,10 +4,12 @@ import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.mapper.AssessmentIndicatorsDetailMapper;
 import com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail;
+import com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO;
 import com.tree.clouds.assessment.service.AssessmentIndicatorsDetailService;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -21,13 +23,13 @@ import java.util.Date;
 public class AssessmentIndicatorsDetailServiceImpl extends ServiceImpl<AssessmentIndicatorsDetailMapper, AssessmentIndicatorsDetail> implements AssessmentIndicatorsDetailService {
 
     @Override
-    public double getScoreByType(String id, Integer type,String year) {
-        Double score = this.baseMapper.getScoreByType(id, type,year);
+    public double getScoreByType(String id, Integer type, String year) {
+        Double score = this.baseMapper.getScoreByType(id, type, year);
         return score == null ? 0 : score;
     }
 
     @Override
-    public double getScoreByUnit(String unitId,String id) {
+    public double getScoreByUnit(String unitId, String id) {
         Double score = this.baseMapper.getScoreByUnit(unitId, id);
         return score == null ? 0 : score;
     }
@@ -35,6 +37,22 @@ public class AssessmentIndicatorsDetailServiceImpl extends ServiceImpl<Assessmen
     @Override
     public int getCountByType(String id, Integer assessmentType) {
         //todo 得改year字段
-        return  this.baseMapper.getCountByType(id,assessmentType, String.valueOf(DateUtil.year(new Date())));
+        return this.baseMapper.getCountByType(id, assessmentType, String.valueOf(DateUtil.year(new Date())));
+    }
+
+    @Override
+    public AssessmentIndicatorsDetail getByNameAndPid(String name, String parentId) {
+        return this.baseMapper.getByNameAndPid(name, parentId);
+    }
+
+    @Override
+    public AssessmentIndicatorsDetail getByReportId(String reportId) {
+        return this.baseMapper.getByReportId(reportId);
+    }
+
+    @Override
+    public List<IndicatorsTreeTreeVO> getByParentId(String id,String unitId) {
+        return   this.baseMapper.getByParentId(id,unitId);
+
     }
 }

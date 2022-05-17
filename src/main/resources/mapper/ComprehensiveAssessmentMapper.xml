@@ -12,7 +12,6 @@
         <result column="innovation_score" property="innovationScore" />
         <result column="score_sum" property="scoreSum" />
         <result column="comprehensive_status" property="comprehensiveStatus" />
-        <result column="remark" property="remark" />
         <result column="CREATED_USER" property="createdUser" />
         <result column="CREATED_TIME" property="createdTime" />
         <result column="UPDATED_USER" property="updatedUser" />
@@ -28,13 +27,27 @@
             select  a.*,b.unit_name,c.evel_name as evelId from comprehensive_assessment a
         left join unit_manage b on a.unit_id=b.unit_id
         left join evaluation_evel c on a.evel_id =c.evel_id
+        <where>
+            <if test="performancePageVO.unitName!=null and performancePageVO.unitName!=''">
+                and b.unit_name like "%"#{performancePageVO.unitName}"%"
+            </if>
+            <if test="performancePageVO.assessmentYear!=null and performancePageVO.assessmentYear!=''">
+                and a.assessment_year = #{performancePageVO.assessmentYear}
+            </if>
+            <if test="performancePageVO.evelId!=null and performancePageVO.evelId!=''">
+                and a.evel_Id = #{performancePageVO.evelId}
+            </if>
+            <if test="performancePageVO.comprehensiveProgress!=null and performancePageVO.comprehensiveProgress!=''">
+                and a.comprehensive_progress = #{performancePageVO.comprehensiveProgress}
+            </if>
+        </where>
     </select>
     <select id="getCompleteDate" resultType="com.tree.clouds.assessment.model.vo.AssessmentConditionVO">
-        select a.unit_id,b.illustrate,c.assessment_criteria  ,d.assessment_year,d.indicators_name  from indicator_report a
+        select a.unit_id,b.illustrate,c.assessment_criteria ,d.assessment_year,d.indicators_name  from indicator_report a
         left join score_record b on a.report_id=b.report_id
         left join assessment_indicators_detail c on c.detail_id=a.detail_id
         left join assessment_indicators d on d.indicators_id=a.indicators_id
-        where a.unit_id=#{unitId} and d.assessment_year=#{assessmentYear}
+        where a.unit_id=#{unitId} and d.assessment_year=#{assessmentYear} and (d.indicators_name ='正向激励加分' or d.indicators_name='绩效减分')
     </select>
 
 </mapper>

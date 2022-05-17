@@ -19,4 +19,7 @@ public class SubmitLogPageVO extends PageParam{
     @ApiModelProperty("单位主键 必传")
     private String unitId;
 
+    @ApiModelProperty("上报id")
+    private String reportId;
+
 }

@@ -5,7 +5,7 @@ import com.tree.clouds.assessment.model.entity.AssessmentIndicators;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tree.clouds.assessment.model.vo.AssessmentPageVO;
 import com.tree.clouds.assessment.model.vo.AssessmentVO;
-import com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO;
+import com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO;
 
 import java.util.List;
 
@@ -19,9 +19,9 @@ import java.util.List;
  */
 public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicators> {
 
-    List<indicatorsTreeTreeVO> getByYear(Integer year,Integer type);
+    List<IndicatorsTreeTreeVO> getByYear(Integer year, Integer type);
 
-    List<indicatorsTreeTreeVO> getByIndicatorId(String id);
+    List<IndicatorsTreeTreeVO> getByIndicatorId(String id);
 
     IPage<AssessmentVO> assessmentPage(IPage<AssessmentVO> page, AssessmentPageVO assessmentPageVO);
 
@@ -31,7 +31,18 @@ public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicat
 
     int getDistributeNumber(String id, Integer type);
 
-    List<indicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer reportStatus);
+    List<IndicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer reportStatus, String content);
 
-    AssessmentIndicators getByName(String indicatorsName,Integer year);
+    AssessmentIndicators getByNameAndPid(String indicatorsName, String pid);
+
+    Integer getScoreSumByYear(Integer year);
+
+    Integer getUnitNumberByYear(String assessmentYear);
+
+    List<IndicatorsTreeTreeVO> getByName(String content);
+
+    IndicatorsTreeTreeVO getIndicatorsTreeTreeVOById(String parentId);
+
+    List<IndicatorsTreeTreeVO> getIndicatorsTreeTreeVOByPId(String id);
+
 }

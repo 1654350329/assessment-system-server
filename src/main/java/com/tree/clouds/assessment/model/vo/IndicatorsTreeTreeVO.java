@@ -9,19 +9,17 @@ import com.tree.clouds.assessment.model.entity.ScoreRecord;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 @Data
-public class indicatorsTreeTreeVO implements ITree<indicatorsTreeTreeVO> {
+public class IndicatorsTreeTreeVO implements ITree<IndicatorsTreeTreeVO> {
     @ApiModelProperty(value = "指标主键")
     private String id;
 
     @ApiModelProperty(value = "parent_Id")
     private String parentId;
 
-    @ApiModelProperty(value = "目录级别 0顶级目录1项目2指标任务3考评标准")
+    @ApiModelProperty(value = "目录级别 0顶级目录1项目2指标任务3考评标准4考核标准")
     private Integer assessmentType;
 
     @ApiModelProperty(value = "指标名称")
@@ -45,7 +43,7 @@ public class indicatorsTreeTreeVO implements ITree<indicatorsTreeTreeVO> {
     private List<FileInfoVO> fileInfoVOS;
 
     @ApiModelProperty(value = "子集")
-    private  List<indicatorsTreeTreeVO> children;
+    private  List<IndicatorsTreeTreeVO> children;
 
     @ApiModelProperty(value = "未分配")
     private Integer unallocated;

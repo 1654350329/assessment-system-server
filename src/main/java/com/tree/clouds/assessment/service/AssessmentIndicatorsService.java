@@ -5,6 +5,7 @@ import com.tree.clouds.assessment.model.entity.AssessmentIndicators;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tree.clouds.assessment.model.vo.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -17,11 +18,11 @@ import java.util.List;
  */
 public interface AssessmentIndicatorsService extends IService<AssessmentIndicators> {
 
-    List<indicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type);
+    List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type);
 
-    List<indicatorsTreeTreeVO> indicatorsChildrenTree(String id);
+    List<IndicatorsTreeTreeVO> indicatorsChildrenTree(String id);
 
-    List<indicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer indicatorsStatus);
+    List<IndicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer indicatorsStatus, String content);
 
     AssessmentIndicators evaluationStandard(String id);
 
@@ -41,9 +42,15 @@ public interface AssessmentIndicatorsService extends IService<AssessmentIndicato
 
     void updateExpirationDate(String assessmentYear, String expirationDate);
 
-    List<indicatorsTreeTreeVO> getTreeById(String id);
+    List<IndicatorsTreeTreeVO> getTreeById(String id);
 
     List<AssessmentIndicators> getGroupByYear(String year);
 
-    List<indicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO);
+    List<IndicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO);
+
+    void copyTask(Integer year);
+
+    int getScoreSum(Integer year);
+
+    void export(Integer year ,HttpServletResponse response);
 }

@@ -126,15 +126,19 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
 
     @Override
     public void addUserManage(UserManageBO userManageBO) {
+        if (StrUtil.isNotBlank(userManageBO.getUserId())){
+            updateUserManage(userManageBO);
+            return;
+        }
         UserManage userByAccount = this.getUserByAccount(userManageBO.getAccount());
         if (userByAccount != null) {
             throw new BaseBusinessException(400, "账号已存在,请重新输入!!");
         }
         //手机号码正则匹配
-        String REGEX_MOBILE = "((\\+86|0086)?\\s*)((134[0-8]\\d{7})|(((13([0-3]|[5-9]))|(14[5-9])|15([0-3]|[5-9])|(16(2|[5-7]))|17([0-3]|[5-8])|18[0-9]|19(1|[8-9]))\\d{8})|(14(0|1|4)0\\d{7})|(1740([0-5]|[6-9]|[10-12])\\d{7}))";
-        if (!Pattern.matches(REGEX_MOBILE, userManageBO.getPhoneNumber())) {
-            throw new BaseBusinessException(400, "手机号码不合法");
-        }
+//        String REGEX_MOBILE = "((\\+86|0086)?\\s*)((134[0-8]\\d{7})|(((13([0-3]|[5-9]))|(14[5-9])|15([0-3]|[5-9])|(16(2|[5-7]))|17([0-3]|[5-8])|18[0-9]|19(1|[8-9]))\\d{8})|(14(0|1|4)0\\d{7})|(1740([0-5]|[6-9]|[10-12])\\d{7}))";
+//        if (!Pattern.matches(REGEX_MOBILE, userManageBO.getPhoneNumber())) {
+//            throw new BaseBusinessException(400, "手机号码不合法");
+//        }
         UserManage userManage = BeanUtil.toBean(userManageBO, UserManage.class);
         String password = bCryptPasswordEncoder.encode(Base64.decodeStr(userManage.getPassword()));
         userManage.setPassword(password);

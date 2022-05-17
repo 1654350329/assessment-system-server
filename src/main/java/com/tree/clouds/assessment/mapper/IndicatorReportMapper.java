@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.tree.clouds.assessment.model.entity.AssessmentIndicators;
 import com.tree.clouds.assessment.model.entity.IndicatorReport;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tree.clouds.assessment.model.vo.AssessmentListVO;
@@ -33,7 +34,11 @@ public interface IndicatorReportMapper extends BaseMapper<IndicatorReport> {
 
     List<AssessmentListVO> getAssessmentList(String unitId);
 
-    Integer getReviewedNumber(String unitId, int type,int year);
+    Integer getReviewedNumber(String unitId,int type,int year);
 
-    int getDistributeSum(String unitId, String year);
+    Integer getDistributeSum(String unitId, String year);
+
+    AssessmentIndicators getAssessmentIndicatorsByReportId(String reportId);
+
+    Integer getAuditNumber(String unitId, int year);
 }

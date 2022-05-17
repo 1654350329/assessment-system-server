@@ -28,6 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/swagger-resources",
             "/webjars/**",
             "/v2/api-docs/**",
+            "/indicators/export/**",
+            "/comprehensive-assessment/exportDate/**"
 
     };
     @Autowired

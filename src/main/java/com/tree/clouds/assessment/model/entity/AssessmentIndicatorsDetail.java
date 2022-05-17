@@ -64,7 +64,7 @@ public class AssessmentIndicatorsDetail extends BaseEntity {
 
     @ApiModelProperty(value = "附件")
     @TableField(exist = false)
-    private List<FileInfoVO> fileInfoVOS;
+    private List<FileInfo> fileInfoVOS;
 
 
 }

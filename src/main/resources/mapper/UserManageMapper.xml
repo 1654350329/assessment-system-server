@@ -15,8 +15,6 @@
         <result column="ACCOUNT" property="account"/>
         <result column="PASSWORD" property="password"/>
         <result column="salt" property="salt"/>
-        <result column="WECHAT_AUTHORIZATION" property="wechatAuthorization"/>
-        <result column="RECEIVE_NOTICE_STATUS" property="receiveNoticeStatus"/>
         <result column="ACCOUNT_STATUS" property="accountStatus"/>
         <result column="REMARK" property="remark"/>
         <result column="CREATED_USER" property="createdUser"/>
@@ -32,13 +30,10 @@
     </sql>
 
     <select id="userManagePage" resultType="com.tree.clouds.assessment.model.bo.UserManageBO">
-        select a.*,b.unit_id ,c.unit_name from user_manage a
+        select distinct a.*,b.unit_id ,c.unit_name from user_manage a
         left join unit_user b on a.user_id=b.user_id
         left join unit_manage c on b.unit_id=c.unit_id
-        <if test="userManagePageVO.roleName != null and userManagePageVO.roleName != ''">
-            left join role_user c on a.user_id=c.user_id
-            left join role_manage d on c.role_id=d.role_id
-        </if>
+        left join role_user d on a.user_id=d.user_id
         where 1=1 and a.del=0
         <if test="userManagePageVO.unitId != null and userManagePageVO.unitId != ''">
             and b.unit_id =#{userManagePageVO.unitId}
@@ -49,8 +44,11 @@
         <if test="userManagePageVO.userName != null and userManagePageVO.userName != ''">
             and a.user_name like "%"#{userManagePageVO.userName}"%"
         </if>
-        <if test="userManagePageVO.roleName != null and userManagePageVO.roleName != ''">
-            and b.role_name like "%"#{userManagePageVO.roleName}"%"
+        <if test="userManagePageVO.roleIds != null and userManagePageVO.roleIds != ''">
+            and d.role_id in
+            <foreach collection="userManagePageVO.roleIds" item="id" separator="," open="(" close=")">
+                #{id}
+            </foreach>
         </if>
 
     </select>

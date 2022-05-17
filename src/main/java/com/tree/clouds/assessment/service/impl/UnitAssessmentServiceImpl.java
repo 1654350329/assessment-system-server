@@ -9,7 +9,7 @@ import com.tree.clouds.assessment.model.entity.UnitAssessment;
 import com.tree.clouds.assessment.mapper.UnitAssessmentMapper;
 import com.tree.clouds.assessment.model.entity.UnitManage;
 import com.tree.clouds.assessment.model.vo.UnitVO;
-import com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO;
+import com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO;
 import com.tree.clouds.assessment.service.AssessmentIndicatorsService;
 import com.tree.clouds.assessment.service.UnitAssessmentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -99,7 +99,7 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
 
     @Override
     public List<Integer> getScoreByYearAndUnit(String assessmentYear, String unitId) {
-        List<indicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(Integer.valueOf(assessmentYear),1);
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(Integer.valueOf(assessmentYear),1);
 //        this.list()
         return null;
     }

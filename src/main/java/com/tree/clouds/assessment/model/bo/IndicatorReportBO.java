@@ -2,12 +2,12 @@ package com.tree.clouds.assessment.model.bo;
 
 import com.tree.clouds.assessment.model.entity.AuditLog;
 import com.tree.clouds.assessment.model.entity.IndicatorReport;
-import com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO;
+import com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class IndicatorReportBO extends indicatorsTreeTreeVO {
+public class IndicatorReportBO extends IndicatorsTreeTreeVO {
 
 
     @ApiModelProperty(value = "报送信息")

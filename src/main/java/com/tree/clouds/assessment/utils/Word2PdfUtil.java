@@ -1,11 +1,14 @@
 package com.tree.clouds.assessment.utils;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.poi.word.Word07Writer;
 import com.aspose.words.Document;
 import com.aspose.words.ImageSaveOptions;
 import com.aspose.words.License;
 import com.aspose.words.SaveFormat;
 import org.aspectj.weaver.ast.Test;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -20,7 +23,19 @@ public class Word2PdfUtil {
 
     public static void main(String[] args) {
         //Word2PdfUtil.doc2("D:\\workhome\\server2\\assessment-system-server\\file\\通知书202112工-1.docx", "D:\\workhome\\server2\\assessment-system-server\\file\\通知书202112工-1.pdf", 40);
-        Word2PdfUtil.doc2Img("D:\\workhome\\server2\\assessment-system-server\\file\\通知书202112工-1.docx", "D:\\");
+//        Word2PdfUtil.doc2Img("D:\\workhome\\server2\\assessment-system-server\\file\\通知书202112工-1.docx", "D:\\");
+        Word07Writer writer = new Word07Writer();
+
+// 添加段落（标题）
+        writer.addText(new Font("方正小标宋简体", Font.PLAIN, 22), "   我是第一部分", "我是第二部分");
+// 添加段落（正文）
+        writer.addText(new Font("宋体", Font.PLAIN, 22), "我是正文第一部分", "我是正文第二部分");
+
+// 写出到文件
+        writer.flush(FileUtil.file("e:/wordWrite.docx"));
+// 关闭
+        writer.close();
+
     }
 
     public static boolean getLicense() {
@@ -87,4 +102,5 @@ public class Word2PdfUtil {
         }
         return filePath;
     }
+
 }

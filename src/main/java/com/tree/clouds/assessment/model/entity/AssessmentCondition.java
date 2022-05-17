@@ -37,11 +37,12 @@ public class AssessmentCondition extends BaseEntity {
 
     @ApiModelProperty(value = "考评年份")
     @TableField("assessment_year")
-    @ExcelProperty("考评年份")
+    @ExcelIgnore
     private String assessmentYear;
 
     @ApiModelProperty(value = "责任单位")
     @TableField("unit_name")
+    @ExcelIgnore
     private String unitName;
 
     @ApiModelProperty(value = "考核项目")

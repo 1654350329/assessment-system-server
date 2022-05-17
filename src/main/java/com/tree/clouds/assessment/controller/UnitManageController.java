@@ -63,7 +63,6 @@ public class UnitManageController {
     @PostMapping("/deleteGroupRole")
     @ApiOperation(value = "刪除单位")
     @Log("刪除单位")
-
     public RestResponse<Boolean> deleteGroupRole(@Validated @RequestBody PublicIdsReqVO publicIdReqVO) {
         unitManageService.deleteGroupRole(publicIdReqVO.getIds());
         return RestResponse.ok(true);

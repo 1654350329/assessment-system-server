@@ -28,7 +28,7 @@
     <update id="updateExpirationDate">
         update assessment_indicators set expiration_date=#{expirationDate} where assessment_year=#{assessmentYear}
     </update>
-    <select id="getByYear" resultType="com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO">
+    <select id="getByYear" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
         select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
         from assessment_indicators where assessment_year =#{year}
         <if test="type==1">
@@ -41,11 +41,10 @@
     <select id="getGroupByYear" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
         select * from assessment_indicators
         where (indicators_Name ='县（市、区）绩效任务' or indicators_Name ='机制创新'
-        or indicators_Name ='正向激励加分' or indicators_Name ='绩效减分' )
+        or indicators_Name ='正向激励加分' or indicators_Name ='绩效减分' ) and parent_Id=0
         <if test="year !=null and year !=''">
             and assessment_year =#{year}
         </if>
-        order by assessment_year desc
     </select>
 
     <select id="assessmentPage" resultType="com.tree.clouds.assessment.model.vo.AssessmentVO">
@@ -62,7 +61,7 @@
 
         </where>
     </select>
-    <select id="getByIndicatorId" resultType="com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO">
+    <select id="getByIndicatorId" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
            select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
         from assessment_indicators where  assessment_Type > 0
         	UNION
@@ -86,22 +85,58 @@
             and a.assessment_id=#{id}
         </if>
     </select>
-    <select id="getByReportId" resultType="com.tree.clouds.assessment.model.vo.indicatorsTreeTreeVO">
+    <select id="getByReportId" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
         select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
         from assessment_indicators where assessment_Type > 0
+        <if test="content!=null and content!=''">
+            and indicators_name like "%"#{content}"%"
+        </if>
         UNION
         select b.report_id as id ,assessment_id as parent_Id,4,assessment_criteria as title
         from assessment_indicators_detail a right join indicator_report b on a.detail_id=b.detail_id
         where b.unit_Id =#{unitId}
-        <if test="reportId!=null">
+        <if test="reportId!=null and reportId!=''">
             and b.report_id=#{reportId}
         </if>
-        <if test="reportStatus!=null">
-            and b.report_status=#{reportStatus}
+        <if test="reportStatus!=null and reportStatus!=7">
+            and b.report_progress >=#{reportStatus}
+        </if>
+        <if test="reportStatus!=null and reportStatus==7">
+            and b.report_status=2
+        </if>
+        <if test="content!=null and content!=''">
+            and (a.assessment_criteria like "%"#{content}"%" or a.instructions like "%"#{content}"%")
         </if>
     </select>
-    <select id="getByName" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
-        select * from assessment_indicators where indicators_Name=#{indicatorsName} and assessment_year=#{year}
+    <select id="getByNameAndPid" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
+        select * from assessment_indicators where indicators_Name=#{indicatorsName} and parent_Id=#{pid}
+    </select>
+    <select id="getScoreSumByYear" resultType="java.lang.Integer">
+        select sum(a.fraction) from assessment_indicators_detail a left join assessment_indicators b on  a.indicators_id=b.indicators_id
+        where b.assessment_year=#{year}
+    </select>
+    <select id="getUnitNumberByYear" resultType="java.lang.Integer">
+     select  count(distinct c.unit_id) from assessment_indicators a
+        left join assessment_indicators_detail b on a.indicators_id=b.indicators_id
+        left join unit_assessment c on c.detail_id=b.detail_id
+        where a.assessment_year =#{assessmentYear}
+    </select>
+    <select id="getByName" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+        from assessment_indicators where assessment_Type > 0
+        <if test="content!=null and content!=''">
+            and indicators_name like "%"#{content}"%"
+        </if>
+    </select>
+    <select id="getIndicatorsTreeTreeVOById"
+            resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
+          select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+        from assessment_indicators where indicators_id=#{parentId}
+    </select>
+    <select id="getIndicatorsTreeTreeVOByPId"
+            resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
+            select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+        from assessment_indicators where parent_id=#{id}
     </select>
 
 </mapper>

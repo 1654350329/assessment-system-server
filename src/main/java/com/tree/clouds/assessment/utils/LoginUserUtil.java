@@ -1,7 +1,10 @@
 package com.tree.clouds.assessment.utils;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.tree.clouds.assessment.model.entity.UserManage;
 import com.tree.clouds.assessment.security.JwtAuthenticationFilter;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * @author 林振坤
@@ -11,39 +14,44 @@ import com.tree.clouds.assessment.security.JwtAuthenticationFilter;
 public class LoginUserUtil {
 
     public static String getUserId() {
-        UserManage userManage = JwtAuthenticationFilter.getLoginUser();
-        if (userManage == null) {
+        try{
+            Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
+            if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
+                return null;
+            }
+            UserManage user = (UserManage) credentials;
+            return user.getUserId();
+        }catch (RuntimeException e){
+            e.printStackTrace();
             return null;
-        } else {
-            return userManage.getUserId();
         }
     }
 
     public static String getUserName() {
-        UserManage userManage = JwtAuthenticationFilter.getLoginUser();
-        if (userManage == null) {
+        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
             return null;
-        } else {
-            return userManage.getUserName();
         }
+        UserManage user = (UserManage) credentials;
+        return user.getUserName();
     }
 
     public static String getUnitId() {
-        UserManage userManage = JwtAuthenticationFilter.getLoginUser();
-        if (userManage == null) {
+        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
             return null;
-        } else {
-            return userManage.getUnitId();
         }
+        UserManage user = (UserManage) credentials;
+        return user.getUnitId();
     }
 
     public static String getUserAccount() {
-        UserManage userManage = JwtAuthenticationFilter.getLoginUser();
-        if (userManage == null) {
+        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
             return null;
-        } else {
-            return userManage.getAccount();
         }
+        UserManage user = (UserManage) credentials;
+        return user.getAccount();
     }
 
 }

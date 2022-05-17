@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -10,6 +11,7 @@ import com.tree.clouds.assessment.mapper.ComprehensiveAssessmentMapper;
 import com.tree.clouds.assessment.model.vo.*;
 import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tree.clouds.assessment.utils.BaseBusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,25 +66,32 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         ComprehensiveAssessment comprehensiveAssessment = BeanUtil.toBean(assessmentVO, ComprehensiveAssessment.class);
         comprehensiveAssessment.setComprehensiveProgress(1);
         this.updateById(comprehensiveAssessment);
-        ComprehensiveAssessment assessment = this.getById(comprehensiveAssessment);
-        List<IndicatorReport> list = indicatorReportService.list(new QueryWrapper<IndicatorReport>().eq(IndicatorReport.REPORT_PROGRESS, 4));
-        for (IndicatorReport indicatorReport : list) {
-            //修改上报进度
-            indicatorReportService.updateProgress(indicatorReport.getReportId(), 5);
-        }
+        ComprehensiveAssessment assessment = this.getById(comprehensiveAssessment.getComprehensiveId());
+//        List<IndicatorReport> list = indicatorReportService.list(new QueryWrapper<IndicatorReport>().eq(IndicatorReport.REPORT_PROGRESS, 4));
+//        for (IndicatorReport indicatorReport : list) {
+//            //修改上报进度
+//            indicatorReportService.updateProgress(indicatorReport.getReportId(), 5);
+//        }
+//        AssessmentIndicators indicators = assessmentIndicatorsService.getById(assessment.getIndicatorsId());
+
+
         //修改专家评分状态
         scoreRecordService.updateStatusByYearAndUnit(assessment.getAssessmentYear(), assessment.getUnitId());
+
 
     }
 
 
     @Override
     public void assessmentComplete(AssessmentCompleteVO assessmentCompleteVO) {
-        if (StrUtil.isBlank(assessmentCompleteVO.getAssessmentYear())){
+        if (StrUtil.isBlank(assessmentCompleteVO.getAssessmentYear())) {
             assessmentCompleteVO.setAssessmentYear(String.valueOf(DateUtil.year(new Date())));
         }
         List<AssessmentConditionVO> assessmentConditionVOS = this.getCompleteDate(assessmentCompleteVO.getUnitId(), assessmentCompleteVO.getAssessmentYear());
-
+        List<ScoreRecord> scoreRecords = scoreRecordService.getByTypeAndUnitIdAndYear(assessmentCompleteVO.getUnitId(), assessmentCompleteVO.getAssessmentYear(), 2);
+        if (CollUtil.isNotEmpty(scoreRecords)) {
+           throw new BaseBusinessException(400,"还有待复评,未评审!");
+        }
         //修改状态
         ComprehensiveAssessment assessment = new ComprehensiveAssessment();
         assessment.setComprehensiveProgress(2);
@@ -114,6 +123,7 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         //修改专家
         ScoreRecord scoreRecord = scoreRecordService.getByReportId(reAssessmentVO.getId());
         scoreRecord.setScoreType(2);
+        scoreRecord.setExpertStatus(0);
         scoreRecord.setRemark(reAssessmentVO.getRemark());
         this.scoreRecordService.updateById(scoreRecord);
     }

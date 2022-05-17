@@ -35,7 +35,6 @@ public class AssessmentController {
     @Log("考核指标列表分页查询")
     @PostMapping("/assessmentPage")
     @ApiOperation(value = "考核指标列表分页查询")
-
     public RestResponse<IPage<AssessmentVO>> assessmentPage(@RequestBody AssessmentPageVO assessmentPageVO) {
         IPage<AssessmentVO> page = assessmentIndicatorsService.assessmentPage(assessmentPageVO);
         return RestResponse.ok(page);

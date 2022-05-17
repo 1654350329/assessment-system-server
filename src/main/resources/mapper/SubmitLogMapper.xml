@@ -26,15 +26,18 @@
         select b.user_name as updated_User,a.* from submit_log a left join user_manage b on a.CREATED_USER=b.user_id
         <where>
         1=1
-<!--            <if test="submitLogPageVO.startTime!=null and submitLogPageVO.startTime!=''">-->
-<!--              and  a.evaluation_method>=#{submitLogPageVO.startTime}-->
-<!--            </if>-->
-<!--            <if test="submitLogPageVO.endTime!=null and submitLogVO.endTime!=''">-->
-<!--                and  a.evaluation_method &lt;= #{submitLogPageVO.endTime}-->
-<!--            </if>-->
-<!--            <if test="submitLogPageVO.status!=null and submitLogVO.status!=''">-->
-<!--                and  a.indicators_Status = #{submitLogPageVO.status}-->
-<!--            </if>-->
+            <if test="submitLogPageVO.startTime!=null and submitLogPageVO.startTime!=''">
+              and  a.evaluation_method>=#{submitLogPageVO.startTime}
+            </if>
+            <if test="submitLogPageVO.endTime!=null and submitLogPageVO.endTime!=''">
+                and  a.evaluation_method &lt;= #{submitLogPageVO.endTime}
+            </if>
+            <if test="submitLogPageVO.status!=null and submitLogPageVO.status!=''">
+                and  a.indicators_Status = #{submitLogPageVO.status}
+            </if>
+            <if test="submitLogPageVO.reportId!=null and submitLogPageVO.reportId!=''">
+                and  a.report_id = #{submitLogPageVO.reportId}
+            </if>
         </where>
     </select>
 

@@ -4,7 +4,6 @@ package com.tree.clouds.assessment.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.common.RestResponse;
 import com.tree.clouds.assessment.common.aop.Log;
-import com.tree.clouds.assessment.model.bo.IndicatorReportBO;
 import com.tree.clouds.assessment.model.entity.AuditLog;
 import com.tree.clouds.assessment.model.vo.*;
 import com.tree.clouds.assessment.service.AssessmentIndicatorsService;
@@ -14,7 +13,6 @@ import com.tree.clouds.assessment.service.SubmitLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +44,6 @@ public class AuditLogController {
     @Log("单位考核指标列表")
     @PostMapping("/assessmentList")
     @ApiOperation(value = "单位考核指标列表")
-
     public RestResponse<IPage<IndicatorReportVO>> assessmentList(@RequestBody AssessmentPageVO assessmentPageVO) {
         IPage<IndicatorReportVO> assessmentVOS = indicatorReportService.assessmentList(assessmentPageVO,1);
         return RestResponse.ok(assessmentVOS);
@@ -64,8 +61,8 @@ public class AuditLogController {
     @Log("初审树")
     @PostMapping("/auditTree")
     @ApiOperation(value = "初审树")
-    public RestResponse<List<indicatorsTreeTreeVO>> auditTree(@RequestBody AuditTreeVO auditTreeVO) {
-        List<indicatorsTreeTreeVO> tree = assessmentIndicatorsService.auditTree(auditTreeVO);
+    public RestResponse<List<IndicatorsTreeTreeVO>> auditTree(@RequestBody AuditTreeVO auditTreeVO) {
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.auditTree(auditTreeVO);
         return RestResponse.ok(tree);
     }
 
@@ -80,7 +77,6 @@ public class AuditLogController {
     @Log("获取初审信息")
     @PostMapping("/getAudit/{id}")
     @ApiOperation(value = "获取初审信息")
-
     public RestResponse<AuditLog> getAudit(@PathVariable String id) {
         AuditLog auditLog=auditLogService.getAudit(id);
         return RestResponse.ok(auditLog);

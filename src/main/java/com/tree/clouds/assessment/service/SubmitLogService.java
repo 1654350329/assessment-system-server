@@ -19,5 +19,5 @@ public interface SubmitLogService extends IService<SubmitLog> {
 
     IPage<SubmitLogVO> submitLogPage(SubmitLogPageVO submitLogPageVO);
 
-    void addLog(AssessmentIndicators indicators, String assessmentCriteria, Integer indicatorsStatus, String remark, String unitId, String time);
+    void addLog(AssessmentIndicators indicators, String assessmentCriteria, Integer indicatorsStatus, String remark, String unitId, String time,String reportId);
 }

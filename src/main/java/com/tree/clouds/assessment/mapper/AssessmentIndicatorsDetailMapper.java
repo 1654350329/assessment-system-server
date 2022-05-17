@@ -2,6 +2,9 @@ package com.tree.clouds.assessment.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail;
+import com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -15,7 +18,13 @@ public interface AssessmentIndicatorsDetailMapper extends BaseMapper<AssessmentI
 
     Double getScoreByType(String id, Integer type,String year);
 
-    Double getScoreByUnit(String unitId,String id);
+    Double getScoreByUnit(String unitId, String id);
 
     int getCountByType(String id, Integer type,String year);
+
+    AssessmentIndicatorsDetail getByNameAndPid(String name, String parentId);
+
+    AssessmentIndicatorsDetail getByReportId(String reportId);
+
+    List<IndicatorsTreeTreeVO> getByParentId(String id,String unitId);
 }
