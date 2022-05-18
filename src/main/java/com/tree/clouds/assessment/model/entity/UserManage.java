@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -58,6 +59,10 @@ public class UserManage extends BaseEntity {
     @TableField(exist = false)
     private String unitId;
 
+    @ApiModelProperty(value = "工作单位")
+    @TableField(exist = false)
+    private String unitName;
+
     @ApiModelProperty(value = "科别")
     @TableField("category")
     private String category;
@@ -94,9 +99,7 @@ public class UserManage extends BaseEntity {
     @TableField("REMARK")
     private String remark;
 
-    @ApiModelProperty(value = "初审权限")
-    @TableField("RECEIVE_STATUS")
-    private Integer receiveStatus;
+
 
 
 

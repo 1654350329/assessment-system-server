@@ -22,6 +22,7 @@ import com.tree.clouds.assessment.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -86,6 +87,8 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
                 }
             }
             record.setRoleName(stringBuilder.toString());
+            record.setReviewAuthority(record.getRoleIds().contains("4") ? 1 : 0);
+            record.setPassword(null);
 
         }
         return userManageVOIPage;
@@ -125,8 +128,9 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
     }
 
     @Override
+    @Transactional
     public void addUserManage(UserManageBO userManageBO) {
-        if (StrUtil.isNotBlank(userManageBO.getUserId())){
+        if (StrUtil.isNotBlank(userManageBO.getUserId())) {
             updateUserManage(userManageBO);
             return;
         }
@@ -146,6 +150,9 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         //添加到单位
         unitUserService.saveUnitUser(userManage.getUserId(), userManageBO.getUnitId());
         //绑定角色
+        if (userManageBO.getReviewAuthority() != null && userManageBO.getReviewAuthority() == 1) {
+            userManageBO.getRoleIds().add("4");
+        }
         roleUserService.addRole(userManageBO.getRoleIds(), userManage.getUserId());
 
     }
@@ -162,6 +169,9 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         this.updateById(userManage);
         //角色先删后增
         roleUserService.removeRole(userManage.getUserId());
+        if (userManageBO.getReviewAuthority() == 1) {
+            userManageBO.getRoleIds().add("4");
+        }
         roleUserService.addRole(userManageBO.getRoleIds(), userManage.getUserId());
     }
 
@@ -192,7 +202,6 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
     }
 
 
-
     @Override
     public void updatePassword(UpdatePasswordVO updatePasswordVO) {
         String password = bCryptPasswordEncoder.encode(Base64.decodeStr(updatePasswordVO.getPassword()));
@@ -204,11 +213,16 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
 
     @Override
     public List<UserManage> getListByRole(String roleId) {
-        return  this.baseMapper.listByRoleId(roleId);
+        return this.baseMapper.listByRoleId(roleId);
     }
 
     @Override
-    public RoleManage getRoleById(String userId) {
+    public List<RoleManage> getRoleById(String userId) {
         return this.baseMapper.getRoleById(userId);
+    }
+
+    @Override
+    public UserManage getInfo(String userId) {
+        return this.baseMapper.getInfo(userId);
     }
 }

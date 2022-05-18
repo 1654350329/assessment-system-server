@@ -54,7 +54,7 @@ public class IndicatorReport extends BaseEntity {
 
     @ApiModelProperty(value = "自评分")
     @TableField("user_score")
-    private String userScore;
+    private Double userScore;
 
     @ApiModelProperty(value = "得分说明")
     @TableField("illustrate")
@@ -77,6 +77,11 @@ public class IndicatorReport extends BaseEntity {
     @TableField("remark")
     private String remark;
 
+    @ApiModelProperty(value = "截止时间")
+    @TableField("expiration_date")
+    private String expirationDate;
+
+
     @ApiModelProperty(value = "报送材料 逗号分割")
     @TableField(exist = false)
     private List<FileInfo> fileInfoVOS;
@@ -84,10 +89,6 @@ public class IndicatorReport extends BaseEntity {
     @ApiModelProperty(value = "联系电话")
     @TableField(exist = false)
     private String phoneNumber;
-
-    @ApiModelProperty(value = "截止日期")
-    @TableField(exist = false)
-    private String expirationDate;
 
     @ApiModelProperty(value = "报送类型")
     @TableField(exist = false)

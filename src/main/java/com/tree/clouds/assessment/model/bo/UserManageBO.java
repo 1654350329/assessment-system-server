@@ -21,4 +21,7 @@ public class UserManageBO extends UserManage {
 
     @ApiModelProperty(value = "角色名称")
     private String roleName;
+
+    @ApiModelProperty(value = "初审权限")
+    private Integer reviewAuthority;
 }

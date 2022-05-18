@@ -1,20 +1,20 @@
 package com.tree.clouds.assessment.service.impl;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.tree.clouds.assessment.model.entity.*;
-import com.tree.clouds.assessment.mapper.AuditLogMapper;
-import com.tree.clouds.assessment.model.vo.*;
-import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tree.clouds.assessment.mapper.AuditLogMapper;
+import com.tree.clouds.assessment.model.entity.*;
+import com.tree.clouds.assessment.model.vo.UpdateAuditVO;
+import com.tree.clouds.assessment.service.*;
+import com.tree.clouds.assessment.utils.BaseBusinessException;
 import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -38,19 +38,24 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
     @Autowired
     private AssessmentIndicatorsDetailService detailService;
     @Autowired
-    private ComprehensiveAssessmentService comprehensiveAssessmentService;
-    @Autowired
-    private UnitAssessmentService unitAssessmentService;
+    private RoleManageService roleManageService;
 
     @Override
     @Transactional
     public void updateAudit(UpdateAuditVO updateAuditVO) {
+        List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
+        if (!(roleCodes.contains("ROLE_admin")||roleCodes.contains("ROLE_user_admin"))){
+            throw new BaseBusinessException(400,"没有审核权限!");
+        }
         //修改审核状态
         IndicatorReport indicatorReport = indicatorReportService.getById(updateAuditVO.getId());
         indicatorReport.setReportStatus(updateAuditVO.getIndicatorsStatus());
+        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate())){
+            indicatorReport.setExpirationDate(updateAuditVO.getExpirationDate());
+        }
 
         indicatorReport.setReportProgress(1);
-        //修改截止日期
         AssessmentIndicators indicators = assessmentIndicatorsService.getById(indicatorReport.getIndicatorsId());
         if (indicators.getIndicatorsName().equals("机制创新")&& updateAuditVO.getIndicatorsStatus() == 1){
             indicatorReport.setReportProgress(2);
@@ -59,9 +64,7 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
             indicatorReport.setReportProgress(0);
         }
         AssessmentIndicatorsDetail detail = detailService.getById(indicatorReport.getDetailId());
-        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate())) {
-            assessmentIndicatorsService.updateExpirationDate(indicators.getAssessmentYear(), updateAuditVO.getExpirationDate());
-        }
+        //修改截止日期
         //新增报送历史日志
         submitLogService.addLog(indicators, detail.getAssessmentCriteria(), updateAuditVO.getIndicatorsStatus(), updateAuditVO.getRemark(), LoginUserUtil.getUnitId(), indicatorReport.getReportTime(), indicatorReport.getReportId());
         //修改上报进度

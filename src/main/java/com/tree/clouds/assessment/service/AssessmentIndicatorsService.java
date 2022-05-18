@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface AssessmentIndicatorsService extends IService<AssessmentIndicators> {
 
-    List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type);
+    List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type, String unitId, String userId);
 
     List<IndicatorsTreeTreeVO> indicatorsChildrenTree(String id);
 

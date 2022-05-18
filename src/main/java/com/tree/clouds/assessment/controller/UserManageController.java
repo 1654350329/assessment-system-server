@@ -40,7 +40,6 @@ public class UserManageController {
     @Log("用户模块分页查询")
     @PostMapping("/userManagePage")
     @ApiOperation(value = "用户模块分页查询")
-
     public RestResponse<IPage<UserManageBO>> userManagePage(@Validated @RequestBody UserManagePageVO userManagePageVO) {
         IPage<UserManageBO> page = userManageservice.userManagePage(userManagePageVO);
         return RestResponse.ok(page);

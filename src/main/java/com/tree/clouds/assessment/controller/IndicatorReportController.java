@@ -57,7 +57,7 @@ public class IndicatorReportController {
                 status=7;
             }
         }
-        List<IndicatorsTreeTreeVO> treeById = indicatorReportService.getTreeById(publicIdReqVO.getId(),publicIdReqVO.getUnitId(), publicIdReqVO.getReportId(),status,publicIdReqVO.getContent());
+        List<IndicatorsTreeTreeVO> treeById = indicatorReportService.getTreeById(publicIdReqVO.getId(),publicIdReqVO.getUnitId(), publicIdReqVO.getReportId(),status,publicIdReqVO.getContent(), 0);
         return RestResponse.ok(treeById);
     }
 

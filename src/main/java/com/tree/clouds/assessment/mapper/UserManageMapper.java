@@ -27,5 +27,7 @@ public interface UserManageMapper extends BaseMapper<UserManage> {
 
     List<UserManage> listByRoleId(@Param("roleId") String roleId);
 
-    RoleManage getRoleById(String userId);
+    List<RoleManage> getRoleById(String userId);
+
+    UserManage getInfo(String userId);
 }

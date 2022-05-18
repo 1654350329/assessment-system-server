@@ -42,6 +42,12 @@
         left join assessment_indicators b on a.indicators_id=b.indicators_id
         where a.detail_id=#{detailId}
     </select>
+    <select id="getExpertDistributeNumber" resultType="java.lang.Integer">
+        select count(c.assessment_id) from assessment_indicators a
+            LEFT JOIN assessment_indicators_detail b on a.indicators_id=b.project_id
+            LEFT JOIN unit_assessment c on c.detail_id=b.detail_id
+            where a.user_id=#{userId} and c.unit_id=#{unitId}
+    </select>
 
 
 </mapper>

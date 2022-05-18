@@ -64,6 +64,9 @@ public class AssessmentIndicators extends BaseEntity {
     @ApiModelProperty(value = "发布日期")
     @TableField("release_date")
     private String releaseDate;
+    @ApiModelProperty(value = "发布人")
+    @TableField("release_user")
+    private String releaseUser;
 
     @ApiModelProperty(value = "截止日期")
     @TableField("expiration_date")

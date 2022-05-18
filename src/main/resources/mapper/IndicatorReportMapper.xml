@@ -32,7 +32,7 @@
         </if>
     </select>
     <select id="getErrorList" resultType="com.tree.clouds.assessment.model.entity.IndicatorReport">
-          select * from indicator_report where report_Status=2
+          select * from indicator_report where report_Status=2 and unit_id=#{unitId}
     </select>
     <select id="getListByType" resultType="com.tree.clouds.assessment.model.entity.IndicatorReport">
         select * from indicator_report
@@ -71,10 +71,14 @@
 				where a.unit_id=#{unitId}
     </select>
     <select id="getReviewedNumber" resultType="java.lang.Integer">
-        select count(*) from  indicator_report b
-        left join assessment_indicators c on c.indicators_id=b.indicators_id
-        left join score_record d on b.report_id=d.report_id
-        where b.unit_id=#{unitId} and c.assessment_year=#{year}
+        select COUNT(*) from indicator_report a
+        left join assessment_indicators_detail b on a.detail_Id=b.detail_Id
+        left join assessment_indicators c on c.indicators_id=b.project_id
+        left join score_record d on a.report_id=d.report_id
+        where a.unit_id=#{unitId} and c.assessment_year=#{year}
+        <if test="userId!=null">
+            and c.user_id =#{userId}
+        </if>
         <if test="type==0">
             and d.expert_status=0
         </if>
@@ -82,7 +86,7 @@
             and d.expert_status=1
         </if>
         <if test="type==2">
-            and b.report_progress=2
+            and a.report_progress=2
         </if>
     </select>
     <select id="getDistributeSum" resultType="java.lang.Integer">

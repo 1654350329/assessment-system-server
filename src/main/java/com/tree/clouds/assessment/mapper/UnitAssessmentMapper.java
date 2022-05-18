@@ -25,4 +25,6 @@ public interface UnitAssessmentMapper extends BaseMapper<UnitAssessment> {
     List<UnitAssessment> getByYear(String assessmentYear);
 
     Integer isRelease(String detailId);
+
+    Integer getExpertDistributeNumber(String unitId, String userId);
 }

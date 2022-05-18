@@ -3,6 +3,8 @@ package com.tree.clouds.assessment.service;
 import com.tree.clouds.assessment.model.entity.RoleManage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 角色管理表 服务类
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface RoleManageService extends IService<RoleManage> {
 
+   List<RoleManage> getRoleByUserId(String userId);
 }

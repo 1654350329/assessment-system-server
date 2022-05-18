@@ -154,7 +154,7 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
             int i = Integer.parseInt(auditTreeVO.getReportStatus());
             status=i+1;
         }
-        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent());
+        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent(),3);
     }
 
     @Override

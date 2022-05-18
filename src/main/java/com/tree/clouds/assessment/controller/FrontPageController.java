@@ -84,27 +84,32 @@ public class FrontPageController {
         data.put("value", unitMaterialMap.values());
 
         //待办列表
-        RoleManage roleManage = userManageService.getRoleById(LoginUserUtil.getUserId());
+        List<RoleManage> roleManages = userManageService.getRoleById(LoginUserUtil.getUserId());
        // 单位账号
-        if (roleManage.getRoleCode().equals("ROLE_up_user")) {
-            List<IndicatorReport> list = indicatorReportService.list(new QueryWrapper<IndicatorReport>().eq(IndicatorReport.REPORT_STATUS, 2));
-            if (CollUtil.isNotEmpty(list)){
-                TodoListVO todoListVO = new TodoListVO();
-                todoListVO.setDoName("材料驳回修改通知");
-                todoListVO.setType(0);
-                todoListVO.setTime(DateUtil.now());
+        for (RoleManage roleManage : roleManages) {
+            if (roleManage.getRoleCode().equals("ROLE_up_user")) {
+                List<IndicatorReport> list = indicatorReportService.list(new QueryWrapper<IndicatorReport>().eq(IndicatorReport.REPORT_STATUS, 2));
+                if (CollUtil.isNotEmpty(list)){
+                    TodoListVO todoListVO = new TodoListVO();
+                    todoListVO.setDoName("材料驳回修改通知");
+                    todoListVO.setType(0);
+                    todoListVO.setTime(DateUtil.now());
+                    data.put("账号待办",todoListVO);
+                }
+            }
+            //专家
+            if (roleManage.getRoleCode().equals("ROLE_EXPERT")) {
+                List<ScoreRecord> list = scoreRecordService.list(new QueryWrapper<ScoreRecord>().eq(ScoreRecord.SCORE_TYPE, 0));
+                if (CollUtil.isNotEmpty(list)){
+                    TodoListVO todoListVO = new TodoListVO();
+                    todoListVO.setDoName("重评通知");
+                    todoListVO.setType(2);
+                    todoListVO.setTime(DateUtil.now());
+                    data.put("专家待办",todoListVO);
+                }
             }
         }
-        //专家
-        if (roleManage.getRoleCode().equals("ROLE_EXPERT")) {
-            List<ScoreRecord> list = scoreRecordService.list(new QueryWrapper<ScoreRecord>().eq(ScoreRecord.SCORE_TYPE, 0));
-            if (CollUtil.isNotEmpty(list)){
-                TodoListVO todoListVO = new TodoListVO();
-                todoListVO.setDoName("重评通知");
-                todoListVO.setType(2);
-                todoListVO.setTime(DateUtil.now());
-            }
-        }
+
         return RestResponse.ok(data);
     }
 

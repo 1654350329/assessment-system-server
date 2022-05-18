@@ -48,6 +48,7 @@ public interface UserManageService extends IService<UserManage> {
 
     List<UserManage> getListByRole(String roleId);
 
-    RoleManage getRoleById(String unitId);
+    List<RoleManage> getRoleById(String unitId);
 
+    UserManage getInfo(String createdUser);
 }

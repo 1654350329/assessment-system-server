@@ -1,7 +1,6 @@
 package com.tree.clouds.assessment.controller;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import com.tree.clouds.assessment.common.RestResponse;
 import com.tree.clouds.assessment.common.aop.Log;
 import com.tree.clouds.assessment.model.entity.AssessmentIndicators;
@@ -11,6 +10,7 @@ import com.tree.clouds.assessment.model.vo.*;
 import com.tree.clouds.assessment.service.AssessmentIndicatorsDetailService;
 import com.tree.clouds.assessment.service.AssessmentIndicatorsService;
 import com.tree.clouds.assessment.service.FileInfoService;
+import com.tree.clouds.assessment.utils.LoginUserUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -45,7 +44,7 @@ public class AssessmentIndicatorsController {
     @PostMapping("/indicatorsTree/{year}")
     @ApiOperation(value = "考核指标配置目录树")
     public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year) {
-        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year, 1);
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year, 1, null, null);
         return RestResponse.ok(tree);
     }
 

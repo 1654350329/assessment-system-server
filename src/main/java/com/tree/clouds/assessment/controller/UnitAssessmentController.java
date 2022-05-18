@@ -8,6 +8,7 @@ import com.tree.clouds.assessment.model.vo.UnitVO;
 import com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO;
 import com.tree.clouds.assessment.service.AssessmentIndicatorsService;
 import com.tree.clouds.assessment.service.UnitAssessmentService;
+import com.tree.clouds.assessment.utils.LoginUserUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +42,10 @@ public class UnitAssessmentController {
     }
 
     @Log("各目录树")
-    @PostMapping("/indicatorsTree/{year}")
+    @PostMapping("/indicatorsTree/{year}/{unitId}")
     @ApiOperation(value = "目录树")
-    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year) {
-        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year,2);
+    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year, @PathVariable String unitId) {
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year,2,unitId, null);
         return RestResponse.ok(tree);
     }
 

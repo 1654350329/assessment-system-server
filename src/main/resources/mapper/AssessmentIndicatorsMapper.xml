@@ -49,14 +49,14 @@
 
     <select id="assessmentPage" resultType="com.tree.clouds.assessment.model.vo.AssessmentVO">
         select DISTINCT a.assessment_year ,a.indicators_status,a.release_date,a.expiration_date,b.user_name as
-        createdUser
-        from assessment_indicators a left join user_manage b on a.CREATED_USER=b.user_id
+        created_User
+        from assessment_indicators a left join user_manage b on a.release_user=b.user_id
         <where>
             <if test="assessmentPageVO.indicatorsStatus !=null and assessmentPageVO.indicatorsStatus !=''">
-                indicators_Status=#{assessmentPageVO.indicatorsStatus}
+                a.indicators_Status=#{assessmentPageVO.indicatorsStatus}
             </if>
             <if test="assessmentPageVO.assessmentYear !=null and assessmentPageVO.assessmentYear !=''">
-                assessment_Year=#{assessmentPageVO.assessmentYear}
+                a.assessment_Year=#{assessmentPageVO.assessmentYear}
             </if>
 
         </where>
@@ -69,9 +69,9 @@
 		from assessment_indicators_detail
     </select>
     <select id="getDistributeNumber" resultType="java.lang.Integer">
-        SELECT count(a.detail_id) from assessment_indicators_detail a left join unit_assessment b on
+        SELECT count(DISTINCT a.detail_id) from assessment_indicators_detail a left join unit_assessment b on
         a.detail_id=b.detail_id
-        where b.assessment_id is not null
+        where b.assessment_id is not null and b.unit_Id=#{unitId}
         <if test="type==0">
             and a.indicators_id=#{id}
         </if>

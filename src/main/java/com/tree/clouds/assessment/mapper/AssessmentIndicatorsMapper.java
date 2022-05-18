@@ -29,7 +29,7 @@ public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicat
 
     List<AssessmentIndicators> getGroupByYear(String year);
 
-    int getDistributeNumber(String id, Integer type);
+    int getDistributeNumber(String id, Integer type, String unitId);
 
     List<IndicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer reportStatus, String content);
 

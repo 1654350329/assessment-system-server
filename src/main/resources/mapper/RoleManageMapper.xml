@@ -18,5 +18,9 @@
     <sql id="Base_Column_List">
         ROLE_ID, ROLE_NAME, ROLE_CODE, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
+    <select id="getRoleByUserId" resultType="com.tree.clouds.assessment.model.entity.RoleManage">
+        select a.* from role_manage a left join role_user b on a.role_id=b.role_id
+        where b.user_id=#{userId}
+    </select>
 
 </mapper>

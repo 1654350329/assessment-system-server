@@ -54,19 +54,30 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     private AuditLogService auditLogService;
     @Autowired
     private RatingRecordHistoryService ratingRecordHistoryService;
+    @Autowired
+    private RoleManageService roleManageService;
 
     @Override
     public IPage<IndicatorReportVO> assessmentList(AssessmentPageVO assessmentPageVO, Integer type) {
         //获取年度项目
         IPage<AssessmentVO> assessmentVOIPage = assessmentIndicatorsService.assessmentPage(assessmentPageVO);
+        List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
         List<IndicatorReportVO> collect = new ArrayList<>();
-        if (type == 1) {
+        if (type == 1||type == 2) {
             List<UnitManage> list = unitManageService.list();
             for (UnitManage unitManage : list) {
+               if (!roleCodes.contains("ROLE_admin")&& !Objects.equals(LoginUserUtil.getUnitId(), unitManage.getUnitId())){
+                   continue;
+               }
                 List<IndicatorReportVO> IndicatorReportVOs = assessmentVOIPage.getRecords().stream().map(record -> {
                     IndicatorReportVO indicatorReportVO = BeanUtil.toBean(record, IndicatorReportVO.class);
                     //获取分配指标数
-                    indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(unitManage.getUnitId()));
+                    if (type ==2){
+                        indicatorReportVO.setDistributeNumber(unitAssessmentService.getExpertDistributeNumber(unitManage.getUnitId(),LoginUserUtil.getUserId()));
+                    }else {
+                        indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(unitManage.getUnitId()));
+                    }
                     //获取提交材料数
                     Integer ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId());
                     indicatorReportVO.setSubmitNumber(ids);
@@ -83,8 +94,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     indicatorReportVO.setUnitName(unitManage.getUnitName());
                     indicatorReportVO.setUnitId(unitManage.getUnitId());
                     //已评数
-                    indicatorReportVO.setReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 1, Integer.parseInt(record.getAssessmentYear())));
-                    indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0, Integer.parseInt(record.getAssessmentYear())));
+                    indicatorReportVO.setReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 1, Integer.parseInt(record.getAssessmentYear()), LoginUserUtil.getUserId()));
+                    indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0, Integer.parseInt(record.getAssessmentYear()), LoginUserUtil.getUserId()));
                     //是否完成填报
                     return indicatorReportVO;
                 }).collect(Collectors.toList());
@@ -115,7 +126,9 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 return indicatorReportVO;
             }).collect(Collectors.toList());
         }
-        collect = collect.stream().filter(indicatorReportVO -> indicatorReportVO.getDistributeNumber() != 0).collect(Collectors.toList());
+        if (!roleCodes.contains("ROLE_admin")){
+            collect = collect.stream().filter(indicatorReportVO -> indicatorReportVO.getDistributeNumber() != 0).collect(Collectors.toList());
+        }
 
         IPage<IndicatorReportVO> iPage = new Page(assessmentVOIPage.getCurrent(), assessmentVOIPage.getSize());
         int cursor = Math.toIntExact(((assessmentVOIPage.getCurrent() - 1) * assessmentVOIPage.getSize()));
@@ -160,8 +173,10 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         if (StrUtil.isNotBlank(updateReportVO.getUserScore()) && Double.parseDouble(updateReportVO.getUserScore()) > detail.getFraction()) {
             throw new BaseBusinessException(400, "自评分数不许大于考核指标分数");
         }
+        if (StrUtil.isNotBlank(updateReportVO.getUserScore())) {
+            one.setUserScore(Double.valueOf(updateReportVO.getUserScore()));
+        }
 
-        one.setUserScore(updateReportVO.getUserScore());
         one.setIllustrate(updateReportVO.getIllustrate());
         one.setCreatedUser(LoginUserUtil.getUserId());
         one.setReportProgress(1);
@@ -199,16 +214,15 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
             assessmentErrorVO.setIndicatorsId(detail.getProjectId());
             assessmentErrorVO.setReportId(record.getReportId());
             assessmentErrorVO.setAssessmentDate(record.getReportTime());
-            assessmentErrorVO.setExpirationDate(assessmentIndicators.getExpirationDate());
+            assessmentErrorVO.setExpirationDate(record.getExpirationDate());
             assessmentErrorVO.setAssessmentCriteria(detail.getAssessmentCriteria());
             //责任人
-            UserManage userManage = userManageService.getById(record.getCreatedUser());
+            UserManage userManage = userManageService.getInfo(record.getCreatedUser());
             assessmentErrorVO.setCreatedUser(userManage.getUserName());
             //责任人
             assessmentErrorVO.setPhoneNumber(userManage.getPhoneNumber());
             //单位
-            UnitManage unitManage = unitManageService.getById(userManage.getUnitId());
-            assessmentErrorVO.setUnitName(unitManage.getUnitName());
+            assessmentErrorVO.setUnitName(userManage.getUnitName());
             assessmentErrorVO.setStatus(0);
             list.add(assessmentErrorVO);
         }
@@ -245,15 +259,25 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
      * @param unitId
      * @param reportId
      * @param content
+     * @param type
      * @return
      */
     @Override
-    public List<IndicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId, Integer indicatorsStatus, String content) {
+    public List<IndicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId, Integer indicatorsStatus, String content, int type) {
         if (StrUtil.isBlank(unitId)) {
             unitId = LoginUserUtil.getUnitId();
         }
         List<IndicatorsTreeTreeVO> list = this.assessmentIndicatorsService.getByReportId(id, unitId, reportId, indicatorsStatus, content);
         for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
+
+            if (!"5".equals(LoginUserUtil.getUserId()) && type == 3 && indicatorsTreeTreeVO.getAssessmentType() == 1) {
+                AssessmentIndicators assessmentIndicators = this.assessmentIndicatorsService.getById(indicatorsTreeTreeVO.getId());
+                if (!assessmentIndicators.getUserId().equals(LoginUserUtil.getUserId())) {
+                    continue;
+                }
+            }
+
+
             if (indicatorsTreeTreeVO.getAssessmentType() == 1) {
                 indicatorsTreeTreeVO.setParentId("0");
             }
@@ -267,9 +291,6 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     continue;
                 }
 
-                AssessmentIndicators indicators = assessmentIndicatorsService.getById(one.getIndicatorsId());
-                one.setExpirationDate(indicators.getExpirationDate());
-
                 UserManage userManage = userManageService.getById(one.getCreatedUser());
                 one.setCreatedUser(userManage.getUserName());
                 one.setPhoneNumber(userManage.getPhoneNumber());
@@ -278,7 +299,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 List<FileInfo> detailFileInfo = fileInfoService.getByBizIdsAndType(detail.getDetailId(), null);
                 detail.setFileInfoVOS(detailFileInfo);
                 AssessmentIndicators project = assessmentIndicatorsService.getById(detail.getProjectId());
-                one.setReportType(StrUtil.contains(project.getEvaluationMethod(), "线上自评") ? 0 : 1);
+                one.setReportType(StrUtil.contains(project.getEvaluationMethod(), "线上他评") ? 0 : 1);
                 List<FileInfo> reportFileInfo = fileInfoService.getByBizIdsAndType(one.getReportId(), null);
                 one.setFileInfoVOS(reportFileInfo);
 
@@ -318,7 +339,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
 
     @Override
     public Integer getReviewedNumber(String unitId, int type, Integer year) {
-        return this.baseMapper.getReviewedNumber(unitId, type, year);
+        return this.baseMapper.getReviewedNumber(unitId, type, year, null);
     }
 
     @Override
@@ -341,6 +362,11 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     public Integer getAuditNumber(String unitId, int year) {
         Integer number = this.baseMapper.getAuditNumber(unitId, year);
         return number == null ? 0 : number;
+    }
+
+    @Override
+    public List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year,String unitId) {
+        return   assessmentIndicatorsService.indicatorsTree(year, 1, unitId,LoginUserUtil.getUserId());
     }
 
 

@@ -97,17 +97,16 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
 
     }
 
-    @Override
-    public List<Integer> getScoreByYearAndUnit(String assessmentYear, String unitId) {
-        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(Integer.valueOf(assessmentYear),1);
-//        this.list()
-        return null;
-    }
 
     @Override
     public List<UnitAssessment> getByYear(String assessmentYear) {
 
         return this.baseMapper.getByYear(assessmentYear);
+    }
+
+    @Override
+    public Integer getExpertDistributeNumber(String unitId, String userId) {
+        return this.baseMapper.getExpertDistributeNumber(unitId,userId);
     }
 
 
