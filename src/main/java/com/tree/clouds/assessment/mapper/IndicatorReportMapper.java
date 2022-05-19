@@ -30,7 +30,7 @@ public interface IndicatorReportMapper extends BaseMapper<IndicatorReport> {
 
     Double getUserScoreByUnit(String unitId, String assessmentYear);
 
-    Integer getMaterial(Integer type,String unitId);
+    Integer getMaterial(Integer type, String unitId, String userId);
 
     List<AssessmentListVO> getAssessmentList(String unitId);
 

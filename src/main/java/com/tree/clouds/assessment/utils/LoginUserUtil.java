@@ -45,6 +45,15 @@ public class LoginUserUtil {
         return user.getUnitId();
     }
 
+    public static String getUnitName() {
+        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
+            return null;
+        }
+        UserManage user = (UserManage) credentials;
+        return user.getUnitName();
+    }
+
     public static String getUserAccount() {
         Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
         if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {

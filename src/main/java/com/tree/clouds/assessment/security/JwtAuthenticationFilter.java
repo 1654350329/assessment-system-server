@@ -32,13 +32,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Autowired
     private UserManageService userManageService;
-    @Autowired
-    private UnitUserService unitUserService;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
-
 
 
     @Override
@@ -61,8 +58,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String account = claim.getSubject();
         // 获取用户的权限等信息
         UserManage userManage = userManageService.getUserByAccount(account);
-        UnitUser one = unitUserService.getOne(new QueryWrapper<UnitUser>().eq(UnitUser.USER_ID, userManage.getUserId()));
-        userManage.setUnitId(one.getUnitId());
+        userManage = userManageService.getInfo(userManage.getUserId());
         UsernamePasswordAuthenticationToken token
                 = new UsernamePasswordAuthenticationToken(userManage.getUserName(), userManage, userDetailService.getUserAuthority(userManage.getUserId()));
 

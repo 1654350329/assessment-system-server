@@ -56,6 +56,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     private RatingRecordHistoryService ratingRecordHistoryService;
     @Autowired
     private RoleManageService roleManageService;
+    @Autowired
+    private MatterListService matterListService;
 
     @Override
     public IPage<IndicatorReportVO> assessmentList(AssessmentPageVO assessmentPageVO, Integer type) {
@@ -64,18 +66,18 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
         List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
         List<IndicatorReportVO> collect = new ArrayList<>();
-        if (type == 1||type == 2) {
+        if (type == 1 || type == 2) {
             List<UnitManage> list = unitManageService.list();
             for (UnitManage unitManage : list) {
-               if (!roleCodes.contains("ROLE_admin")&& !Objects.equals(LoginUserUtil.getUnitId(), unitManage.getUnitId())){
-                   continue;
-               }
+                if (!roleCodes.contains("ROLE_admin") && !Objects.equals(LoginUserUtil.getUnitId(), unitManage.getUnitId())) {
+                    continue;
+                }
                 List<IndicatorReportVO> IndicatorReportVOs = assessmentVOIPage.getRecords().stream().map(record -> {
                     IndicatorReportVO indicatorReportVO = BeanUtil.toBean(record, IndicatorReportVO.class);
                     //获取分配指标数
-                    if (type ==2){
-                        indicatorReportVO.setDistributeNumber(unitAssessmentService.getExpertDistributeNumber(unitManage.getUnitId(),LoginUserUtil.getUserId()));
-                    }else {
+                    if (type == 2) {
+                        indicatorReportVO.setDistributeNumber(unitAssessmentService.getExpertDistributeNumber(unitManage.getUnitId(), LoginUserUtil.getUserId()));
+                    } else {
                         indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(unitManage.getUnitId()));
                     }
                     //获取提交材料数
@@ -126,7 +128,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 return indicatorReportVO;
             }).collect(Collectors.toList());
         }
-        if (!roleCodes.contains("ROLE_admin")){
+        if (!roleCodes.contains("ROLE_admin")) {
             collect = collect.stream().filter(indicatorReportVO -> indicatorReportVO.getDistributeNumber() != 0).collect(Collectors.toList());
         }
 
@@ -141,7 +143,13 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
 
     @Override
     public List<AssessmentListVO> assessmentList() {
-        return this.baseMapper.getAssessmentList(LoginUserUtil.getUnitId());
+        List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
+        String unitId = null;
+        if (!roleCodes.contains("ROLE_admin")) {
+            unitId = LoginUserUtil.getUnitId();
+        }
+        return this.baseMapper.getAssessmentList(unitId);
     }
 
     //手动实现分页
@@ -195,6 +203,9 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         auditLog.setReportId(one.getReportId());
         auditLog.setIndicatorsStatus(0);
         auditLogService.saveOrUpdate(auditLog, new QueryWrapper<AuditLog>().eq(AuditLog.REPORT_ID, one.getReportId()));
+        //添加到待办列表
+        UnitManage unitManage = unitManageService.getById(one.getUnitId());
+        matterListService.addMatter(unitManage.getUnitName() + "-" + assessmentIndicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料上报待审核", one.getUnitId(), one.getReportId(), null, 1, assessmentIndicators.getAssessmentYear(), assessmentIndicators.getIndicatorsId());
     }
 
     @Override
@@ -268,9 +279,11 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
             unitId = LoginUserUtil.getUnitId();
         }
         List<IndicatorsTreeTreeVO> list = this.assessmentIndicatorsService.getByReportId(id, unitId, reportId, indicatorsStatus, content);
+        List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
         for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
 
-            if (!"5".equals(LoginUserUtil.getUserId()) && type == 3 && indicatorsTreeTreeVO.getAssessmentType() == 1) {
+            if (!(roleCodes.contains("ROLE_admin") || roleCodes.contains("ROLE_user_admin")) && type == 3 && indicatorsTreeTreeVO.getAssessmentType() == 1) {
                 AssessmentIndicators assessmentIndicators = this.assessmentIndicatorsService.getById(indicatorsTreeTreeVO.getId());
                 if (!assessmentIndicators.getUserId().equals(LoginUserUtil.getUserId())) {
                     continue;
@@ -333,8 +346,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     }
 
     @Override
-    public int getMaterial(Integer type, String unitId) {
-        return this.baseMapper.getMaterial(type, unitId);
+    public int getMaterial(Integer type, String unitId, String userId) {
+        return this.baseMapper.getMaterial(type, unitId,userId);
     }
 
     @Override
@@ -365,8 +378,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     }
 
     @Override
-    public List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year,String unitId) {
-        return   assessmentIndicatorsService.indicatorsTree(year, 1, unitId,LoginUserUtil.getUserId());
+    public List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year, String unitId) {
+        return assessmentIndicatorsService.indicatorsTree(year, 1, unitId, LoginUserUtil.getUserId());
     }
 
 

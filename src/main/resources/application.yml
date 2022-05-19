@@ -28,12 +28,12 @@ spring:
     time-zone: GMT+8
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
-    username: root
-    password: 123456
-    #    url: jdbc:mysql://localhost:3306/graded?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
-#    username: graded
-#    password: root
+#    url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
+#    username: root
+#    password: 123456
+    url: jdbc:mysql://localhost:3306/graded?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
+    username: graded
+    password: root
 
 #    password: root
 # mybatis-plus 配置
@@ -57,8 +57,3 @@ qiniu:
   bucket: xpwgh
   fontUrl: https://xpwghoss.3dy.me/
 
-sms:
-  account: 123162
-  password: naKfTX
-  extno: 10690371
-  url: http://47.99.242.143:7862/sms

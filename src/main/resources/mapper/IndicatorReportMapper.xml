@@ -45,7 +45,12 @@
           where  b.assessment_Year=#{assessmentYear} and a.unit_id=#{unitId}
     </select>
     <select id="getMaterial" resultType="java.lang.Integer">
-        select count(b.FILE_ID) from indicator_report a left join file_info b on a.report_id=b.biz_Id
+        select count(b.FILE_ID) from indicator_report a
+        left join file_info b on a.report_id=b.biz_Id
+        <if test="userId!=null">
+            left join assessment_indicators_detail c on a.detail_id=c.detail_id
+            left join assessment_indicators d on c.project_id=d.indicators_id
+        </if>
         where
         <if test="type==0">
             a.report_Progress> 0
@@ -59,6 +64,9 @@
         <if test="unitId != null">
             and a.unit_Id= #{unitId}
         </if>
+        <if test="userId != null">
+            and d.user_id= #{userId}
+        </if>
     </select>
     <select id="getAssessmentList" resultType="com.tree.clouds.assessment.model.vo.AssessmentListVO">
          select a.report_id,a.UPDATED_TIME as assessmentDate,g.indicators_Status,b.assessment_year,e.UNIT_NAME,c.USER_NAME as createdUser,c.PHONE_NUMBER,b.indicators_name,f.assessment_criteria from indicator_report a
@@ -68,7 +76,10 @@
 		     left join unit_manage e on e.UNIT_ID= a.unit_ID
 		     left join assessment_indicators_detail f on f.detail_id= a.detail_id
 		     left join audit_log g on g.report_id= a.report_id
-				where a.unit_id=#{unitId}
+		     <if test="unitId!=null">
+                 where a.unit_id=#{unitId}
+             </if>
+
     </select>
     <select id="getReviewedNumber" resultType="java.lang.Integer">
         select COUNT(*) from indicator_report a

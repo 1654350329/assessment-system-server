@@ -39,7 +39,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     public List<SysMenuDto> getCurrentUserNav() {
         UserManage sysUser = sysUserService.getUserByAccount(LoginUserUtil.getUserAccount());
         List<String> menuIds = sysRoleMenuMapper.getNavMenuIds(sysUser.getUserId());
-        List<SysMenu> menus = this.listByIds(menuIds).stream().sorted(Comparator.comparing(SysMenu::getOrdernum)).collect(Collectors.toList());
+        List<SysMenu> menus = this.listByIds(menuIds);
         ArrayList<SysMenuTreeVO> sysMenuVOS = new ArrayList<>();
         for (SysMenu sysMenu : menus) {
             SysMenuTreeVO sysMenuVO = BeanUtil.toBean(sysMenu, SysMenuTreeVO.class);

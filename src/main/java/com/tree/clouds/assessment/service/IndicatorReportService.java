@@ -34,7 +34,7 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
     List<IndicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId, Integer indicatorsStatus, String content, int type);
 
 
-    int getMaterial(Integer type, String unitId);
+    int getMaterial(Integer type, String unitId, String userId);
 
     Integer getReviewedNumber(String unitId, int type, Integer year);
 

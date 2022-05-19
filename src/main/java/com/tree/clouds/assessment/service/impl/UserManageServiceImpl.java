@@ -112,7 +112,6 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
             //获取角色
             List<RoleManage> roles = this.roleUserService.getRoleByUserId(userId);
             authority = roles.stream().map(RoleManage::getRoleCode).collect(Collectors.joining(","));
-
             List<String> menuIds = sysRoleMenuMapper.getNavMenuIds(userId);
             List<SysMenu> menus = this.sysMenuService.listByIds(menuIds);
             String perms = menus.stream().map(SysMenu::getPerms).collect(Collectors.joining(","));

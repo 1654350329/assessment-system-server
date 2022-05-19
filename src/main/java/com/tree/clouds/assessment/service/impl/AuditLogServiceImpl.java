@@ -39,31 +39,36 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
     private AssessmentIndicatorsDetailService detailService;
     @Autowired
     private RoleManageService roleManageService;
+    @Autowired
+    private MatterListService matterListService;
 
     @Override
     @Transactional
     public void updateAudit(UpdateAuditVO updateAuditVO) {
         List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
         List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
-        if (!(roleCodes.contains("ROLE_admin")||roleCodes.contains("ROLE_user_admin"))){
-            throw new BaseBusinessException(400,"没有审核权限!");
+        if (!(roleCodes.contains("ROLE_admin") || roleCodes.contains("ROLE_user_admin"))) {
+            throw new BaseBusinessException(400, "没有审核权限!");
         }
         //修改审核状态
         IndicatorReport indicatorReport = indicatorReportService.getById(updateAuditVO.getId());
         indicatorReport.setReportStatus(updateAuditVO.getIndicatorsStatus());
-        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate())){
+        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate())) {
             indicatorReport.setExpirationDate(updateAuditVO.getExpirationDate());
         }
 
         indicatorReport.setReportProgress(1);
         AssessmentIndicators indicators = assessmentIndicatorsService.getById(indicatorReport.getIndicatorsId());
-        if (indicators.getIndicatorsName().equals("机制创新")&& updateAuditVO.getIndicatorsStatus() == 1){
+        if (indicators.getIndicatorsName().equals("机制创新") && updateAuditVO.getIndicatorsStatus() == 1) {
             indicatorReport.setReportProgress(2);
         }
-        if (updateAuditVO.getIndicatorsStatus() == 0){
-            indicatorReport.setReportProgress(0);
-        }
         AssessmentIndicatorsDetail detail = detailService.getById(indicatorReport.getDetailId());
+        if (updateAuditVO.getIndicatorsStatus() == 0) {
+            indicatorReport.setReportProgress(0);
+            //添加到驳回待办
+            matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料驳回", indicatorReport.getUnitId(), indicatorReport.getReportId(), null, 2,indicators.getAssessmentYear(),indicatorReport.getIndicatorsId());
+        }
+
         //修改截止日期
         //新增报送历史日志
         submitLogService.addLog(indicators, detail.getAssessmentCriteria(), updateAuditVO.getIndicatorsStatus(), updateAuditVO.getRemark(), LoginUserUtil.getUnitId(), indicatorReport.getReportTime(), indicatorReport.getReportId());
@@ -80,13 +85,16 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
         auditLog.setExpirationDate(updateAuditVO.getExpirationDate());
         auditLog.setIndicatorsStatus(updateAuditVO.getIndicatorsStatus());
         this.saveOrUpdate(auditLog, new QueryWrapper<AuditLog>().eq(AuditLog.REPORT_ID, indicatorReport.getReportId()));
-        if ( updateAuditVO.getIndicatorsStatus() == 1) {
-            if (!indicators.getIndicatorsName().equals("机制创新")){
+        if (updateAuditVO.getIndicatorsStatus() == 1) {
+            if (!indicators.getIndicatorsName().equals("机制创新")) {
                 ScoreRecord scoreRecord = new ScoreRecord();
                 scoreRecord.setReportId(updateAuditVO.getId());
                 scoreRecord.setScoreType(0);
                 scoreRecord.setExpertStatus(0);
-                scoreRecordService.saveOrUpdate(scoreRecord,new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID,updateAuditVO.getId()));
+                scoreRecordService.saveOrUpdate(scoreRecord, new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateAuditVO.getId()));
+                //添加到专家待评
+                AssessmentIndicators project = assessmentIndicatorsService.getById(detail.getProjectId());
+                matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料驳回", indicatorReport.getUnitId(), indicatorReport.getReportId(), project.getUserId(), 3,indicators.getAssessmentYear(),indicatorReport.getIndicatorsId());
             }
 
         }

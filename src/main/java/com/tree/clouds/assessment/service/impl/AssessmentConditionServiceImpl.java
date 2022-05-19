@@ -10,18 +10,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.common.Constants;
 import com.tree.clouds.assessment.mapper.AssessmentConditionMapper;
 import com.tree.clouds.assessment.model.entity.AssessmentCondition;
+import com.tree.clouds.assessment.model.entity.RoleManage;
 import com.tree.clouds.assessment.model.entity.UserManage;
 import com.tree.clouds.assessment.model.vo.ConditionVO;
 import com.tree.clouds.assessment.model.vo.GetConditionVO;
 import com.tree.clouds.assessment.model.vo.ScorePageVO;
 import com.tree.clouds.assessment.service.AssessmentConditionService;
+import com.tree.clouds.assessment.service.RoleManageService;
 import com.tree.clouds.assessment.utils.BaseBusinessException;
 import com.tree.clouds.assessment.utils.DownloadFile;
+import com.tree.clouds.assessment.utils.LoginUserUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -34,8 +39,15 @@ import java.util.*;
 @Service
 public class AssessmentConditionServiceImpl extends ServiceImpl<AssessmentConditionMapper, AssessmentCondition> implements AssessmentConditionService {
 
+    @Autowired
+    private RoleManageService roleManageService;
     @Override
     public IPage<ConditionVO> conditionPage(ScorePageVO scorePageVO) {
+        List<RoleManage> roleManageList = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> role_admin = roleManageList.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin")).collect(Collectors.toList());
+        if (CollUtil.isEmpty(role_admin)){
+            scorePageVO.setUnitName(LoginUserUtil.getUnitName());
+        }
         return this.baseMapper.conditionPage(scorePageVO.getPage(), scorePageVO);
     }
 

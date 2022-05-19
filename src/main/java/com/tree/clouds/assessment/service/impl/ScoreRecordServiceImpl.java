@@ -163,8 +163,8 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     }
 
     @Override
-    public void updateStatusByYearAndUnit(String assessmentYear, String unitId) {
-        this.baseMapper.updateStatusByYearAndUnit(assessmentYear,unitId);
+    public void updateStatusByYearAndUnit(String assessmentYear, String unitId,Integer type) {
+        this.baseMapper.updateStatusByYearAndUnit(assessmentYear,unitId,type);
     }
 
     @Override

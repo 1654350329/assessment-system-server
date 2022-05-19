@@ -60,14 +60,6 @@ public class ScoreRecordController {
         return RestResponse.ok(tree);
     }
 
-//    @Log("获取各个分值")
-//    @PostMapping("/getScore")
-//    @ApiOperation(value = "获取各个分值")
-//    public RestResponse<Map<String,Integer>> getScore() {
-////        List<indicatorsTreeTreeVO> tree = scoreRecordService.getScore(auditTreeVO);
-//        return RestResponse.ok(null);
-//    }
-
     @Log("专家评分")
     @PostMapping("/updateScore")
     @ApiOperation(value = "专家评分")

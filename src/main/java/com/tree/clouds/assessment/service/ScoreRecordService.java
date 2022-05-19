@@ -30,7 +30,7 @@ public interface ScoreRecordService extends IService<ScoreRecord> {
 
     ScoreRecord getByReportId(String id);
 
-    void updateStatusByYearAndUnit(String assessmentYear, String unitId);
+    void updateStatusByYearAndUnit(String assessmentYear, String unitId,Integer type);
 
     List<ScoreRecord> getByTypeAndUnitIdAndYear(String unitId, String assessmentYear,Integer type);
 }

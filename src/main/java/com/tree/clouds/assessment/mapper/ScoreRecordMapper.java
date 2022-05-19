@@ -24,7 +24,7 @@ public interface ScoreRecordMapper extends BaseMapper<ScoreRecord> {
 
     Double getSumByUnitAndYear(String unitId, int year);
 
-    void updateStatusByYearAndUnit(String assessmentYear, String unitId);
+    void updateStatusByYearAndUnit(String assessmentYear, String unitId,Integer status);
 
     List<ScoreRecord> getByTypeAndUnitIdAndYear(String assessmentYear, String unitId, Integer type);
 }

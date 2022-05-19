@@ -31,6 +31,9 @@
             <if test="performancePageVO.unitName!=null and performancePageVO.unitName!=''">
                 and b.unit_name like "%"#{performancePageVO.unitName}"%"
             </if>
+            <if test="performancePageVO.unitId!=null and performancePageVO.unitId!=''">
+                and b.unit_Id = #{performancePageVO.unitId}
+            </if>
             <if test="performancePageVO.assessmentYear!=null and performancePageVO.assessmentYear!=''">
                 and a.assessment_year = #{performancePageVO.assessmentYear}
             </if>

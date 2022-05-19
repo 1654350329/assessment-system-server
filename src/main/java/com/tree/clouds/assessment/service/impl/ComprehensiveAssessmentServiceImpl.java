@@ -12,6 +12,7 @@ import com.tree.clouds.assessment.model.vo.*;
 import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.utils.BaseBusinessException;
+import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,10 +44,20 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
     private AssessmentIndicatorsDetailService detailService;
     @Autowired
     private AssessmentIndicatorsService assessmentIndicatorsService;
+    @Autowired
+    private MatterListService matterListService;
+    @Autowired
+    private RoleManageService roleManageService;
 
 
     @Override
     public IPage<ComprehensiveAssessment> performancePage(PerformancePageVO performancePageVO) {
+        List<RoleManage> roleManageList = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> role_admin = roleManageList.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin")).collect(Collectors.toList());
+        if (CollUtil.isEmpty(role_admin)){
+            performancePageVO.setUnitId(LoginUserUtil.getUnitId());
+            performancePageVO.setComprehensiveProgress("2");
+        }
         return this.baseMapper.performancePage(performancePageVO.getPage(), performancePageVO);
     }
 
@@ -76,7 +87,7 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
 
 
         //修改专家评分状态
-        scoreRecordService.updateStatusByYearAndUnit(assessment.getAssessmentYear(), assessment.getUnitId());
+        scoreRecordService.updateStatusByYearAndUnit(assessment.getAssessmentYear(), assessment.getUnitId(),1);
 
 
     }
@@ -92,6 +103,7 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         if (CollUtil.isNotEmpty(scoreRecords)) {
            throw new BaseBusinessException(400,"还有待复评,未评审!");
         }
+        scoreRecordService.updateStatusByYearAndUnit(assessmentCompleteVO.getAssessmentYear(),assessmentCompleteVO.getUnitId(),2);
         //修改状态
         ComprehensiveAssessment assessment = new ComprehensiveAssessment();
         assessment.setComprehensiveProgress(2);
@@ -126,6 +138,10 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         scoreRecord.setExpertStatus(0);
         scoreRecord.setRemark(reAssessmentVO.getRemark());
         this.scoreRecordService.updateById(scoreRecord);
+        //添加到待办
+        AssessmentIndicatorsDetail detail = this.detailService.getByReportId(reAssessmentVO.getId());
+        AssessmentIndicators indicators = this.assessmentIndicatorsService.getById(detail.getProjectId());
+        matterListService.addMatter(indicators.getIndicatorsName()+"-"+detail.getAssessmentCriteria()+"材料复评通知",null,reAssessmentVO.getId(),indicators.getUserId(),4,indicators.getAssessmentYear(),detail.getIndicatorsId());
     }
 
     @Override

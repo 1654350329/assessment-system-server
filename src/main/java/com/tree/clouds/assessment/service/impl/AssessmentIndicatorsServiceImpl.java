@@ -54,6 +54,8 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     private IndicatorReportService indicatorReportService;
     @Autowired
     private RoleManageService roleManageService;
+    @Autowired
+    private MatterListService matterListService;
 
     @Override
     public List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type, String unitId, String userId) {
@@ -61,8 +63,23 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             year = DateUtil.year(new Date());
         }
         List<IndicatorsTreeTreeVO> list = this.baseMapper.getByYear(year, type);
+        if (CollUtil.isEmpty(list)){
+            String[] names={"县（市、区）绩效任务","机制创新","正向激励加分","绩效减分"};
+            List<AssessmentIndicators> assessmentIndicatorsList=new ArrayList<>();
+            AssessmentIndicators assessmentIndicators=new AssessmentIndicators();
+            assessmentIndicators.setAssessmentYear(String.valueOf(year));
+            assessmentIndicators.setParentId("0");
+            assessmentIndicators.setAssessmentType(0);
+            assessmentIndicators.setIndicatorsStatus(0);
+            for (String name : names) {
+                assessmentIndicators.setIndicatorsName(name);
+                assessmentIndicatorsList.add(assessmentIndicators);
+            }
+            this.saveBatch(assessmentIndicatorsList);
+            list= this.baseMapper.getByYear(year, type);
+        }
         List<RoleManage> roleManages = roleManageService.getRoleByUserId(userId);
-        List<String> role_admin = roleManages.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin")||code.equals("ROLE_user_admin")).collect(Collectors.toList());
+        List<String> role_admin = roleManages.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin") || code.equals("ROLE_user_admin")).collect(Collectors.toList());
         if (userId != null && CollUtil.isEmpty(role_admin)) {
             list = list.stream().filter(vo -> {
                 AssessmentIndicators id = this.getById(vo.getId());
@@ -328,6 +345,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
 
 
         List<UnitAssessment> unitAssessments = unitAssessmentService.getByYear(releaseAssessmentVO.getAssessmentYear());
+        Set<String> unitIds = new HashSet<>();
         List<IndicatorReport> reports = new ArrayList<>();
         for (UnitAssessment unitAssessment : unitAssessments) {
             IndicatorReport indicatorReport = new IndicatorReport();
@@ -337,10 +355,14 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             indicatorReport.setUnitId(unitAssessment.getUnitId());
             indicatorReport.setExpirationDate(releaseAssessmentVO.getExpirationDate());
             reports.add(indicatorReport);
+            unitIds.add(unitAssessment.getUnitId());
         }
-
         //添加到待上报表
         indicatorReportService.saveBatch(reports);
+        //添加到待办列表
+        for (String unitId : unitIds) {
+            matterListService.addMatter(releaseAssessmentVO.getAssessmentYear() + "年考核指标已发布", unitId, null, null, 0,releaseAssessmentVO.getAssessmentYear(),null);
+        }
     }
 
     @Override

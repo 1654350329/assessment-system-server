@@ -2,6 +2,7 @@ package com.tree.clouds.assessment.service;
 
 import com.tree.clouds.assessment.model.entity.RoleManage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tree.clouds.assessment.model.vo.DistributeRoleVO;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ import java.util.List;
 public interface RoleManageService extends IService<RoleManage> {
 
    List<RoleManage> getRoleByUserId(String userId);
+
+    void distributeRole(DistributeRoleVO distributeRoleVO);
 }
