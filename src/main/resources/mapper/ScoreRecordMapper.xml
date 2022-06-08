@@ -19,7 +19,7 @@
         record_id, indicators_id, expert_score, illustrate, unit_name, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
     <update id="updateStatusByYearAndUnit">
-        update score_record set score_type =#{status} , expert_status =0
+        update score_record set score_type =#{status} , expert_status =1
         where report_id in (select a.report_id from indicator_report a
             left join assessment_indicators b on a.indicators_id=b.indicators_id
             where a.unit_id=#{unitId} and b.assessment_year=#{assessmentYear})
@@ -32,7 +32,7 @@
     </select>
     <select id="getReviewPage" resultType="com.tree.clouds.assessment.model.vo.ReviewVO">
         select
-        a.report_id,a.expert_Status,d.assessment_Year,f.unit_name,e.user_name as createdUser,e.PHONE_NUMBER,c.project_id as indicatorsId,d.indicators_name,c.assessment_criteria,a.expert_status
+        a.report_id,a.expert_Status,d.assessment_Year,f.unit_id,f.unit_name,e.user_name as createdUser,e.PHONE_NUMBER,c.project_id as indicatorsId,d.indicators_name,c.assessment_criteria,a.expert_status
         from score_record a
         left join indicator_report b on b.report_id=a.report_id
         left join assessment_indicators_detail c on c.detail_id=b.detail_id

@@ -37,8 +37,8 @@
             <if test="unitId!=null">
                 and unit_Id=#{unitId}
             </if>
-            <if test="userId!=null">
-                and user_Id=#{userId}
+            <if test="expertUnitId!=null">
+                and expert_Unit_Id=#{expertUnitId}
             </if>
         </where>
     </select>

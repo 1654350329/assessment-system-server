@@ -62,6 +62,10 @@ public class AssessmentIndicatorsDetail extends BaseEntity {
     @TableField("fraction")
     private Double fraction;
 
+    @ApiModelProperty(value = "指标类型 0下属单位 1区县")
+    @TableField("indicators_type")
+    private Integer indicatorsType;
+
     @ApiModelProperty(value = "附件")
     @TableField(exist = false)
     private List<FileInfo> fileInfoVOS;

@@ -42,32 +42,33 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
 
     @Override
     public List<UnitVO> assessmentList(UnitVO unitVO) {
-        if (unitVO.getYear()==null){
+        if (unitVO.getYear() == null) {
             unitVO.setYear(DateUtil.year(new Date()));
         }
         QueryWrapper<UnitManage> queryWrapper = new QueryWrapper<>();
         if (StrUtil.isNotBlank(unitVO.getUnitName())) {
             queryWrapper.like(UnitManage.UNIT_NAME, unitVO.getUnitName());
         }
+        queryWrapper.eq(UnitManage.UNIT_TYPE, UnitManage.UNIT_TYPE_ZERO);
         List<UnitManage> unitManages = unitManageService.list(queryWrapper);
-        List<UnitVO> unitVOS=new ArrayList<>();
+        List<UnitVO> unitVOS = new ArrayList<>();
         for (UnitManage unitManage : unitManages) {
             UnitVO unit = BeanUtil.toBean(unitManage, UnitVO.class);
-            unit.setNumber(this.baseMapper.getCountUnit(unitManage.getUnitId(),unitVO.getYear()));
+            unit.setNumber(this.baseMapper.getCountUnit(unitManage.getUnitId(), unitVO.getYear()));
             unitVOS.add(unit);
         }
-      return unitVOS;
+        return unitVOS;
     }
 
     @Override
     @Transactional
     public void addAssessment(List<String> ids, String unitId) {
-        if (CollUtil.isEmpty(ids) ){
+        if (CollUtil.isEmpty(ids)) {
             return;
         }
         Integer release = this.baseMapper.isRelease(ids.get(0));
-        if (release!=null && release==1){
-            throw new BaseBusinessException(400,"当前年已发布,不许修改分配考核指标");
+        if (release != null && release == 1) {
+            throw new BaseBusinessException(400, "当前年已发布,不许修改分配考核指标");
         }
         //删除已分配项目
         this.remove(new QueryWrapper<UnitAssessment>().eq(UnitAssessment.UNIT_ID, unitId));
@@ -100,13 +101,18 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
 
     @Override
     public List<UnitAssessment> getByYear(String assessmentYear) {
-
         return this.baseMapper.getByYear(assessmentYear);
     }
 
     @Override
-    public Integer getExpertDistributeNumber(String unitId, String userId) {
-        return this.baseMapper.getExpertDistributeNumber(unitId,userId);
+    public Integer getExpertDistributeNumber(String unitId, String expertUnit) {
+        return this.baseMapper.getExpertDistributeNumber(unitId, expertUnit);
+    }
+
+    @Override
+    public Double getScoreByUnitIdAndYear(String unitId, String year) {
+        Double scoreByUnitIdAndYear = this.baseMapper.getScoreByUnitIdAndYear(unitId, year);
+        return scoreByUnitIdAndYear == null ? 0 : scoreByUnitIdAndYear;
     }
 
 

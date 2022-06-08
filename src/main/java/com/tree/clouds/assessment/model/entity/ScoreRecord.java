@@ -55,7 +55,7 @@ public class ScoreRecord extends BaseEntity {
     private String illustrate;
 
     @ApiModelProperty(value = "驳回说明")
-    @TableField("remark")
+    @TableField(value = "remark",updateStrategy = FieldStrategy.IGNORED)
     private String remark;
 
 

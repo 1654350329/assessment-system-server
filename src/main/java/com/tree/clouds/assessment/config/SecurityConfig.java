@@ -21,7 +21,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String[] URL_WHITELIST = {
 
             "/login",
-            "/logout",
             "/captcha",
             "/favicon.ico",
             "/doc.html",
@@ -48,6 +47,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
     @Autowired
     DecryptUsernamePasswordFilter decryptUsernamePasswordFilter;
+    @Autowired
+    CustomizeLogoutHandler customizeLogoutHandler;
 
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {

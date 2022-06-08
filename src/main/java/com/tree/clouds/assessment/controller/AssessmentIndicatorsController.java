@@ -41,10 +41,10 @@ public class AssessmentIndicatorsController {
 
 
     @Log("考核指标配置目录树")
-    @PostMapping("/indicatorsTree/{year}")
+    @PostMapping("/indicatorsTree/{year}/{indicatorsType}")
     @ApiOperation(value = "考核指标配置目录树")
-    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year) {
-        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year, 1, null, null);
+    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year,@PathVariable Integer indicatorsType) {
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year, 1, null, null,indicatorsType);
         return RestResponse.ok(tree);
     }
 
@@ -59,7 +59,6 @@ public class AssessmentIndicatorsController {
     @Log("根据考核标准查询目录树")
     @PostMapping("/getTreeById/{id}")
     @ApiOperation(value = "根据考核标准查询目录树")
-
     public RestResponse<List<IndicatorsTreeTreeVO>> getTreeById(@PathVariable String id) {
         List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.getTreeById(id);
         return RestResponse.ok(tree);
@@ -69,16 +68,14 @@ public class AssessmentIndicatorsController {
     @Log("查看考评标准")
     @PostMapping("/evaluationStandard/{id}")
     @ApiOperation(value = "查看考评标准")
-
-    public RestResponse<AssessmentIndicators> evaluationStandard(@PathVariable String id) {
-        AssessmentIndicators assessmentIndicators = assessmentIndicatorsService.evaluationStandard(id);
+    public RestResponse<AssessmentIndicatorsVO> evaluationStandard(@PathVariable String id) {
+        AssessmentIndicatorsVO assessmentIndicators = assessmentIndicatorsService.evaluationStandard(id);
         return RestResponse.ok(assessmentIndicators);
     }
 
     @Log("新增项目")
     @PostMapping("/addIndicators")
     @ApiOperation(value = "新增项目")
-
     public RestResponse<Boolean> addIndicators(@RequestBody UpdateIndicatorsVO updateIndicatorsVO) {
         assessmentIndicatorsService.addIndicators(updateIndicatorsVO);
         return RestResponse.ok(true);
@@ -87,16 +84,14 @@ public class AssessmentIndicatorsController {
     @Log("编辑项目")
     @PostMapping("/updateIndicators")
     @ApiOperation(value = "编辑项目")
-
     public RestResponse<Boolean> updateIndicators(@RequestBody UpdateIndicatorsVO updateIndicatorsVO) {
         assessmentIndicatorsService.updateIndicators(updateIndicatorsVO);
         return RestResponse.ok(true);
     }
 
-    @Log("删除项目,指标")
+    @Log("删除项目,指标,考评标准")
     @PostMapping("/deleteIndicators")
     @ApiOperation(value = "删除项目,指标,考评标准")
-
     public RestResponse<Boolean> deleteIndicators(@RequestBody PublicIdsReqVO publicIdsReqVO) {
         assessmentIndicatorsService.deleteIndicators(publicIdsReqVO.getIds());
         return RestResponse.ok(true);
@@ -105,7 +100,6 @@ public class AssessmentIndicatorsController {
     @Log("删除考核标准")
     @PostMapping("/deleteAssessment")
     @ApiOperation(value = "删除考核标准")
-
     public RestResponse<Boolean> deleteAssessment(@RequestBody PublicIdsReqVO publicIdsReqVO) {
         assessmentIndicatorsDetailService.removeByIds(publicIdsReqVO.getIds());
         return RestResponse.ok(true);
@@ -130,35 +124,33 @@ public class AssessmentIndicatorsController {
     @Log("查看考核标准")
     @PostMapping("/getAssessmentIndicators/{id}")
     @ApiOperation(value = "查看考核标准")
-
     public RestResponse<AssessmentIndicatorsDetail> getAssessmentIndicators(@PathVariable String id) {
         AssessmentIndicatorsDetail assessmentIndicators = assessmentIndicatorsDetailService.getById(id);
         List<FileInfo> fileInfos = fileInfoService.getByBizIdsAndType(assessmentIndicators.getDetailId(), null);
-//        List<FileInfoVO> collect = fileInfos.stream().map(fileInfo -> BeanUtil.toBean(fileInfo, FileInfoVO.class)).collect(Collectors.toList());
         assessmentIndicators.setFileInfoVOS(fileInfos);
         return RestResponse.ok(assessmentIndicators);
     }
 
     @Log("复制项目")
-    @PostMapping("/copyTask/{year}")
+    @PostMapping("/copyTask/{year}/{indicatorsType}")
     @ApiOperation(value = "复制项目根据年份")
-    public RestResponse<Boolean> copyTask(@PathVariable Integer year) {
-        assessmentIndicatorsService.copyTask(year);
+    public RestResponse<Boolean> copyTask(@PathVariable Integer year,@PathVariable Integer indicatorsType) {
+        assessmentIndicatorsService.copyTask(year,indicatorsType);
         return RestResponse.ok(true);
     }
 
     @Log("导出项目")
-    @GetMapping("/export/{year}")
+    @GetMapping("/export/{year}/{indicatorsType}")
     @ApiOperation(value = "导出项目根据年份")
-    public void export(@PathVariable Integer year, HttpServletResponse response) {
-        assessmentIndicatorsService.export(year,response);
+    public void export(@PathVariable Integer year,@PathVariable Integer indicatorsType,HttpServletResponse response) {
+        assessmentIndicatorsService.export(year,indicatorsType,response);
     }
 
     @Log("配置总分值 总分值")
-    @PostMapping("/getScoreSum/{year}")
+    @PostMapping("/getScoreSum/{year}/{indicatorsType}")
     @ApiOperation(value = "配置总分值")
-    public RestResponse<Integer> getScoreSum(@PathVariable Integer year) {
-        int score = assessmentIndicatorsService.getScoreSum(year);
+    public RestResponse<Integer> getScoreSum(@PathVariable Integer year, @PathVariable Integer indicatorsType) {
+        int score = assessmentIndicatorsService.getScoreSum(year,indicatorsType);
         return RestResponse.ok(score);
     }
 }

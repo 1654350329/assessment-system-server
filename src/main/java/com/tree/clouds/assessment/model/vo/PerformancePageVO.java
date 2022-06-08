@@ -15,4 +15,6 @@ public class PerformancePageVO extends PageParam{
     private String evelId;
     @ApiModelProperty(value = "状态(进度) 0待评定 1待复核 2已完成")
     private String comprehensiveProgress;
+    @ApiModelProperty(value = "0下属单位 1区县")
+    private int indicatorsType;
 }

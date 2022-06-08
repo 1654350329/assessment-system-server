@@ -49,9 +49,9 @@ public class MatterList extends BaseEntity {
     @TableField("report_id")
     private String reportId;
 
-    @ApiModelProperty(value = "专家id")
-    @TableField("user_id")
-    private String userId;
+    @ApiModelProperty(value = "主评单位id")
+    @TableField("expert_Unit_Id")
+    private String expertUnitId;
 
     @ApiModelProperty(value = "0未读 1已读")
     @TableField("matter_status")

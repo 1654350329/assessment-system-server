@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.img.ImgUtil;
 import cn.hutool.core.io.FileUtil;
@@ -59,7 +60,7 @@ public class FileInfoServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> i
         try {
             File file = MultipartFileUtil.multipartFileToFile(multipartFile);
             String formatDate = DateUtil.formatDate(new Date()).replaceAll("-", "/");
-            String filePath = Constants.FILE_PATH + formatDate;
+            String filePath = Constants.TMP_HOME + formatDate;
             FileUtil.move(file,new File(filePath),true);
             //文件上传
             String type = StringUtils.substringAfterLast(originalFilename, ".");
@@ -118,6 +119,9 @@ public class FileInfoServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> i
 
     @Override
     public boolean saveFileInfo(List<FileInfoVO> bizFiles, String reportId) {
+        if (CollUtil.isEmpty(bizFiles)){
+            return true;
+        }
         List<FileInfo> collect = bizFiles.stream().map(bizFile -> {
             FileInfo fileInfo = BeanUtil.toBean(bizFile, FileInfo.class);
             fileInfo.setBizId(reportId);

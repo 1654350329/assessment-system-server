@@ -20,11 +20,13 @@ public interface AssessmentIndicatorsDetailMapper extends BaseMapper<AssessmentI
 
     Double getScoreByUnit(String unitId, String id);
 
-    int getCountByType(String id, Integer type,String year);
+    int getCountByType(String id, Integer type);
 
     AssessmentIndicatorsDetail getByNameAndPid(String name, String parentId);
 
     AssessmentIndicatorsDetail getByReportId(String reportId);
 
     List<IndicatorsTreeTreeVO> getByParentId(String id,String unitId);
+
+    List<AssessmentIndicatorsDetail> getListByYearAndType(int type, String assessmentYear);
 }

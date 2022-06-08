@@ -8,7 +8,7 @@
         GROUP_ID, GROUP_NAME, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
     <select id="unitManagePage" resultType="com.tree.clouds.assessment.model.entity.UnitManage">
-        select * from unit_manage where 1=1
+        select * from unit_manage where 1=1 and unit_type=0
         <if test="unitManagePageVO.unitName !=null and unitManagePageVO.unitName !=''">
             and unit_NAME like "%"#{unitManagePageVO.unitName}"%"
         </if>

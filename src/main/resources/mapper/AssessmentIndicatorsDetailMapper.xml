@@ -55,7 +55,6 @@
         select count(a.detail_id) from assessment_indicators_detail a
         left join assessment_indicators b on a.indicators_id=b.indicators_id
         <where>
-            b.assessment_year=#{year}
             <if test="type==0">
                 and a.indicators_id=#{id}
             </if>
@@ -83,6 +82,12 @@
         from indicator_report a
         left join assessment_indicators_detail b on a.detail_id =b.detail_id
         where b.assessment_id=#{id} and a.unit_id=#{unitId}
+    </select>
+    <select id="getListByYearAndType"
+            resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicatorsDetail">
+        select a.* from assessment_indicators_detail a
+            left join assessment_indicators b on a.indicators_id=b.indicators_id
+            where a.indicators_type=#{type} and b.assessment_Year=#{assessmentYear}
     </select>
 
 </mapper>

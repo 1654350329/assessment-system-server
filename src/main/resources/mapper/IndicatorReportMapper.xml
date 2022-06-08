@@ -84,20 +84,20 @@
     <select id="getReviewedNumber" resultType="java.lang.Integer">
         select COUNT(*) from indicator_report a
         left join assessment_indicators_detail b on a.detail_Id=b.detail_Id
-        left join assessment_indicators c on c.indicators_id=b.project_id
+        left join assessment_indicators c on c.indicators_id=b.task_id
         left join score_record d on a.report_id=d.report_id
         where a.unit_id=#{unitId} and c.assessment_year=#{year}
-        <if test="userId!=null">
-            and c.user_id =#{userId}
+        <if test="expertUnitId!=null">
+            and c.unit_id =#{expertUnitId}
         </if>
         <if test="type==0">
-            and d.expert_status=0
+            and (d.expert_status=0 or d.expert_status is null) and a.report_progress=2
         </if>
         <if test="type==1">
             and d.expert_status=1
         </if>
         <if test="type==2">
-            and a.report_progress=2
+            and a.report_progress=3
         </if>
     </select>
     <select id="getDistributeSum" resultType="java.lang.Integer">

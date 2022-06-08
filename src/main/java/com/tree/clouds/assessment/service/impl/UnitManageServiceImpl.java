@@ -44,4 +44,9 @@ public class UnitManageServiceImpl extends ServiceImpl<UnitManageMapper, UnitMan
         }
         this.removeByIds(ids);
     }
+
+    @Override
+    public List<UnitManage> getListByType(Integer type) {
+        return this.list(new QueryWrapper<UnitManage>().eq(UnitManage.UNIT_TYPE,type));
+    }
 }

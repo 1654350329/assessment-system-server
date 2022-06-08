@@ -29,5 +29,6 @@ public interface UnitAssessmentService extends IService<UnitAssessment> {
 
     List<UnitAssessment> getByYear(String assessmentYear);
 
-    Integer getExpertDistributeNumber(String unitId, String userId);
+    Integer getExpertDistributeNumber(String unitId, String expertUnit);
+    Double getScoreByUnitIdAndYear(String unitId, String year);
 }

@@ -30,5 +30,5 @@ public interface ComprehensiveAssessmentService extends IService<ComprehensiveAs
 
     void reAssessment(ReAssessmentVO reAssessmentVO);
 
-    ComprehensiveAssessment getByYearAndUnitId(int year, String unitId);
+    ComprehensiveAssessment getByYearAndUnitId(String year, String unitId);
 }

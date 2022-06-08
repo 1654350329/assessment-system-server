@@ -11,6 +11,9 @@ public class ReviewVO {
     @ApiModelProperty(value = "考评年份")
     private Integer assessmentYear;
 
+    @ApiModelProperty(value = "责任单位id")
+    private String unitId;
+
     @ApiModelProperty(value = "责任单位")
     private String unitName;
 

@@ -54,9 +54,10 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     @Transactional
     public void updateScore(UpdateScoreRecord updateScoreRecord) {
         AssessmentIndicatorsDetail detail = detailService.getByReportId(updateScoreRecord.getId());
-        if (updateScoreRecord.getExpertScore()>detail.getFraction()){
-            throw new BaseBusinessException(400,"评分不能超过当前考核标准分数!");
+        if (updateScoreRecord.getExpertScore() > detail.getFraction()) {
+            throw new BaseBusinessException(400, "评分不能超过当前考核标准分数!");
         }
+        AssessmentIndicators indicators = assessmentIndicatorsService.getById(detail.getIndicatorsId());
         ScoreRecord one = this.getOne(new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateScoreRecord.getId()));
         if (one == null) {
             one = new ScoreRecord();
@@ -66,52 +67,37 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
         one.setExpertScore(updateScoreRecord.getExpertScore());
         one.setExpertStatus(1);
         one.setScoreType(1);
+        one.setRemark(null);
         this.saveOrUpdate(one, new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateScoreRecord.getId()));
         //更新上报进度
         IndicatorReport indicatorReport = indicatorReportService.getByReportIdAndUnitId(updateScoreRecord.getId(), null);
-        indicatorReportService.updateProgress(indicatorReport.getReportId(), 2);
+        indicatorReportService.updateProgress(indicatorReport.getReportId(), 3);
         //添加评分历史
         ratingRecordHistoryService.addRecord(one.getReportId(), one.getExpertScore(), one.getIllustrate());
         //添加到成绩管理
-        ComprehensiveAssessment byYearAndUnitId = this.comprehensiveAssessmentService.getByYearAndUnitId(DateUtil.year(new Date()), indicatorReport.getUnitId());
-        if (byYearAndUnitId == null && isComplete(updateScoreRecord.getUnitId(), DateUtil.year(new Date()))) {
-            List<AssessmentIndicators> assessmentIndicators = assessmentIndicatorsService.getGroupByYear(String.valueOf(DateUtil.year(new Date())));
+        ComprehensiveAssessment byYearAndUnitId = this.comprehensiveAssessmentService.getByYearAndUnitId(indicators.getAssessmentYear(), indicatorReport.getUnitId());
+        if (byYearAndUnitId == null && isComplete(updateScoreRecord.getUnitId(), indicators.getAssessmentYear())) {
+            UnitManage unitManage = unitManageService.getById(updateScoreRecord.getUnitId());
             ComprehensiveAssessment assessment = new ComprehensiveAssessment();
             assessment.setUnitId(updateScoreRecord.getUnitId());
             assessment.setComprehensiveProgress(0);//初审为0
-            //自评总分
-            Double UserScore = this.indicatorReportService.getUserScoreByUnit(updateScoreRecord.getUnitId(), Integer.parseInt(assessmentIndicators.get(0).getAssessmentYear()));
-            //专家评分
-            Double sum = this.baseMapper.getExpertRating(updateScoreRecord.getUnitId(),  assessmentIndicators.get(0).getAssessmentYear());
-            assessment.setUserScore(String.valueOf(UserScore));
-            assessment.setExpertRating(String.valueOf(sum));
-            for (AssessmentIndicators assessmentIndicator : assessmentIndicators) {
-                double scoreByUnit = detailService.getScoreByUnit(updateScoreRecord.getUnitId(), assessmentIndicator.getIndicatorsId());
-                assessment.setAssessmentYear(assessmentIndicator.getAssessmentYear());
-                if (assessmentIndicator.getIndicatorsName().equals("县（市、区）绩效任务")) {
-                    assessment.setTaskScore(String.valueOf(scoreByUnit));
-                }
-                if (assessmentIndicator.getIndicatorsName().equals("机制创新")) {
-                    assessment.setInnovationScoreSum(String.valueOf(scoreByUnit));
-                }
-                if (assessmentIndicator.getIndicatorsName().equals("正向激励加分")) {
-                    assessment.setPositiveScore(String.valueOf(scoreByUnit));
-                }
-                if (assessmentIndicator.getIndicatorsName().equals("绩效减分")) {
-                    assessment.setPerformanceScore(String.valueOf(scoreByUnit));
-                }
-            }
+            assessment.setIndicatorsType(unitManage.getUnitType());
+            assessment.setAssessmentYear(indicators.getAssessmentYear());
+            Double sum = this.baseMapper.getExpertRating(updateScoreRecord.getUnitId(), indicators.getAssessmentYear());
+            assessment.setOnLineScore(sum.toString());
+            Double score = unitAssessmentService.getScoreByUnitIdAndYear(updateScoreRecord.getUnitId(), indicators.getAssessmentYear());
+            assessment.setTaskScore(score.toString());
             comprehensiveAssessmentService.save(assessment);
         }
-        if (byYearAndUnitId!=null){
-            Double sum = this.baseMapper.getExpertRating(updateScoreRecord.getUnitId(), byYearAndUnitId.getAssessmentYear());
-            byYearAndUnitId.setExpertRating(String.valueOf(sum));
+        if (byYearAndUnitId != null) {
+            Double sum = this.baseMapper.getExpertRating(indicatorReport.getUnitId(), byYearAndUnitId.getAssessmentYear());
+            byYearAndUnitId.setOnLineScore(String.valueOf(sum));
             comprehensiveAssessmentService.updateById(byYearAndUnitId);
         }
 
     }
 
-    public Boolean isComplete(String unitId, Integer year) {
+    public Boolean isComplete(String unitId, String year) {
         Integer reviewedNumber = this.indicatorReportService.getReviewedNumber(unitId, 2, year);
         Integer distributeNumber = unitAssessmentService.getDistributeNumber(unitId);
         return reviewedNumber.equals(distributeNumber);
@@ -148,13 +134,13 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
 
     @Override
     public List<IndicatorsTreeTreeVO> scoreTree(AuditTreeVO auditTreeVO) {
-        int status=1;
-        if (StrUtil.isNotBlank(auditTreeVO.getReportStatus())){
-            //0未评 1已评 对应上报进度 1 跟2
+        int status = 2;
+        if (StrUtil.isNotBlank(auditTreeVO.getReportStatus())) {
+            //0未评 1已评 对应上报进度 2 跟3
             int i = Integer.parseInt(auditTreeVO.getReportStatus());
-            status=i+1;
+            status = i + 1;
         }
-        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent(),3);
+        return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent(), 3);
     }
 
     @Override
@@ -163,12 +149,12 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     }
 
     @Override
-    public void updateStatusByYearAndUnit(String assessmentYear, String unitId,Integer type) {
-        this.baseMapper.updateStatusByYearAndUnit(assessmentYear,unitId,type);
+    public void updateStatusByYearAndUnit(String assessmentYear, String unitId, Integer type) {
+        this.baseMapper.updateStatusByYearAndUnit(assessmentYear, unitId, type);
     }
 
     @Override
-    public List<ScoreRecord> getByTypeAndUnitIdAndYear(String unitId, String assessmentYear,Integer type) {
-        return  this.baseMapper.getByTypeAndUnitIdAndYear(assessmentYear,unitId,type);
+    public List<ScoreRecord> getByTypeAndUnitIdAndYear(String unitId, String assessmentYear, Integer type) {
+        return this.baseMapper.getByTypeAndUnitIdAndYear(assessmentYear, unitId, type);
     }
 }

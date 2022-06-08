@@ -37,7 +37,6 @@ public class UnitManageController {
     @PostMapping("/groupManagePage")
     @ApiOperation(value = "单位管理模块分页查询")
     @Log("单位管理模块分页查询")
-
     public RestResponse<IPage<UnitManage>> groupManagePage(@RequestBody UnitManagePageVO unitManagePageVO) {
         IPage<UnitManage> page = unitManageService.groupManagePage(unitManagePageVO);
         return RestResponse.ok(page);
@@ -54,7 +53,6 @@ public class UnitManageController {
     @PostMapping("/updateGroupRole")
     @ApiOperation(value = "修改单位")
     @Log("修改单位")
-
     public RestResponse<Boolean> updateGroupRole(@RequestBody UnitManage groupRole) {
         unitManageService.updateById(groupRole);
         return RestResponse.ok(true);

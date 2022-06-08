@@ -36,7 +36,7 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
 
     int getMaterial(Integer type, String unitId, String userId);
 
-    Integer getReviewedNumber(String unitId, int type, Integer year);
+    Integer getReviewedNumber(String unitId, int type, String year);
 
     Map<String, Object> getData(GetDataVO getDataVO);
 
@@ -44,5 +44,5 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
 
     Integer getAuditNumber(String unitId, int year);
 
-    List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year,String unitId);
+    List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year, String unitId, int progress);
 }

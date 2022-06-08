@@ -8,7 +8,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.word.Word07Writer;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.tree.clouds.assessment.common.Constants;
 import com.tree.clouds.assessment.model.entity.*;
 import com.tree.clouds.assessment.mapper.AssessmentIndicatorsMapper;
@@ -21,6 +20,7 @@ import com.tree.clouds.assessment.utils.DownloadFile;
 import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -58,34 +58,35 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     private MatterListService matterListService;
 
     @Override
-    public List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type, String unitId, String userId) {
+    public List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type, String unitId, String userId, Integer indicatorsType) {
         if (year == null) {
             year = DateUtil.year(new Date());
         }
-        List<IndicatorsTreeTreeVO> list = this.baseMapper.getByYear(year, type);
-        if (CollUtil.isEmpty(list)){
-            String[] names={"县（市、区）绩效任务","机制创新","正向激励加分","绩效减分"};
-            List<AssessmentIndicators> assessmentIndicatorsList=new ArrayList<>();
-            AssessmentIndicators assessmentIndicators=new AssessmentIndicators();
-            assessmentIndicators.setAssessmentYear(String.valueOf(year));
-            assessmentIndicators.setParentId("0");
-            assessmentIndicators.setAssessmentType(0);
-            assessmentIndicators.setIndicatorsStatus(0);
+        List<IndicatorsTreeTreeVO> list = this.baseMapper.getByYear(year, type, indicatorsType);
+        if (CollUtil.isEmpty(list)) {
+            String[] names = {"县（市、区）绩效任务", "机制创新", "正向激励加分", "绩效减分"};
+            List<AssessmentIndicators> assessmentIndicatorsList = new ArrayList<>();
             for (String name : names) {
+                AssessmentIndicators assessmentIndicators = new AssessmentIndicators();
+                assessmentIndicators.setAssessmentYear(String.valueOf(year));
+                assessmentIndicators.setParentId("0");
+                assessmentIndicators.setAssessmentType(0);
+                assessmentIndicators.setIndicatorsStatus(0);
+                assessmentIndicators.setIndicatorsType(indicatorsType);
                 assessmentIndicators.setIndicatorsName(name);
                 assessmentIndicatorsList.add(assessmentIndicators);
             }
             this.saveBatch(assessmentIndicatorsList);
-            list= this.baseMapper.getByYear(year, type);
+            list = this.baseMapper.getByYear(year, type, indicatorsType);
         }
-        List<RoleManage> roleManages = roleManageService.getRoleByUserId(userId);
-        List<String> role_admin = roleManages.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin") || code.equals("ROLE_user_admin")).collect(Collectors.toList());
-        if (userId != null && CollUtil.isEmpty(role_admin)) {
-            list = list.stream().filter(vo -> {
-                AssessmentIndicators id = this.getById(vo.getId());
-                return vo.getAssessmentType() != 1 || Objects.equals(id.getUserId(), userId);
-            }).collect(Collectors.toList());
-        }
+//        List<RoleManage> roleManages = roleManageService.getRoleByUserId(userId);
+//        List<String> role_admin = roleManages.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin") || code.equals("ROLE_user_admin")).collect(Collectors.toList());
+//        if (userId != null && CollUtil.isEmpty(role_admin)) {
+//            list = list.stream().filter(vo -> {
+//                AssessmentIndicators id = this.getById(vo.getId());
+//                return vo.getAssessmentType() != 2 || Objects.equals(id.getUnitId(), userId);
+//            }).collect(Collectors.toList());
+//        }
         for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
             if (indicatorsTreeTreeVO.getAssessmentType() == 1 && type == 1) {
                 indicatorsTreeTreeVO.setFile("文件");
@@ -221,8 +222,13 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     }
 
     @Override
-    public AssessmentIndicators evaluationStandard(String id) {
-        return this.getById(id);
+    public AssessmentIndicatorsVO evaluationStandard(String id) {
+        AssessmentIndicators indicators = this.getById(id);
+        AssessmentIndicatorsVO assessmentIndicatorsVO = BeanUtil.toBean(indicators, AssessmentIndicatorsVO.class);
+        if (StrUtil.isNotBlank(indicators.getUnitIds())){
+            assessmentIndicatorsVO.setUnitIds(Arrays.asList(indicators.getUnitIds().split(",")));
+        }
+        return assessmentIndicatorsVO;
     }
 
     @Override
@@ -242,10 +248,12 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
 
     @Override
     public void addIndicators(UpdateIndicatorsVO updateIndicatorsVO) {
+        AssessmentIndicators indicators = this.getById(updateIndicatorsVO.getParentId());
         getStatus(updateIndicatorsVO.getParentId());
         AssessmentIndicators assessmentIndicators = BeanUtil.toBean(updateIndicatorsVO, AssessmentIndicators.class);
         assessmentIndicators.setAssessmentType(1);
         assessmentIndicators.setAssessmentYear(String.valueOf(DateUtil.year(new Date())));
+        assessmentIndicators.setIndicatorsType(indicators.getIndicatorsType());
         this.save(assessmentIndicators);
     }
 
@@ -255,6 +263,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         if (updateTaskVO.getAssessmentType() != 4) {
             getStatus(updateTaskVO.getIndicatorsId());
             AssessmentIndicators assessmentIndicators = BeanUtil.toBean(updateTaskVO, AssessmentIndicators.class);
+            assessmentIndicators.setUnitIds(String.join(",", updateTaskVO.getUnitIds()));
             this.updateById(assessmentIndicators);
         } else {
             AssessmentIndicatorsDetail detail = this.detailService.getById(updateTaskVO.getIndicatorsId());
@@ -264,9 +273,11 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             detail.setFraction(updateTaskVO.getFraction());
             this.detailService.updateById(detail);
 
-            fileInfoService.deleteByBizId(detail.getDetailId());
             //新增文件
-            fileInfoService.saveFileInfo(updateTaskVO.getFileInfoVOS(), detail.getDetailId());
+            if (CollUtil.isNotEmpty(updateTaskVO.getFileInfoVOS())) {
+                fileInfoService.deleteByBizId(detail.getDetailId());
+                fileInfoService.saveFileInfo(updateTaskVO.getFileInfoVOS(), detail.getDetailId());
+            }
         }
 
     }
@@ -279,8 +290,10 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     }
 
     @Override
+    @Transactional
     public void addTask(UpdateTaskVO updateTaskVO) {
         getStatus(updateTaskVO.getParentId());
+        AssessmentIndicators indicators = this.getById(updateTaskVO.getParentId());
         if (updateTaskVO.getAssessmentType() != 4) {
             AssessmentIndicators name = this.baseMapper.getByNameAndPid(updateTaskVO.getIndicatorsName(), updateTaskVO.getParentId());
             if (name != null) {
@@ -288,6 +301,15 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             }
             AssessmentIndicators assessmentIndicators = BeanUtil.toBean(updateTaskVO, AssessmentIndicators.class);
             assessmentIndicators.setAssessmentYear(String.valueOf(DateUtil.year(new Date())));
+            assessmentIndicators.setIndicatorsType(indicators.getIndicatorsType());
+            assessmentIndicators.setUnitId(updateTaskVO.getUnitId());
+            if (CollUtil.isNotEmpty(updateTaskVO.getUnitIds())) {
+                assessmentIndicators.setUnitIds(String.join(",", updateTaskVO.getUnitIds()));
+            }
+            //下属单位 默认考评单位id 10
+            if (indicators.getIndicatorsType() == 0 && updateTaskVO.getAssessmentType() == 2) {
+                assessmentIndicators.setUnitId("10");
+            }
             this.save(assessmentIndicators);
         } else {
             AssessmentIndicatorsDetail detail = this.detailService.getByNameAndPid(updateTaskVO.getIndicatorsName(), updateTaskVO.getParentId());
@@ -298,6 +320,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             indicatorsDetail.setFraction(updateTaskVO.getFraction());
             indicatorsDetail.setInstructions(updateTaskVO.getInstructions());
             indicatorsDetail.setAssessmentCriteria(updateTaskVO.getIndicatorsName());
+            indicatorsDetail.setIndicatorsType(indicators.getIndicatorsType());
             this.detailService.save(indicatorsDetail);
             //新增文件
             fileInfoService.saveFileInfo(updateTaskVO.getFileInfoVOS(), indicatorsDetail.getDetailId());
@@ -325,8 +348,12 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     }
 
     @Override
+    @Transactional
     public void releaseAssessment(ReleaseAssessmentVO releaseAssessmentVO) {
-        List<AssessmentIndicators> list = this.list(new QueryWrapper<AssessmentIndicators>().eq(AssessmentIndicators.ASSESSMENT_YEAR, releaseAssessmentVO.getAssessmentYear()));
+
+        List<AssessmentIndicators> list = this.list(new QueryWrapper<AssessmentIndicators>()
+                .eq(AssessmentIndicators.ASSESSMENT_YEAR, releaseAssessmentVO.getAssessmentYear())
+                .eq(AssessmentIndicators.INDICATORS_TYPE, releaseAssessmentVO.getIndicatorsType()));
         if (CollUtil.isNotEmpty(list)) {
             AssessmentIndicators assessmentIndicators = list.get(0);
             if (assessmentIndicators.getIndicatorsStatus() != null && assessmentIndicators.getIndicatorsStatus() == 1) {
@@ -341,28 +368,74 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         assessmentIndicators.setExpirationDate(releaseAssessmentVO.getExpirationDate());
         assessmentIndicators.setReleaseDate(DateUtil.now());
         assessmentIndicators.setReleaseUser(LoginUserUtil.getUserId());
-        this.update(assessmentIndicators, new QueryWrapper<AssessmentIndicators>().eq(AssessmentIndicators.ASSESSMENT_YEAR, releaseAssessmentVO.getAssessmentYear()));
+        this.update(assessmentIndicators, new QueryWrapper<AssessmentIndicators>()
+                .eq(AssessmentIndicators.ASSESSMENT_YEAR, releaseAssessmentVO.getAssessmentYear())
+                .eq(AssessmentIndicators.INDICATORS_TYPE, releaseAssessmentVO.getIndicatorsType()));
 
-
-        List<UnitAssessment> unitAssessments = unitAssessmentService.getByYear(releaseAssessmentVO.getAssessmentYear());
         Set<String> unitIds = new HashSet<>();
         List<IndicatorReport> reports = new ArrayList<>();
-        for (UnitAssessment unitAssessment : unitAssessments) {
-            IndicatorReport indicatorReport = new IndicatorReport();
-            indicatorReport.setReportProgress(0);
-            indicatorReport.setDetailId(unitAssessment.getDetailId());
-            indicatorReport.setIndicatorsId(unitAssessment.getIndicatorsId());
-            indicatorReport.setUnitId(unitAssessment.getUnitId());
-            indicatorReport.setExpirationDate(releaseAssessmentVO.getExpirationDate());
-            reports.add(indicatorReport);
-            unitIds.add(unitAssessment.getUnitId());
+        //下属单位
+        if (releaseAssessmentVO.getIndicatorsType() == 0) {
+            List<UnitAssessment> unitAssessments = unitAssessmentService.getByYear(releaseAssessmentVO.getAssessmentYear());
+            if (CollUtil.isEmpty(unitAssessments)){
+                throw new BaseBusinessException(400, "责任单位数量为0,不许发布!");
+            }
+            for (UnitAssessment unitAssessment : unitAssessments) {
+                IndicatorReport indicatorReport = new IndicatorReport();
+                indicatorReport.setReportProgress(0);
+                indicatorReport.setDetailId(unitAssessment.getDetailId());
+                indicatorReport.setIndicatorsId(unitAssessment.getIndicatorsId());
+                indicatorReport.setUnitId(unitAssessment.getUnitId());
+                indicatorReport.setExpirationDate(releaseAssessmentVO.getExpirationDate());
+                reports.add(indicatorReport);
+                unitIds.add(unitAssessment.getUnitId());
+            }
+
+        } else {
+            //区县
+            List<UnitAssessment> unitAssessments = new ArrayList<>();
+            List<UnitManage> areaList = unitManageService.getListByType(UnitManage.UNIT_TYPE_ONE);
+            List<AssessmentIndicatorsDetail> details = this.detailService.getListByYearAndType(1, releaseAssessmentVO.getAssessmentYear());
+            for (UnitManage unitManage : areaList) {
+                for (AssessmentIndicatorsDetail detail : details) {
+                    IndicatorReport indicatorReport = new IndicatorReport();
+                    AssessmentIndicators indicators = this.getById(detail.getProjectId());
+                    if (indicators.getEvaluationMethod() == 1) {
+                        indicatorReport.setReportProgress(2);
+                    } else {
+                        indicatorReport.setReportProgress(3);
+                    }
+                    indicatorReport.setDetailId(detail.getDetailId());
+                    indicatorReport.setIndicatorsId(detail.getIndicatorsId());
+                    indicatorReport.setUnitId(unitManage.getUnitId());
+                    indicatorReport.setExpirationDate(releaseAssessmentVO.getExpirationDate());
+                    reports.add(indicatorReport);
+                    unitIds.add(unitManage.getUnitId());
+                    UnitAssessment unitAssessment = new UnitAssessment();
+                    unitAssessment.setDetailId(detail.getDetailId());
+                    unitAssessment.setUnitId(unitManage.getUnitId());
+                    unitAssessments.add(unitAssessment);
+                }
+            }
+            unitAssessmentService.saveBatch(unitAssessments);
         }
         //添加到待上报表
         indicatorReportService.saveBatch(reports);
+        //添加到评分列表
+        List<ScoreRecord> collect = reports.stream().filter(report -> report.getReportProgress() == 2).map(report -> {
+            ScoreRecord scoreRecord = new ScoreRecord();
+            scoreRecord.setReportId(report.getReportId());
+            scoreRecord.setExpertStatus(0);
+            return scoreRecord;
+        }).collect(Collectors.toList());
+        scoreRecordService.saveBatch(collect);
+
         //添加到待办列表
         for (String unitId : unitIds) {
-            matterListService.addMatter(releaseAssessmentVO.getAssessmentYear() + "年考核指标已发布", unitId, null, null, 0,releaseAssessmentVO.getAssessmentYear(),null);
+            matterListService.addMatter(releaseAssessmentVO.getAssessmentYear() + "年考核指标已发布", unitId, null, null, 0, releaseAssessmentVO.getAssessmentYear(), null);
         }
+
+
     }
 
     @Override
@@ -372,14 +445,18 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         List<String> year = new ArrayList<>();
         List<AssessmentVO> AssessmentVOs = new ArrayList<>();
         for (AssessmentVO record : page.getRecords()) {
-            Integer number = this.baseMapper.getUnitNumberByYear(record.getAssessmentYear());
-            record.setUnitNumber(number);
+            record.setUnitNumber(10);
+            if (assessmentPageVO.getIndicatorsType() == 0) {
+                Integer number = this.baseMapper.getUnitNumberByYear(record.getAssessmentYear());
+                record.setUnitNumber(number);
+            }
             if (!year.contains(record.getAssessmentYear())) {
                 AssessmentVOs.add(record);
                 year.add(record.getAssessmentYear());
             }
         }
         page.setRecords(AssessmentVOs);
+        page.setTotal(AssessmentVOs.size());
         return page;
     }
 
@@ -448,7 +525,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
 
     @Override
     public List<IndicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO) {
-        Integer status = null;
+        int status = 1;
         if (StrUtil.isNotBlank(auditTreeVO.getReportStatus())) {
             status = Integer.parseInt(auditTreeVO.getReportStatus());
             if (status == 2) {
@@ -460,12 +537,12 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
 
 
     @Override
-    public void copyTask(Integer year) {
+    public void copyTask(Integer year, Integer indicatorsType) {
         int nowYear = DateUtil.year(new Date());
         if (nowYear == year) {
             throw new BaseBusinessException(400, "不许复制当前年指标");
         }
-        List<IndicatorsTreeTreeVO> treeTreeVOList = this.baseMapper.getByYear(year, 0);
+        List<IndicatorsTreeTreeVO> treeTreeVOList = this.baseMapper.getByYear(year, 0, indicatorsType);
         List<AssessmentIndicators> assessmentIndicators = new ArrayList<>();
         List<AssessmentIndicatorsDetail> details = new ArrayList<>();
         //key旧id value新id
@@ -496,14 +573,14 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     }
 
     @Override
-    public int getScoreSum(Integer year) {
-        Integer scoreSumByYear = this.baseMapper.getScoreSumByYear(year);
+    public int getScoreSum(Integer year, Integer indicatorsType) {
+        Integer scoreSumByYear = this.baseMapper.getScoreSumByYear(year, indicatorsType);
         return scoreSumByYear == null ? 0 : scoreSumByYear;
     }
 
     @Override
-    public void export(Integer year, HttpServletResponse response) {
-        List<IndicatorsTreeTreeVO> tree = this.indicatorsTree(year, 2, null, null);
+    public void export(Integer year, Integer indicatorsType, HttpServletResponse response) {
+        List<IndicatorsTreeTreeVO> tree = this.indicatorsTree(year, 2, null, null, indicatorsType);
 
         Word07Writer writer = new Word07Writer();
         writer.addText(new Font("方正小标宋简体", Font.PLAIN, 20), "               ", year + "年指标方案");
@@ -568,6 +645,21 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         writer.close();
         byte[] bytes = DownloadFile.File2byte(file);
         DownloadFile.downloadFile(bytes, fileName, response, false);
+    }
+
+    @Override
+    public List<IndicatorsTreeTreeVO> getScoreLeftTree(Integer year, String unitId, Integer unitType,Integer progress) {
+        List<IndicatorsTreeTreeVO> scoreLeftTree = this.baseMapper.getScoreLeftTree(year, unitId, unitType,progress);
+        scoreLeftTree.forEach(tree->{
+            if (tree.getAssessmentType()==0){
+                tree.setFile("文件夹");
+            }
+            if (tree.getAssessmentType()==1){
+                tree.setFile("文件");
+            }
+        });
+        scoreLeftTree=ConvertUtil.convertTree(scoreLeftTree, treeVO -> "0".equals(treeVO.getParentId()));
+        return scoreLeftTree;
     }
 
 }

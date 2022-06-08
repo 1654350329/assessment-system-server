@@ -57,9 +57,8 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
             indicatorReport.setExpirationDate(updateAuditVO.getExpirationDate());
         }
 
-        indicatorReport.setReportProgress(1);
         AssessmentIndicators indicators = assessmentIndicatorsService.getById(indicatorReport.getIndicatorsId());
-        if (indicators.getIndicatorsName().equals("机制创新") && updateAuditVO.getIndicatorsStatus() == 1) {
+        if ( updateAuditVO.getIndicatorsStatus() == 1) {
             indicatorReport.setReportProgress(2);
         }
         AssessmentIndicatorsDetail detail = detailService.getById(indicatorReport.getDetailId());
@@ -86,15 +85,16 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
         auditLog.setIndicatorsStatus(updateAuditVO.getIndicatorsStatus());
         this.saveOrUpdate(auditLog, new QueryWrapper<AuditLog>().eq(AuditLog.REPORT_ID, indicatorReport.getReportId()));
         if (updateAuditVO.getIndicatorsStatus() == 1) {
-            if (!indicators.getIndicatorsName().equals("机制创新")) {
+            AssessmentIndicators id = this.assessmentIndicatorsService.getById(detail.getProjectId());
+            if (id.getEvaluationMethod()==1) {
                 ScoreRecord scoreRecord = new ScoreRecord();
                 scoreRecord.setReportId(updateAuditVO.getId());
                 scoreRecord.setScoreType(0);
                 scoreRecord.setExpertStatus(0);
                 scoreRecordService.saveOrUpdate(scoreRecord, new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateAuditVO.getId()));
                 //添加到专家待评
-                AssessmentIndicators project = assessmentIndicatorsService.getById(detail.getProjectId());
-                matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料驳回", indicatorReport.getUnitId(), indicatorReport.getReportId(), project.getUserId(), 3,indicators.getAssessmentYear(),indicatorReport.getIndicatorsId());
+                AssessmentIndicators project = assessmentIndicatorsService.getById(detail.getTaskId());
+                matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料驳回", indicatorReport.getUnitId(), indicatorReport.getReportId(), project.getUnitId(), 3,indicators.getAssessmentYear(),indicatorReport.getIndicatorsId());
             }
 
         }

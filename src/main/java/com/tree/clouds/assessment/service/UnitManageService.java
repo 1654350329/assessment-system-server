@@ -20,4 +20,6 @@ public interface UnitManageService extends IService<UnitManage> {
     IPage<UnitManage> groupManagePage(UnitManagePageVO unitManagePageVO);
 
     void deleteGroupRole(List<String> ids);
+
+    List<UnitManage> getListByType(Integer type);
 }

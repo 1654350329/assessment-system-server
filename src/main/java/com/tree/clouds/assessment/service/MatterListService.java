@@ -17,7 +17,7 @@ public interface MatterListService extends IService<MatterList> {
 
     IPage<MatterList> matterListPage(PageParam pageVO);
 
-    void addMatter(String title, String unitId, String reportId, String userId, Integer type,String year,String indicatorsId);
+    void addMatter(String title, String unitId, String reportId, String expertUnitId, Integer type,String year,String indicatorsId);
 
     void updateMatter(String matterId);
 }

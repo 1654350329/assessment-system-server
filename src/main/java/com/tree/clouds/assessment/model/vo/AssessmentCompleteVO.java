@@ -10,4 +10,5 @@ public class AssessmentCompleteVO {
 
     @ApiModelProperty("考评年份")
     private String assessmentYear;
+
 }

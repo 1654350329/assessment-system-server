@@ -38,6 +38,9 @@
             <if test="submitLogPageVO.reportId!=null and submitLogPageVO.reportId!=''">
                 and  a.report_id = #{submitLogPageVO.reportId}
             </if>
+            <if test="submitLogPageVO.unitId!=null and submitLogPageVO.unitId!=''">
+                and  a.unit_Id = #{submitLogPageVO.unitId}
+            </if>
         </where>
     </select>
 

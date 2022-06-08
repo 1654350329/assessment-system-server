@@ -36,8 +36,7 @@ public class AssessmentIndicatorsDetailServiceImpl extends ServiceImpl<Assessmen
 
     @Override
     public int getCountByType(String id, Integer assessmentType) {
-        //todo 得改year字段
-        return this.baseMapper.getCountByType(id, assessmentType, String.valueOf(DateUtil.year(new Date())));
+        return this.baseMapper.getCountByType(id, assessmentType);
     }
 
     @Override
@@ -51,8 +50,12 @@ public class AssessmentIndicatorsDetailServiceImpl extends ServiceImpl<Assessmen
     }
 
     @Override
-    public List<IndicatorsTreeTreeVO> getByParentId(String id,String unitId) {
-        return   this.baseMapper.getByParentId(id,unitId);
+    public List<IndicatorsTreeTreeVO> getByParentId(String id, String unitId) {
+        return this.baseMapper.getByParentId(id, unitId);
+    }
 
+    @Override
+    public List<AssessmentIndicatorsDetail> getListByYearAndType(int type, String assessmentYear) {
+        return this.baseMapper.getListByYearAndType(type,assessmentYear);
     }
 }

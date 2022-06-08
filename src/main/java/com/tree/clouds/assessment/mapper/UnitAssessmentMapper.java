@@ -26,5 +26,7 @@ public interface UnitAssessmentMapper extends BaseMapper<UnitAssessment> {
 
     Integer isRelease(String detailId);
 
-    Integer getExpertDistributeNumber(String unitId, String userId);
+    Integer getExpertDistributeNumber(String unitId, String expertUnit);
+
+    Double getScoreByUnitIdAndYear(String unitId, String year);
 }

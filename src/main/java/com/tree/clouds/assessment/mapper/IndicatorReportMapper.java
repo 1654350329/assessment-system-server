@@ -34,7 +34,7 @@ public interface IndicatorReportMapper extends BaseMapper<IndicatorReport> {
 
     List<AssessmentListVO> getAssessmentList(String unitId);
 
-    Integer getReviewedNumber(String unitId,int type,int year,String userId);
+    Integer getReviewedNumber(String unitId,int type,String year,String expertUnitId);
 
     Integer getDistributeSum(String unitId, String year);
 

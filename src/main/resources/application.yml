@@ -31,9 +31,9 @@ spring:
 #    url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
 #    username: root
 #    password: 123456
-    url: jdbc:mysql://localhost:3306/graded?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
-    username: graded
-    password: root
+    url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
 
 #    password: root
 # mybatis-plus 配置
@@ -48,7 +48,7 @@ mybatis-plus:
 markerhub:
   jwt:
     header: Authorization
-    expire: 604800 #7天，秒单位
+    expire: 1800 #30分钟，秒单位
     secret: ji8n3439n439n43ld9ne9343fdfer49h
 
 qiniu:

@@ -46,6 +46,10 @@ public class ComprehensiveAssessment extends BaseEntity {
     @TableId(value = "comprehensive_id", type = IdType.UUID)
     private String comprehensiveId;
 
+    @ApiModelProperty(value = "指标类型")
+    @TableField("indicators_type")
+    private Integer indicatorsType;
+
     @ApiModelProperty(value = "考评年份")
     @TableField("assessment_year")
     private String assessmentYear;
@@ -58,33 +62,17 @@ public class ComprehensiveAssessment extends BaseEntity {
     @TableField("indicators_id")
     private String indicatorsId;
 
-    @ApiModelProperty(value = "绩效任务总分值")
+    @ApiModelProperty(value = "考核总分值")
     @TableField("task_score")
     private String taskScore;
 
-    @ApiModelProperty(value = "机制创新总分值")
-    @TableField("innovation_score_sum")
-    private String innovationScoreSum;
+    @ApiModelProperty(value = "线上得分")
+    @TableField("on_Line_Score")
+    private String onLineScore;
 
-    @ApiModelProperty(value = "正向激励总分值")
-    @TableField("positive_score")
-    private String positiveScore;
-
-    @ApiModelProperty(value = "绩效减分总分值")
-    @TableField("performance_score")
-    private String performanceScore;
-
-    @ApiModelProperty(value = "自评总分")
-    @TableField("user_score")
-    private String userScore;
-
-    @ApiModelProperty(value = "专家总评分")
-    @TableField("expert_Rating")
-    private String expertRating;
-
-    @ApiModelProperty(value = "机制创新分")
-    @TableField("innovation_score")
-    private String innovationScore;
+    @ApiModelProperty(value = "线下得分")
+    @TableField("offline_score")
+    private String offlineScore;
 
     @ApiModelProperty(value = "综合得分")
     @TableField("score_sum")

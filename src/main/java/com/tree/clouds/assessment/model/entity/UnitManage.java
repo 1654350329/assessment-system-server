@@ -25,13 +25,21 @@ public class UnitManage extends BaseEntity {
 
     public static final String UNIT_ID = "UNIT_ID";
     public static final String UNIT_NAME = "UNIT_NAME";
-    @ApiModelProperty(value = "分组id")
+    public static final String UNIT_TYPE = "unit_type";
+    //单位类型 0下属单位 1区县
+    public static final Integer UNIT_TYPE_ZERO = 0;
+    public static final Integer UNIT_TYPE_ONE = 1;
+    @ApiModelProperty(value = "单位id")
     @TableId(value = UNIT_ID, type = IdType.UUID)
     private String unitId;
 
-    @ApiModelProperty(value = "分组名称")
+    @ApiModelProperty(value = "单位名称")
     @TableField(UNIT_NAME)
     private String unitName;
+
+    @ApiModelProperty(value = "单位类型")
+    @TableField(UNIT_TYPE)
+    private Integer unitType;
 
 
 }

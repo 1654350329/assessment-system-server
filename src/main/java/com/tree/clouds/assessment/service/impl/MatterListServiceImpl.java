@@ -56,7 +56,7 @@ public class MatterListServiceImpl extends ServiceImpl<MatterListMapper, MatterL
         }
         //获得账号管理员待办3 4
         if (roleCodes.contains("ROLE_EXPERT")) {
-            List<MatterList> matterListIPage = this.baseMapper.getMatterList( 3,LoginUserUtil.getUserId(), null);
+            List<MatterList> matterListIPage = this.baseMapper.getMatterList( 3,LoginUserUtil.getUnitId(), null);
             matterLists.addAll(matterListIPage);
         }
         IPage<MatterList> iPage = new Page();
@@ -86,12 +86,12 @@ public class MatterListServiceImpl extends ServiceImpl<MatterListMapper, MatterL
     }
 
     @Override
-    public void addMatter(String title, String unitId, String reportId, String userId, Integer type,String year,String indicatorsId) {
+    public void addMatter(String title, String unitId, String reportId, String expertUnitId, Integer type,String year,String indicatorsId) {
         MatterList matterList = new MatterList();
         matterList.setTitle(title);
         matterList.setUnitId(unitId);
         matterList.setReportId(reportId);
-        matterList.setUserId(userId);
+        matterList.setExpertUnitId(expertUnitId);
         matterList.setMatterType(type);
         matterList.setMatterStatus(0);
         matterList.setYear(year);

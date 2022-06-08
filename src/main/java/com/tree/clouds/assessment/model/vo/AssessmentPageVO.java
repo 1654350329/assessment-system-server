@@ -26,4 +26,7 @@ public class AssessmentPageVO extends PageParam {
     @ApiModelProperty("责任单位id")
     @JsonIgnore
     private String unitId;
+
+    @ApiModelProperty(value = "指标类型 0下属单位 1区县考核")
+    private int indicatorsType;
 }

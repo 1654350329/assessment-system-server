@@ -203,7 +203,10 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
 
     @Override
     public void updatePassword(UpdatePasswordVO updatePasswordVO) {
-        String password = bCryptPasswordEncoder.encode(Base64.decodeStr(updatePasswordVO.getPassword()));
+        String decodeStr = Base64.decodeStr(updatePasswordVO.getPassword());
+        //校验密码复杂度
+        PwdCheckUtil.checkStrongPwd(decodeStr);
+        String password = bCryptPasswordEncoder.encode(decodeStr);
         UserManage user = new UserManage();
         user.setPassword(password);
         user.setUserId(LoginUserUtil.getUserId());

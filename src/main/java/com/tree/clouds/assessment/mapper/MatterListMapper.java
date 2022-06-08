@@ -17,5 +17,5 @@ import java.util.List;
 public interface MatterListMapper extends BaseMapper<MatterList> {
 
 
-    List<MatterList> getMatterList(Integer type, String userId, String unitId);
+    List<MatterList> getMatterList(Integer type, String expertUnitId, String unitId);
 }

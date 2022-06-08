@@ -28,4 +28,5 @@ public interface AssessmentIndicatorsDetailService extends IService<AssessmentIn
 
     List<IndicatorsTreeTreeVO> getByParentId(String id,String unitId);
 
+    List<AssessmentIndicatorsDetail> getListByYearAndType(int type, String assessmentYear);
 }

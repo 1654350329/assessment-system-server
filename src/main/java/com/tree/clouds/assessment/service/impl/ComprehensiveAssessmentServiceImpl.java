@@ -141,11 +141,11 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         //添加到待办
         AssessmentIndicatorsDetail detail = this.detailService.getByReportId(reAssessmentVO.getId());
         AssessmentIndicators indicators = this.assessmentIndicatorsService.getById(detail.getProjectId());
-        matterListService.addMatter(indicators.getIndicatorsName()+"-"+detail.getAssessmentCriteria()+"材料复评通知",null,reAssessmentVO.getId(),indicators.getUserId(),4,indicators.getAssessmentYear(),detail.getIndicatorsId());
+        matterListService.addMatter(indicators.getIndicatorsName()+"-"+detail.getAssessmentCriteria()+"材料复评通知",null,reAssessmentVO.getId(),indicators.getUnitId(),4,indicators.getAssessmentYear(),detail.getIndicatorsId());
     }
 
     @Override
-    public ComprehensiveAssessment getByYearAndUnitId(int year, String unitId) {
+    public ComprehensiveAssessment getByYearAndUnitId(String year, String unitId) {
         return this.getOne(new QueryWrapper<ComprehensiveAssessment>().eq(ComprehensiveAssessment.UNIT_ID, unitId)
                 .eq(ComprehensiveAssessment.ASSESSMENT_YEAR, year));
     }

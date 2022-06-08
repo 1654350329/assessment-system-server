@@ -18,13 +18,13 @@ import java.util.List;
  */
 public interface AssessmentIndicatorsService extends IService<AssessmentIndicators> {
 
-    List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type, String unitId, String userId);
+    List<IndicatorsTreeTreeVO> indicatorsTree(Integer year, Integer type, String unitId, String userId,Integer indicatorsType);
 
     List<IndicatorsTreeTreeVO> indicatorsChildrenTree(String id);
 
     List<IndicatorsTreeTreeVO> getByReportId(String id, String unitId, String reportId, Integer indicatorsStatus, String content);
 
-    AssessmentIndicators evaluationStandard(String id);
+    AssessmentIndicatorsVO evaluationStandard(String id);
 
     void addTask(UpdateTaskVO updateTaskVO);
 
@@ -48,9 +48,11 @@ public interface AssessmentIndicatorsService extends IService<AssessmentIndicato
 
     List<IndicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO);
 
-    void copyTask(Integer year);
+    void copyTask(Integer year,Integer indicatorsType);
 
-    int getScoreSum(Integer year);
+    int getScoreSum(Integer year, Integer indicatorsType);
 
-    void export(Integer year ,HttpServletResponse response);
+    void export(Integer year,Integer indicatorsType ,HttpServletResponse response);
+
+    List<IndicatorsTreeTreeVO> getScoreLeftTree(Integer year, String unitId, Integer unitType,Integer progress);
 }

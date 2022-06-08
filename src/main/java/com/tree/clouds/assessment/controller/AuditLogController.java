@@ -74,6 +74,14 @@ public class AuditLogController {
         auditLogService.updateAudit(updateAuditVO);
         return RestResponse.ok(true);
     }
+    @Log("评分左侧树")
+    @PostMapping("/scoreLeftTree/{year}/{unitId}")
+    @ApiOperation(value = "评分左侧树")
+    public RestResponse<List<IndicatorsTreeTreeVO>> scoreLeftTree(@PathVariable Integer year, @PathVariable String unitId) {
+        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, unitId,1);
+        return RestResponse.ok(tree);
+    }
+
     @Log("获取初审信息")
     @PostMapping("/getAudit/{id}")
     @ApiOperation(value = "获取初审信息")

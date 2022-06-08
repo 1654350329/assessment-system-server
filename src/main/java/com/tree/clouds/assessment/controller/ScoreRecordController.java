@@ -48,7 +48,7 @@ public class ScoreRecordController {
     @PostMapping("/scoreLeftTree/{year}/{unitId}")
     @ApiOperation(value = "评分左侧树")
     public RestResponse<List<IndicatorsTreeTreeVO>> scoreLeftTree(@PathVariable Integer year, @PathVariable String unitId) {
-        List<IndicatorsTreeTreeVO> tree  = indicatorReportService.scoreLeftTree(year,unitId);
+        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, unitId, 1);
         return RestResponse.ok(tree);
     }
 
@@ -72,14 +72,15 @@ public class ScoreRecordController {
     @PostMapping("/getScore")
     @ApiOperation(value = "获取专家评分")
     public RestResponse<ScoreRecord> getScore(@RequestBody GetScoreVO getScoreVO) {
-        ScoreRecord scoreRecord= scoreRecordService.getScore(getScoreVO.getId(),getScoreVO.getUnitId(),getScoreVO.getScoreType());
+        ScoreRecord scoreRecord = scoreRecordService.getScore(getScoreVO.getId(), getScoreVO.getUnitId(), getScoreVO.getScoreType());
         return RestResponse.ok(scoreRecord);
     }
+
     @Log("复评列表")
     @PostMapping("/reviewPage")
     @ApiOperation(value = "复评列表")
     public RestResponse<IPage<ReviewVO>> reviewPage(@RequestBody ReviewPageVO reviewPageVO) {
-        IPage<ReviewVO> page= scoreRecordService.reviewPage(reviewPageVO);
+        IPage<ReviewVO> page = scoreRecordService.reviewPage(reviewPageVO);
         return RestResponse.ok(page);
     }
 

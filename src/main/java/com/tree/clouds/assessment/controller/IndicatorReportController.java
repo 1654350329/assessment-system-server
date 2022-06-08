@@ -7,6 +7,7 @@ import com.tree.clouds.assessment.common.RestResponse;
 import com.tree.clouds.assessment.common.aop.Log;
 import com.tree.clouds.assessment.model.vo.*;
 import com.tree.clouds.assessment.service.IndicatorReportService;
+import com.tree.clouds.assessment.utils.LoginUserUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,14 @@ public class IndicatorReportController {
     public RestResponse<List<AssessmentListVO>> assessmentList() {
         List<AssessmentListVO> assessmentVOS = indicatorReportService.assessmentList();
         return RestResponse.ok(assessmentVOS);
+    }
+
+    @Log("评分左侧树")
+    @PostMapping("/scoreLeftTree/{year}")
+    @ApiOperation(value = "评分左侧树")
+    public RestResponse<List<IndicatorsTreeTreeVO>> scoreLeftTree(@PathVariable Integer year) {
+        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, LoginUserUtil.getUnitId(),0);
+        return RestResponse.ok(tree);
     }
 
     @Log("查询填报树")

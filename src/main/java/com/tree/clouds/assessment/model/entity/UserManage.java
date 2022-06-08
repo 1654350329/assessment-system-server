@@ -1,5 +1,6 @@
 package com.tree.clouds.assessment.model.entity;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -86,6 +87,10 @@ public class UserManage extends BaseEntity {
     @ApiModelProperty(value = "密码")
     @TableField("PASSWORD")
     private String password;
+
+    @ApiModelProperty(value = "密码更新时间")
+    @TableField("PASSWORD_TIME")
+    private String passwordTime;
 
     @ApiModelProperty(value = "盐")
     @TableField("salt")

@@ -42,10 +42,10 @@ public class UnitAssessmentController {
     }
 
     @Log("各目录树")
-    @PostMapping("/indicatorsTree/{year}/{unitId}")
+    @PostMapping("/indicatorsTree/{year}/{unitId}/{indicatorsType}")
     @ApiOperation(value = "目录树")
-    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year, @PathVariable String unitId) {
-        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year,2,unitId, null);
+    public RestResponse<List<IndicatorsTreeTreeVO>> indicatorsTree(@PathVariable Integer year, @PathVariable String unitId, @PathVariable Integer indicatorsType) {
+        List<IndicatorsTreeTreeVO> tree = assessmentIndicatorsService.indicatorsTree(year,2,unitId, null,indicatorsType);
         return RestResponse.ok(tree);
     }
 

@@ -58,6 +58,9 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String account = claim.getSubject();
         // 获取用户的权限等信息
         UserManage userManage = userManageService.getUserByAccount(account);
+        if (userManage == null) {
+            throw new JwtException("用户不存在!");
+        }
         userManage = userManageService.getInfo(userManage.getUserId());
         UsernamePasswordAuthenticationToken token
                 = new UsernamePasswordAuthenticationToken(userManage.getUserName(), userManage, userDetailService.getUserAuthority(userManage.getUserId()));

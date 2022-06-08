@@ -4,19 +4,19 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.tree.clouds.assessment.model.entity.ComprehensiveAssessment">
-        <id column="comprehensive_id" property="comprehensiveId" />
-        <result column="task_score" property="taskScore" />
-        <result column="innovation_score_sum" property="innovationScoreSum" />
-        <result column="performance_score" property="performanceScore" />
-        <result column="user_score" property="userScore" />
-        <result column="innovation_score" property="innovationScore" />
-        <result column="score_sum" property="scoreSum" />
-        <result column="comprehensive_status" property="comprehensiveStatus" />
-        <result column="CREATED_USER" property="createdUser" />
-        <result column="CREATED_TIME" property="createdTime" />
-        <result column="UPDATED_USER" property="updatedUser" />
-        <result column="UPDATED_TIME" property="updatedTime" />
-        <result column="DEL" property="del" />
+        <id column="comprehensive_id" property="comprehensiveId"/>
+        <result column="task_score" property="taskScore"/>
+        <result column="innovation_score_sum" property="innovationScoreSum"/>
+        <result column="performance_score" property="performanceScore"/>
+        <result column="user_score" property="userScore"/>
+        <result column="innovation_score" property="innovationScore"/>
+        <result column="score_sum" property="scoreSum"/>
+        <result column="comprehensive_status" property="comprehensiveStatus"/>
+        <result column="CREATED_USER" property="createdUser"/>
+        <result column="CREATED_TIME" property="createdTime"/>
+        <result column="UPDATED_USER" property="updatedUser"/>
+        <result column="UPDATED_TIME" property="updatedTime"/>
+        <result column="DEL" property="del"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -24,10 +24,11 @@
         comprehensive_id, comprehensive_year, task_score, innovation_score_sum, positive_score, performance_score, user_score, expert_score, innovation_score, score_sum, evel_name, comprehensive_status, remark, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
     <select id="performancePage" resultType="com.tree.clouds.assessment.model.entity.ComprehensiveAssessment">
-            select  a.*,b.unit_name,c.evel_name as evelId from comprehensive_assessment a
+        select a.*,b.unit_name,c.evel_name as evelId from comprehensive_assessment a
         left join unit_manage b on a.unit_id=b.unit_id
         left join evaluation_evel c on a.evel_id =c.evel_id
         <where>
+            a.indicators_type=#{performancePageVO.indicatorsType}
             <if test="performancePageVO.unitName!=null and performancePageVO.unitName!=''">
                 and b.unit_name like "%"#{performancePageVO.unitName}"%"
             </if>

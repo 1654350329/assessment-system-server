@@ -15,10 +15,11 @@ public class UpdateIndicatorsVO {
     @ApiModelProperty(value = "指标名称")
     private String indicatorsName;
 
-    @ApiModelProperty(value = "考评方式 1、线上自评 2、线下他评 33、线下选评")
-    private String evaluationMethod;
+    @ApiModelProperty(value = "考评方式 0、线上 1、线下")
+    private Integer evaluationMethod;
 
-    @ApiModelProperty(value = "专家id")
-    private String userId;
+    @ApiModelProperty(value = "指标类型 0下属单位 1区县")
+    private Integer indicatorsType;
+
 
 }

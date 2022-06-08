@@ -33,4 +33,11 @@ public class UpdateTaskVO {
     @ApiModelProperty(value = "附件 0考核指标配置文件 ")
     private List<FileInfoVO> fileInfoVOS;
 
+    @ApiModelProperty(value = "考核牵头单位")
+    private String unitId;
+    @ApiModelProperty(value = "协助考核部门单位")
+    private List<String> unitIds;
+
+    @ApiModelProperty(value = "指标类型 0下属单位 1区县考核")
+    private Integer indicatorsType;
 }

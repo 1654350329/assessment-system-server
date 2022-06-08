@@ -19,7 +19,7 @@ import java.util.List;
  */
 public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicators> {
 
-    List<IndicatorsTreeTreeVO> getByYear(Integer year, Integer type);
+    List<IndicatorsTreeTreeVO> getByYear(Integer year, Integer type, Integer indicatorsType);
 
     List<IndicatorsTreeTreeVO> getByIndicatorId(String id);
 
@@ -35,7 +35,7 @@ public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicat
 
     AssessmentIndicators getByNameAndPid(String indicatorsName, String pid);
 
-    Integer getScoreSumByYear(Integer year);
+    Integer getScoreSumByYear(Integer year, Integer indicatorsType);
 
     Integer getUnitNumberByYear(String assessmentYear);
 
@@ -45,4 +45,5 @@ public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicat
 
     List<IndicatorsTreeTreeVO> getIndicatorsTreeTreeVOByPId(String id);
 
+    List<IndicatorsTreeTreeVO> getScoreLeftTree(Integer year, String unitId, Integer unitType, Integer progress);
 }
