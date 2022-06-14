@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.controller;
 
 
+import cn.hutool.core.date.DateUtil;
 import com.tree.clouds.assessment.common.RestResponse;
 import com.tree.clouds.assessment.common.aop.Log;
 import com.tree.clouds.assessment.model.vo.PublicIdsReqVO;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -64,7 +66,13 @@ public class UnitAssessmentController {
         List<String> list = unitAssessmentService.getAssessment(unitId);
         return RestResponse.ok(list);
     }
-
+    @Log("获取已分配指标任务总分数")
+    @PostMapping("/getAssessmentFraction/{unitId}/{year}")
+    @ApiOperation(value = "获取已分配指标任务")
+    public RestResponse<Double> getAssessmentFraction(@PathVariable String unitId, @PathVariable String year) {
+        Double fraction = unitAssessmentService.getScoreByUnitIdAndYear(unitId, year);
+        return RestResponse.ok(fraction);
+    }
 
 
 

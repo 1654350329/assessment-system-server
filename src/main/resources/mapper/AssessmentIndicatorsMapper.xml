@@ -28,16 +28,23 @@
     <update id="updateExpirationDate">
         update assessment_indicators set expiration_date=#{expirationDate} where assessment_year=#{assessmentYear}
     </update>
+    <delete id="removeByYearAndType">
+        delete from assessment_indicators where indicators_type=#{indicatorsType} and assessment_year=#{assessmentYear}
+
+    </delete>
     <select id="getByYear" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
-        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort
         from assessment_indicators where assessment_year =#{year} and indicators_type = #{indicatorsType}
         <if test="type==1">
             and assessment_Type &lt; 2
         </if>
+
         UNION
-        select a.detail_id as id ,a.assessment_id as parent_Id,4,a.assessment_criteria as title from
+        select a.detail_id as id ,a.assessment_id as parent_Id,4,a.assessment_criteria as title,4 from
         assessment_indicators_detail a
         left join assessment_indicators b on a.indicators_id=b.indicators_id where b.indicators_type=#{indicatorsType}
+        and b.assessment_year =#{year}
+        order by sort asc
     </select>
     <select id="getGroupByYear" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
         select * from assessment_indicators
@@ -50,7 +57,7 @@
 
     <select id="assessmentPage" resultType="com.tree.clouds.assessment.model.vo.AssessmentVO">
         select DISTINCT a.assessment_year ,a.indicators_status,a.release_date,a.expiration_date,b.user_name as
-        created_User
+        created_User,a.indicators_type
         from assessment_indicators a left join user_manage b on a.release_user=b.user_id
         <where>
             1=1
@@ -90,13 +97,13 @@
         </if>
     </select>
     <select id="getByReportId" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
-        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort
         from assessment_indicators where assessment_Type > 0
         <if test="content!=null and content!=''">
             and indicators_name like "%"#{content}"%"
         </if>
         UNION
-        select b.report_id as id ,assessment_id as parent_Id,4,assessment_criteria as title
+        select b.report_id as id ,assessment_id as parent_Id,4,assessment_criteria as title,4
         from assessment_indicators_detail a right join indicator_report b on a.detail_id=b.detail_id
         where 1=1
         <if test="unitId!=null and unitId!=''">
@@ -114,6 +121,7 @@
         <if test="content!=null and content!=''">
             and (a.assessment_criteria like "%"#{content}"%" or a.instructions like "%"#{content}"%")
         </if>
+        order by sort asc
     </select>
     <select id="getByNameAndPid" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
         select * from assessment_indicators where indicators_Name=#{indicatorsName} and parent_Id=#{pid}
@@ -147,16 +155,17 @@
         from assessment_indicators where parent_id=#{id}
     </select>
     <select id="getScoreLeftTree" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
-        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort
         from assessment_indicators where assessment_year =#{year} and indicators_type = #{unitType}
          and assessment_Type = 0
         UNION
-        select a.indicators_id as id,a.parent_Id,a.assessment_Type,a.indicators_name as title
+        select a.indicators_id as id,a.parent_Id,a.assessment_Type,a.indicators_name as title,4
         from assessment_indicators a
         left join assessment_indicators_detail b on a.indicators_id=b.project_id
         left join indicator_report c on c.detail_id=b.detail_id
         where a.assessment_year =#{year} and a.indicators_type = #{unitType}
          and a.assessment_Type = 1 and c.report_id is not null and c.unit_id=#{unitId} and c.report_progress>=#{progress}
+           order by sort asc
     </select>
 
 </mapper>

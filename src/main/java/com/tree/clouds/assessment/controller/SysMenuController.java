@@ -50,7 +50,7 @@ public class SysMenuController {
 
     @GetMapping("/nav")
     @ApiOperation(value = "当前用户的菜单和权限信息")
-    public RestResponse<Map> nav() {
+    public RestResponse<Map<Object, Object>> nav() {
 
         UserManage userByAccount = userManageService.getUserByAccount(LoginUserUtil.getUserAccount());
 

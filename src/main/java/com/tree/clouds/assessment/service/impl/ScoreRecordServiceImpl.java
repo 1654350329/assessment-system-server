@@ -138,7 +138,7 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
         if (StrUtil.isNotBlank(auditTreeVO.getReportStatus())) {
             //0未评 1已评 对应上报进度 2 跟3
             int i = Integer.parseInt(auditTreeVO.getReportStatus());
-            status = i + 1;
+            status = i + status;
         }
         return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent(), 3);
     }

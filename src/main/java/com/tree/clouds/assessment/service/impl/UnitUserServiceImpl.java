@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.tree.clouds.assessment.mapper.UnitUserMapper;
 import com.tree.clouds.assessment.model.entity.UnitUser;
+import com.tree.clouds.assessment.model.entity.UserManage;
 import com.tree.clouds.assessment.service.UnitUserService;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class UnitUserServiceImpl extends ServiceImpl<UnitUserMapper, UnitUser> i
 
     @Override
     public void saveUnitUser(String userId, String unitId) {
+        this.remove(new QueryWrapper<UnitUser>().eq(UnitUser.USER_ID,userId));
         UnitUser unitUser = new UnitUser();
         unitUser.setUserId(userId);
         unitUser.setUnitId(unitId);

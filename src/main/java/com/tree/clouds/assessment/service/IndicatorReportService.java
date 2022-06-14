@@ -18,10 +18,11 @@ import java.util.Map;
  */
 public interface IndicatorReportService extends IService<IndicatorReport> {
 
-    IPage<IndicatorReportVO> assessmentList(AssessmentPageVO assessmentPageVO,Integer type);
+    IPage<IndicatorReportVO> assessmentList(AssessmentPageVO assessmentPageVO, Integer type);
+
     List<AssessmentListVO> assessmentList();
 
-    void updateReport(UpdateReportVO updateReportVO,int progress);
+    void updateReport(UpdateReportVO updateReportVO, int progress);
 
     IndicatorReport getByReportIdAndUnitId(String detailId, String unitId);
 
@@ -34,7 +35,9 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
     List<IndicatorsTreeTreeVO> getTreeById(String id, String unitId, String reportId, Integer indicatorsStatus, String content, int type);
 
 
-    int getMaterial(Integer type, String unitId, String userId);
+    int getMaterial(Integer type, String unitId);
+
+    int getMaterial(String unitId, Integer type);
 
     Integer getReviewedNumber(String unitId, int type, String year);
 

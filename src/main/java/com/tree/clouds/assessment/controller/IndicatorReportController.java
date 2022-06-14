@@ -34,7 +34,8 @@ public class IndicatorReportController {
     @PostMapping("/assessmentList")
     @ApiOperation(value = "单位考核指标列表")
     public RestResponse<IPage<IndicatorReportVO>> assessmentList(@RequestBody AssessmentPageVO assessmentPageVO) {
-        IPage<IndicatorReportVO> assessmentVOS = indicatorReportService.assessmentList(assessmentPageVO,0);
+        assessmentPageVO.setIndicatorsType(0);
+        IPage<IndicatorReportVO> assessmentVOS = indicatorReportService.assessmentList(assessmentPageVO, 0);
         return RestResponse.ok(assessmentVOS);
     }
 
@@ -50,7 +51,7 @@ public class IndicatorReportController {
     @PostMapping("/scoreLeftTree/{year}")
     @ApiOperation(value = "评分左侧树")
     public RestResponse<List<IndicatorsTreeTreeVO>> scoreLeftTree(@PathVariable Integer year) {
-        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, LoginUserUtil.getUnitId(),0);
+        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, LoginUserUtil.getUnitId(), 0);
         return RestResponse.ok(tree);
     }
 
@@ -58,15 +59,15 @@ public class IndicatorReportController {
     @PostMapping("/getTree")
     @ApiOperation(value = "查询填报树")
     public RestResponse<List<IndicatorsTreeTreeVO>> getTree(@RequestBody PublicIdReqVO publicIdReqVO) {
-        Integer status=null;
-        if (StrUtil.isNotBlank(publicIdReqVO.getReportStatus())){
-            status=Integer.parseInt(publicIdReqVO.getReportStatus());
+        Integer status = null;
+        if (StrUtil.isNotBlank(publicIdReqVO.getReportStatus())) {
+            status = Integer.parseInt(publicIdReqVO.getReportStatus());
             //如果查询2驳回状态  则查7改为另一个字段
-            if (status==2){
-                status=7;
+            if (status == 2) {
+                status = 7;
             }
         }
-        List<IndicatorsTreeTreeVO> treeById = indicatorReportService.getTreeById(publicIdReqVO.getId(),publicIdReqVO.getUnitId(), publicIdReqVO.getReportId(),status,publicIdReqVO.getContent(), 0);
+        List<IndicatorsTreeTreeVO> treeById = indicatorReportService.getTreeById(publicIdReqVO.getId(), publicIdReqVO.getUnitId(), publicIdReqVO.getReportId(), status, publicIdReqVO.getContent(), 0);
         return RestResponse.ok(treeById);
     }
 
@@ -74,7 +75,7 @@ public class IndicatorReportController {
     @PostMapping("/updateReport")
     @ApiOperation(value = "填报数据")
     public RestResponse<Boolean> updateReport(@RequestBody UpdateReportVO updateReportVO) {
-        indicatorReportService.updateReport(updateReportVO,1);
+        indicatorReportService.updateReport(updateReportVO, 1);
         return RestResponse.ok(true);
     }
 
@@ -82,7 +83,7 @@ public class IndicatorReportController {
     @PostMapping("/assessmentErrorList")
     @ApiOperation(value = "驳回列表")
     public RestResponse<IPage<AssessmentErrorVO>> assessmentErrorList(@RequestBody AssessmentPageVO assessmentPageVO) {
-        IPage<AssessmentErrorVO> page=indicatorReportService.assessmentErrorList(assessmentPageVO);
+        IPage<AssessmentErrorVO> page = indicatorReportService.assessmentErrorList(assessmentPageVO);
         return RestResponse.ok(page);
     }
 

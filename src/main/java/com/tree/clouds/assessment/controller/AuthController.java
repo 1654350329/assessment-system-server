@@ -46,7 +46,7 @@ public class AuthController {
 
     @GetMapping("/captcha")
     @ApiOperation(value = "获取验证码")
-    public RestResponse<Map> captcha() throws IOException {
+    public RestResponse<Map<String, String>> captcha() throws IOException {
 
         String key = UUID.randomUUID().toString();
         String code = producer.createText();
@@ -70,7 +70,7 @@ public class AuthController {
 
     @GetMapping("/info")
     @ApiOperation(value = "获取用户信息")
-    private RestResponse<Map> getInfo() {
+    private RestResponse<Map<String, Object>> getInfo() {
         //roles, name, avatar, introduction
         UserManage user = userManageService.getById(LoginUserUtil.getUserId());
         String userAuthorityInfo = userManageService.getUserAuthorityInfo(user.getUserId());

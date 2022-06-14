@@ -45,6 +45,7 @@ public class AuditLogController {
     @PostMapping("/assessmentList")
     @ApiOperation(value = "单位考核指标列表")
     public RestResponse<IPage<IndicatorReportVO>> assessmentList(@RequestBody AssessmentPageVO assessmentPageVO) {
+        assessmentPageVO.setIndicatorsType(0);
         IPage<IndicatorReportVO> assessmentVOS = indicatorReportService.assessmentList(assessmentPageVO,1);
         return RestResponse.ok(assessmentVOS);
     }

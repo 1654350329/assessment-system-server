@@ -38,6 +38,10 @@
         <if test="userManagePageVO.unitId != null and userManagePageVO.unitId != ''">
             and b.unit_id =#{userManagePageVO.unitId}
         </if>
+        <if test="userManagePageVO.accountStatus != null">
+            and a.account_Status =#{userManagePageVO.accountStatus}
+        </if>
+
         <if test="userManagePageVO.account != null and userManagePageVO.account != ''">
             and a.account like "%"#{userManagePageVO.account}"%"
         </if>

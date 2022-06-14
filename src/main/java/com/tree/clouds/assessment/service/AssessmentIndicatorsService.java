@@ -55,4 +55,6 @@ public interface AssessmentIndicatorsService extends IService<AssessmentIndicato
     void export(Integer year,Integer indicatorsType ,HttpServletResponse response);
 
     List<IndicatorsTreeTreeVO> getScoreLeftTree(Integer year, String unitId, Integer unitType,Integer progress);
+
+    boolean isExpertUnit(String unitId);
 }

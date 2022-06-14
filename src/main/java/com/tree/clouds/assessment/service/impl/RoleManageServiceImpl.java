@@ -15,9 +15,11 @@ import com.tree.clouds.assessment.service.UserManageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -45,9 +47,43 @@ public class RoleManageServiceImpl extends ServiceImpl<RoleManageMapper, RoleMan
     @Override
     public void distributeRole(DistributeRoleVO distributeRoleVO) {
         this.sysRoleMenuMapper.delete(new QueryWrapper<SysRoleMenu>().eq(SysRoleMenu.ROLE_ID, distributeRoleVO.getRoleId()));
-        List<String> menuIds = distributeRoleVO.getMenuIds();
-        Set<String> menuSet = new HashSet<>(menuIds);
+        List<String> menuIds =new ArrayList<>();
 
+        if (distributeRoleVO.getRoleId().equals("1")){
+            menuIds= this.sysMenuService.list().stream().map(SysMenu::getId).collect(Collectors.toList());
+        }
+        if (distributeRoleVO.getRoleId().equals("2")){
+            menuIds=  this.sysMenuService.list(new QueryWrapper<SysMenu>().eq(SysMenu.NAME,"考核与材料报送")
+                    .or()
+                    .eq(SysMenu.NAME,"考核指标")
+                    .or()
+                    .eq(SysMenu.NAME,"驳回列表")
+                    .or()
+                    .eq(SysMenu.NAME,"考核与材料报送")).stream().map(SysMenu::getId).collect(Collectors.toList());
+        }
+        if (distributeRoleVO.getRoleId().equals("4")){
+            menuIds= this.sysMenuService.list(new QueryWrapper<SysMenu>().eq(SysMenu.NAME,"考核与材料报送")
+                    .or()
+                    .eq(SysMenu.NAME,"下属单位考核指标")
+                    .or()
+                    .eq(SysMenu.NAME,"初审管理")
+                    .or()
+                    .eq(SysMenu.NAME,"初审管理审核")
+                    .or()
+                    .eq(SysMenu.NAME,"考评得分管理")
+                    .or()
+                    .eq(SysMenu.NAME,"下属单位加减分一览表")
+                    .or()
+                    .eq(SysMenu.NAME,"区县单位加减分一览表")
+                    .or()
+                    .eq(SysMenu.NAME,"加减分表明细")
+                    .or()
+                    .eq(SysMenu.NAME,"辅助管理")
+                    .or()
+                    .eq(SysMenu.NAME,"单位账号管理")
+                   ).stream().map(SysMenu::getId).collect(Collectors.toList());
+        }
+        Set<String> menuSet = new HashSet<>(menuIds);
         for (String menuId : menuIds) {
             SysMenu sysMenu = this.sysMenuService.getById(menuId);
             String pid = sysMenu.getParentId();

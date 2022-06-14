@@ -5,6 +5,7 @@ import com.tree.clouds.assessment.model.entity.AssessmentIndicators;
 import com.tree.clouds.assessment.model.entity.IndicatorReport;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.tree.clouds.assessment.model.vo.AssessmentListVO;
+import com.tree.clouds.assessment.model.vo.PageParam;
 import com.tree.clouds.assessment.model.vo.PerformancePageVO;
 import com.tree.clouds.assessment.model.vo.PerformanceVO;
 
@@ -22,7 +23,7 @@ public interface IndicatorReportMapper extends BaseMapper<IndicatorReport> {
 
     Integer getSubmitNumber(String unitId);
 
-    Integer getStatusNumber(String unitId, int status,Integer progress);
+    Integer getStatusNumber(String unitId, int status, Integer progress);
 
     IPage<IndicatorReport> getErrorList(IPage<IndicatorReport> page, String unitId);
 
@@ -30,11 +31,13 @@ public interface IndicatorReportMapper extends BaseMapper<IndicatorReport> {
 
     Double getUserScoreByUnit(String unitId, String assessmentYear);
 
-    Integer getMaterial(Integer type, String unitId, String userId);
+    Integer getMaterial(Integer type, String unitId);
+
+    Integer getMaterial(String unitId, Integer type);
 
     List<AssessmentListVO> getAssessmentList(String unitId);
 
-    Integer getReviewedNumber(String unitId,int type,String year,String expertUnitId);
+    Integer getReviewedNumber(String unitId, int type, String year, String expertUnitId);
 
     Integer getDistributeSum(String unitId, String year);
 

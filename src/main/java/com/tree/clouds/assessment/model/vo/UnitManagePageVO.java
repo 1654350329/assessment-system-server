@@ -8,4 +8,7 @@ public class UnitManagePageVO extends PageParam {
 
     @ApiModelProperty(value = "单位名称")
     private String unitName;
+
+    @ApiModelProperty(value = "所属单位")
+    private String areaName;
 }

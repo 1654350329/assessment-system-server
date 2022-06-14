@@ -46,6 +46,7 @@ public class UnitManageController {
     @ApiOperation(value = "添加单位")
     @Log("添加单位")
     public RestResponse<Boolean> addGroupRole(@RequestBody UnitManage groupRole) {
+        groupRole.setUnitType(0);
         unitManageService.save(groupRole);
         return RestResponse.ok(true);
     }

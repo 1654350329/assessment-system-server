@@ -34,9 +34,6 @@ public class RoleManageController {
     @Autowired
     private RoleManageService roleManageService;
 
-
-
-
     @PostMapping("/addRole")
     @ApiOperation(value = "添加角色")
     @Log("添加角色")
@@ -65,6 +62,8 @@ public class RoleManageController {
         roleManageService.distributeRole(distributeRoleVO);
         return RestResponse.ok(true);
     }
+
+
 
 
 }

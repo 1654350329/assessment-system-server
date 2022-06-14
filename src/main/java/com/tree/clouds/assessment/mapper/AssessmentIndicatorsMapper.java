@@ -46,4 +46,6 @@ public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicat
     List<IndicatorsTreeTreeVO> getIndicatorsTreeTreeVOByPId(String id);
 
     List<IndicatorsTreeTreeVO> getScoreLeftTree(Integer year, String unitId, Integer unitType, Integer progress);
+
+    void removeByYearAndType(Integer assessmentYear, Integer indicatorsType);
 }

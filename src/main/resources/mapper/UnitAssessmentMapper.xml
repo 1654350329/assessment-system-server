@@ -43,12 +43,12 @@
         where a.detail_id=#{detailId}
     </select>
     <select id="getExpertDistributeNumber" resultType="java.lang.Integer">
-        select count(c.assessment_id) from assessment_indicators a
-            LEFT JOIN assessment_indicators_detail b on a.indicators_id=b.task_id
-            LEFT JOIN assessment_indicators d on b.project_id=d.indicators_id
-            LEFT JOIN unit_assessment c on c.detail_id=b.detail_id
-            where a.unit_id=#{expertUnit} and c.unit_id=#{unitId} and d.evaluation_method=1
-    </select>
+	    select	 count(a.assessment_id) from unit_assessment a
+		 left join assessment_indicators_detail b on a.detail_id=b.detail_id
+		 LEFT JOIN assessment_indicators c on b.task_id=c.indicators_id
+		LEFT JOIN assessment_indicators d on b.project_id=d.indicators_id
+		where a.unit_id=#{expertUnit} and c.unit_id=#{unitId} and d.evaluation_method=1
+	</select>
     <select id="getScoreByUnitIdAndYear" resultType="java.lang.Double">
         select sum(b.fraction) from unit_assessment a
           left join assessment_indicators_detail b on a.detail_id=b.detail_id

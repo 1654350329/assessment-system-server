@@ -14,6 +14,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
@@ -35,7 +36,7 @@ public class JwtLogoutSuccessHandler implements LogoutSuccessHandler {
 
         RestResponse result = RestResponse.ok("");
 
-        outputStream.write(JSONUtil.toJsonStr(result).getBytes("UTF-8"));
+        outputStream.write(JSONUtil.toJsonStr(result).getBytes(StandardCharsets.UTF_8));
 
         outputStream.flush();
         outputStream.close();

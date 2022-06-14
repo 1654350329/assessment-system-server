@@ -5,8 +5,6 @@ import lombok.Data;
 
 @Data
 public class AuditTreeVO {
-    @ApiModelProperty(value = "内容指标")
-    private String indicatorsName;
     @ApiModelProperty(value = "审核状态")
     private String reportStatus;
     @ApiModelProperty(value = "单位主键")

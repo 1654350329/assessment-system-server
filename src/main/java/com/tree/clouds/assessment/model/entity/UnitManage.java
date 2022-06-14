@@ -37,6 +37,10 @@ public class UnitManage extends BaseEntity {
     @TableField(UNIT_NAME)
     private String unitName;
 
+    @ApiModelProperty(value = "所属区县")
+    @TableField("area_name")
+    private String areaName;
+
     @ApiModelProperty(value = "单位类型")
     @TableField(UNIT_TYPE)
     private Integer unitType;

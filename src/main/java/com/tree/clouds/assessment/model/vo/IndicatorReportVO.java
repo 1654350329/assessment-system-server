@@ -35,6 +35,9 @@ public class IndicatorReportVO {
     @ApiModelProperty(value = "责任单位")
     private String unitName;
 
+    @ApiModelProperty(value = "责任单位类型")
+    private Integer unitType;
+
     @ApiModelProperty(value = "责任单位id")
     private String unitId;
 

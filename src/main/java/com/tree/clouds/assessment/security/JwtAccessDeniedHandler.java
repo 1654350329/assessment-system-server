@@ -11,21 +11,22 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
-	@Override
-	public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         ServletOutputStream outputStream = response.getOutputStream();
 
-        RestResponse result = RestResponse.fail(accessDeniedException.getMessage());
+        RestResponse result = RestResponse.fail(401,"无权限,禁止访问");
 
-        outputStream.write(JSONUtil.toJsonStr(result).getBytes("UTF-8"));
+        outputStream.write(JSONUtil.toJsonStr(result).getBytes(StandardCharsets.UTF_8));
 
         outputStream.flush();
         outputStream.close();

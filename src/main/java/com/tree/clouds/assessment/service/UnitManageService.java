@@ -21,5 +21,5 @@ public interface UnitManageService extends IService<UnitManage> {
 
     void deleteGroupRole(List<String> ids);
 
-    List<UnitManage> getListByType(Integer type);
+    List<UnitManage> getListByType(Integer type, String unitName);
 }

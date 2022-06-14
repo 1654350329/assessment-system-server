@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -46,7 +47,12 @@ public class UnitManageServiceImpl extends ServiceImpl<UnitManageMapper, UnitMan
     }
 
     @Override
-    public List<UnitManage> getListByType(Integer type) {
-        return this.list(new QueryWrapper<UnitManage>().eq(UnitManage.UNIT_TYPE,type));
+    public List<UnitManage> getListByType(Integer type, String unitName) {
+        QueryWrapper<UnitManage> queryWrapper = new QueryWrapper<UnitManage>()
+                .eq(UnitManage.UNIT_TYPE, type);
+        if (StrUtil.isNotBlank(unitName)) {
+            queryWrapper.like(UnitManage.UNIT_NAME, unitName);
+        }
+        return this.list(queryWrapper);
     }
 }

@@ -1,15 +1,18 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tree.clouds.assessment.mapper.SysRoleMenuMapper;
 import com.tree.clouds.assessment.model.bo.SysMenuDto;
+import com.tree.clouds.assessment.model.entity.RoleManage;
 import com.tree.clouds.assessment.model.entity.SysMenu;
 import com.tree.clouds.assessment.mapper.SysMenuMapper;
+import com.tree.clouds.assessment.model.entity.UnitManage;
 import com.tree.clouds.assessment.model.entity.UserManage;
 import com.tree.clouds.assessment.model.vo.SysMenuTreeVO;
-import com.tree.clouds.assessment.service.SysMenuService;
+import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tree.clouds.assessment.service.UserManageService;
+import com.tree.clouds.assessment.utils.BaseBusinessException;
 import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +24,7 @@ import java.util.stream.Collectors;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author LZK
@@ -34,12 +37,40 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
 
     @Autowired
     private SysRoleMenuMapper sysRoleMenuMapper;
+    @Autowired
+    private RoleManageService roleManageService;
+    @Autowired
+    private AssessmentIndicatorsService assessmentIndicatorsService;
+    @Autowired
+    private UnitManageService unitManageService;
 
     @Override
     public List<SysMenuDto> getCurrentUserNav() {
         UserManage sysUser = sysUserService.getUserByAccount(LoginUserUtil.getUserAccount());
         List<String> menuIds = sysRoleMenuMapper.getNavMenuIds(sysUser.getUserId());
         List<SysMenu> menus = this.listByIds(menuIds);
+        //为牵头单位且为管理员 有评分功能
+        List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
+        if (assessmentIndicatorsService.isExpertUnit(LoginUserUtil.getUnitId()) && roleCodes.contains("ROLE_user_admin")) {
+            List<SysMenu> list = this.list(new QueryWrapper<SysMenu>().eq(SysMenu.NAME, "专家评分")
+                    .or()
+                    .eq(SysMenu.NAME, "评分列表")
+                    .or()
+                    .eq(SysMenu.NAME, "复评列表")
+            );
+            menus.addAll(list);
+        }
+        UnitManage unitManage = unitManageService.getById(LoginUserUtil.getUserId());
+        if (unitManage!=null){
+            if (roleCodes.contains("ROLE_user_admin") && unitManage.getUnitType() == 0) {
+                menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("区县单位加减分一览表")).collect(Collectors.toList());
+            }
+            if (roleCodes.contains("ROLE_user_admin") && unitManage.getUnitType() == 1) {
+                menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("下属单位加减分一览表")).collect(Collectors.toList());
+            }
+        }
+
         ArrayList<SysMenuTreeVO> sysMenuVOS = new ArrayList<>();
         for (SysMenu sysMenu : menus) {
             SysMenuTreeVO sysMenuVO = BeanUtil.toBean(sysMenu, SysMenuTreeVO.class);

@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -70,22 +71,32 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         if (type == 1 || type == 2) {
             List<UnitManage> list;
             if (type == 1) {
-                list = unitManageService.getListByType(UnitManage.UNIT_TYPE_ZERO);
+                list = unitManageService.getListByType(UnitManage.UNIT_TYPE_ZERO, assessmentPageVO.getUnitName());
             } else {
-                list = unitManageService.list();
+                QueryWrapper<UnitManage> queryWrapper = new QueryWrapper<>();
+                if (StrUtil.isNotBlank(assessmentPageVO.getUnitName())) {
+                    queryWrapper.like(UnitManage.UNIT_NAME, assessmentPageVO.getUnitName());
+                }
+                list = unitManageService.list(queryWrapper);
             }
             for (UnitManage unitManage : list) {
                 if (!roleCodes.contains("ROLE_admin") && !Objects.equals(LoginUserUtil.getUnitId(), unitManage.getUnitId())) {
                     continue;
                 }
-                List<IndicatorReportVO> IndicatorReportVOs = assessmentVOIPage.getRecords().stream().map(record -> {
+                for (AssessmentVO record : assessmentVOIPage.getRecords()) {
+                    if (!Objects.equals(unitManage.getUnitType(), record.getIndicatorsType())) {
+                        continue;
+                    }
                     IndicatorReportVO indicatorReportVO = BeanUtil.toBean(record, IndicatorReportVO.class);
                     //获取分配指标数
-                    if (type == 2) {
+                    if (unitManage.getUnitType() == 0) {
                         Integer expertDistributeNumber = unitAssessmentService.getExpertDistributeNumber(unitManage.getUnitId(), LoginUserUtil.getUnitId());
                         indicatorReportVO.setDistributeNumber(expertDistributeNumber);
                     } else {
                         indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(unitManage.getUnitId()));
+                    }
+                    if (indicatorReportVO.getDistributeNumber() == 0) {
+                        continue;
                     }
                     //获取提交材料数
                     Integer ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId());
@@ -104,11 +115,11 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     indicatorReportVO.setUnitId(unitManage.getUnitId());
                     //已评数
                     indicatorReportVO.setReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 1, record.getAssessmentYear(), LoginUserUtil.getUnitId()));
-                    indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0,record.getAssessmentYear(), LoginUserUtil.getUnitId()));
+                    indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0, record.getAssessmentYear(), LoginUserUtil.getUnitId()));
                     //是否完成填报
-                    return indicatorReportVO;
-                }).filter(in -> in.getDistributeNumber() != 0).collect(Collectors.toList());
-                collect.addAll(IndicatorReportVOs);
+                    indicatorReportVO.setUnitType(unitManage.getUnitType());
+                    collect.add(indicatorReportVO);
+                }
             }
         } else {
             collect = assessmentVOIPage.getRecords().stream().map(record -> {
@@ -144,7 +155,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         int limit = Math.toIntExact(assessmentVOIPage.getSize());
         paging(cursor, limit, collect);
         iPage.setRecords(collect);
-        iPage.setTotal(assessmentVOIPage.getTotal() * collect.size());
+        iPage.setTotal(collect.size());
         return iPage;
     }
 
@@ -345,13 +356,23 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
             indicatorsTreeTreeVO.setFraction(this.detailService.getScoreByType(indicatorsTreeTreeVO.getId(), indicatorsTreeTreeVO.getAssessmentType(), String.valueOf(DateUtil.year(new Date()))));
         }
         List<IndicatorsTreeTreeVO> IndicatorsTreeTreeVOS = ConvertUtil.convertTree(list, treeVO -> "0".equals(treeVO.getParentId()));
-        return IndicatorsTreeTreeVOS.stream().filter(indicatorsTreeTreeVO -> indicatorsTreeTreeVO.getId().equals(id)).collect(Collectors.toList());
+        List<IndicatorsTreeTreeVO> collect = IndicatorsTreeTreeVOS.stream().filter(indicatorsTreeTreeVO -> indicatorsTreeTreeVO.getId().equals(id)).collect(Collectors.toList());
+        if (CollUtil.isEmpty(collect)) {
+            throw new BaseBusinessException(400, "该项目下,未搜到相应数据!");
+        }
+        return collect;
     }
 
     @Override
-    public int getMaterial(Integer type, String unitId, String userId) {
-        return this.baseMapper.getMaterial(type, unitId, userId);
+    public int getMaterial(Integer type, String unitId) {
+        return this.baseMapper.getMaterial(type, unitId);
     }
+
+    @Override
+    public int getMaterial(String unitId, Integer type) {
+        return this.baseMapper.getMaterial(unitId, type);
+    }
+
 
     @Override
     public Integer getReviewedNumber(String unitId, int type, String year) {
@@ -383,7 +404,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     @Override
     public List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year, String unitId, int progress) {
         UnitManage unitManage = unitManageService.getById(unitId);
-        return assessmentIndicatorsService.getScoreLeftTree(year, unitId, unitManage.getUnitType(),progress);
+        return assessmentIndicatorsService.getScoreLeftTree(year, unitId, unitManage.getUnitType(), progress);
     }
 
 

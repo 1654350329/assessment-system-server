@@ -35,7 +35,7 @@ public class AssessmentIndicators extends BaseEntity {
     public static final String P_ID = "p_id";
     public static final String INDICATORS_NAME = "indicators_name";
     public static final String EVALUATION_METHOD = "evaluation_method";
-    public static final String USER_ID = "user_id";
+    public static final String UNIT_ID = "unit_id";
     public static final String ASSESSMENT_CRITERIA = "assessment_criteria";
     public static final String INSTRUCTIONS = "instructions";
     public static final String FRACTION = "fraction";
@@ -92,6 +92,10 @@ public class AssessmentIndicators extends BaseEntity {
     @ApiModelProperty(value = "截止日期")
     @TableField("expiration_date")
     private String expirationDate;
+
+    @ApiModelProperty(value = "排序")
+    @TableField("sort")
+    private Integer sort;
 
     @ApiModelProperty(value = "考评年份")
     @TableField("assessment_year")

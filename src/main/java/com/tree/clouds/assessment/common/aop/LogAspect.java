@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.tree.clouds.assessment.model.entity.OperationLog;
 import com.tree.clouds.assessment.service.OperationLogService;
 import com.tree.clouds.assessment.utils.BaseBusinessException;
+import com.tree.clouds.assessment.utils.IPUtil;
 import com.tree.clouds.assessment.utils.LoginUserUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -61,7 +62,7 @@ public class LogAspect {
 
     private void saveLog(ProceedingJoinPoint joinPoint, HttpServletRequest request) throws IOException {
         //获取ip地址
-        String ipAddresses = request.getRemoteAddr();
+        String ipAddresses = IPUtil.getIp(request);
         OperationLog operationLog = new OperationLog();
         operationLog.setIp(ipAddresses);
         operationLog.setCreatedUser(LoginUserUtil.getUserId());

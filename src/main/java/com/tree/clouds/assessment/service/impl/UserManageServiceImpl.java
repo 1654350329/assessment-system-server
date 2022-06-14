@@ -172,6 +172,8 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
             userManageBO.getRoleIds().add("4");
         }
         roleUserService.addRole(userManageBO.getRoleIds(), userManage.getUserId());
+        //添加到单位
+        unitUserService.saveUnitUser(userManage.getUserId(), userManageBO.getUnitId());
     }
 
     @Override

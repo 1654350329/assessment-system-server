@@ -40,6 +40,7 @@ public class ScoreRecordController {
     @PostMapping("/scorePage")
     @ApiOperation(value = "评分列表分页")
     public RestResponse<IPage<IndicatorReportVO>> scorePage(@RequestBody AssessmentPageVO assessmentPageVO) {
+        assessmentPageVO.setIndicatorsType(assessmentPageVO.getUnitType());
         IPage<IndicatorReportVO> iPage = indicatorReportService.assessmentList(assessmentPageVO, 2);
         return RestResponse.ok(iPage);
     }

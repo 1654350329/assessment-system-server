@@ -12,6 +12,8 @@ public class AssessmentVO {
     private String assessmentYear;
     @ApiModelProperty(value = "责任单位数量")
     private Integer unitNumber;
+    @ApiModelProperty(value = "责任单位类型")
+    private Integer indicatorsType;
     @ApiModelProperty(value = "发布日期")
     private String releaseDate;
 
