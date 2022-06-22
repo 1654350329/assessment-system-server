@@ -42,8 +42,8 @@ public class IndicatorReportController {
     @Log("首页单位考核指标列表")
     @PostMapping("/getList")
     @ApiOperation(value = "首页单位考核指标列表")
-    public RestResponse<List<AssessmentListVO>> assessmentList() {
-        List<AssessmentListVO> assessmentVOS = indicatorReportService.assessmentList();
+    public RestResponse<IPage<AssessmentListVO>> assessmentList(@RequestBody PageParam pageParam) {
+        IPage<AssessmentListVO> assessmentVOS = indicatorReportService.assessmentList(pageParam);
         return RestResponse.ok(assessmentVOS);
     }
 

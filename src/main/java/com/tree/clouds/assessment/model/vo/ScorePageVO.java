@@ -13,4 +13,7 @@ public class ScorePageVO extends PageParam {
 
     @ApiModelProperty("超期")
     private Boolean overdue;
+    @ApiModelProperty("考核体系0下属单位 1区县")
+    private Integer indicatorsType;
+
 }

@@ -42,6 +42,7 @@
                 and  a.unit_Id = #{submitLogPageVO.unitId}
             </if>
         </where>
+        order by a.CREATED_TIME desc
     </select>
 
 </mapper>

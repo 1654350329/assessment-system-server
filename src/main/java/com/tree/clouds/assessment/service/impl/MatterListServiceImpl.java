@@ -49,16 +49,20 @@ public class MatterListServiceImpl extends ServiceImpl<MatterListMapper, MatterL
             List<MatterList> matterListIPage = this.baseMapper.getMatterList( 2,null, LoginUserUtil.getUnitId());
             matterLists.addAll(matterListIPage);
         }
-        //获得账号管理员待办
+        //获得账号管理员待办3 4
         if (roleCodes.contains("ROLE_user_admin")) {
-            List<MatterList> matterListIPage = this.baseMapper.getMatterList( 1,null, LoginUserUtil.getUnitId());
+            List<MatterList> matterListIPage = this.baseMapper.getMatterList(1, null, LoginUserUtil.getUnitId());
+            matterLists.addAll(matterListIPage);
+        }
+        if (roleCodes.contains("ROLE_user_admin")) {
+            List<MatterList> matterListIPage = this.baseMapper.getMatterList(3, LoginUserUtil.getUnitId(), null);
             matterLists.addAll(matterListIPage);
         }
         //获得账号管理员待办3 4
-        if (roleCodes.contains("ROLE_EXPERT")) {
-            List<MatterList> matterListIPage = this.baseMapper.getMatterList( 3,LoginUserUtil.getUnitId(), null);
-            matterLists.addAll(matterListIPage);
-        }
+//        if (roleCodes.contains("ROLE_EXPERT")) {
+//            List<MatterList> matterListIPage = this.baseMapper.getMatterList( 3,LoginUserUtil.getUnitId(), null);
+//            matterLists.addAll(matterListIPage);
+//        }
         IPage<MatterList> iPage = new Page();
         iPage.setCurrent(pageVO.getCurrent());
         iPage.setSize(pageVO.getSize());

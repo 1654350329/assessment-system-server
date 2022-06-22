@@ -63,36 +63,50 @@ public class FrontPageController {
     public RestResponse<Map<String, Object>> getAllData() {
         List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
         List<String> code = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
-        String unitId = null;
-        if (!code.contains("ROLE_admin")) {
-            unitId = LoginUserUtil.getUnitId();
-        }
+        String unitId = LoginUserUtil.getUnitId();
+
 
         Map<String, Object> data = new LinkedHashMap<>();
+        //别人审我
         //上报材料总数(本单位)
         int materialCount = indicatorReportService.getMaterial(0, unitId);
+//        int materialCount = indicatorReportService.getMaterial(0, unitId);
         data.put("上报材料总数(本单位)", materialCount);
         //已审核材料总数(本单位)
-        int completeMaterialCount = indicatorReportService.getMaterial(1, unitId);
-        data.put("已审核材料总数(本单位)", materialCount);
+        int completeMaterialCount = indicatorReportService.getReportSum(1, unitId);
+        data.put("已审核指标总数(本单位)", completeMaterialCount);
+        int unMaterialCount = indicatorReportService.getReportSum(0, unitId);
         //未审核数(本单位)
-        int unnatural = materialCount - completeMaterialCount;
-        data.put("未审核数(本单位)", unnatural);
+        int unnatural = unMaterialCount - completeMaterialCount;
+        data.put("未审核指标数(本单位)", unnatural);
         //审核失败(本单位)
-        int errorNumber = indicatorReportService.getMaterial(2, unitId);
-        data.put("被驳回上报材料数(本单位)", errorNumber);
-        List<UnitManage> unitManages = unitManageService.list();
-        //上报材料总数
-//        int reportCount = indicatorReportService.getMaterialReport(unitId,0);
-        data.put("上报材料总数", 10);
-        //未审核材料总数
-        int userNumber = userManageService.getListByRole("2").size();
-        data.put("未审核材料总数", userNumber);
+        int errorNumber = indicatorReportService.getReportSum(2, unitId);
+        data.put("被驳回指标数(本单位)", errorNumber);
+        //我审人家
+
+
+        int reportCount = 0;
+        int unReportCount = 0;
+        if (code.contains("ROLE_admin") || code.contains("ROLE_user_admin")) {
+            //上报材料总数
+            reportCount = indicatorReportService.getMaterial(null, unitId, 0);
+            //未审核指标数
+            int Count = indicatorReportService.getReportSum(null, unitId, 0);
+            int userReportCount = indicatorReportService.getReportSum(null, unitId, 1);
+            //评分
+            int Count2 = indicatorReportService.getReportSum(null, unitId, 5);
+            int userReportCount2 = indicatorReportService.getReportSum(null, unitId, 6);
+            unReportCount = (Count - userReportCount) + (Count2 - userReportCount2);
+        }
+        data.put("上报材料总数", reportCount);
+
+        data.put("未审核指标数", unReportCount);
+        List<UnitManage> unitManages = unitManageService.getListByType(0, null);
         //各单位上报材料数
         Map<String, Integer> unitMaterialMap = new LinkedHashMap<>();
         for (UnitManage unitManage : unitManages) {
-//            int unitCount = indicatorReportService.getMaterial(0, unitManage.getUnitId(), userId);
-//            unitMaterialMap.put(unitManage.getUnitName(), unitCount);
+            int unitCount = indicatorReportService.getMaterial(unitManage.getUnitId(), unitId, 0);
+            unitMaterialMap.put(unitManage.getUnitName(), unitCount);
         }
         data.put("unitMaterialMap", unitMaterialMap);
         data.put("key", unitMaterialMap.keySet());

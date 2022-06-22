@@ -149,8 +149,8 @@ public class AssessmentIndicatorsController {
     @Log("配置总分值 总分值")
     @PostMapping("/getScoreSum/{year}/{indicatorsType}")
     @ApiOperation(value = "配置总分值")
-    public RestResponse<Integer> getScoreSum(@PathVariable Integer year, @PathVariable Integer indicatorsType) {
-        int score = assessmentIndicatorsService.getScoreSum(year,indicatorsType);
+    public RestResponse<Double> getScoreSum(@PathVariable Integer year, @PathVariable Integer indicatorsType) {
+        double score = assessmentIndicatorsService.getScoreSum(year, indicatorsType);
         return RestResponse.ok(score);
     }
 }

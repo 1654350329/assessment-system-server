@@ -2,6 +2,7 @@ package com.tree.clouds.assessment.model.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -18,6 +19,7 @@ public class UpdateTaskVO {
     private String parentId;
 
     @ApiModelProperty(value = "名称")
+    @Length(max = 200, message = "最多输入200字符")
     private String indicatorsName;
 
     @ApiModelProperty(value = "目录级别 0顶级目录1项目2指标任务3考评标准4考核标准")
@@ -25,6 +27,7 @@ public class UpdateTaskVO {
     private Integer assessmentType;
 
     @ApiModelProperty(value = "申报填报说明 考核标准新增才需填写")
+    @Length(max = 300, message = "最多输入200字符")
     private String instructions;
 
     @ApiModelProperty(value = "分数 考核标准新增才需填写")

@@ -26,7 +26,7 @@ public class AssessmentListVO {
     @ApiModelProperty(value = "考核内容")
     private String assessmentCriteria;
     @ApiModelProperty(value = "审核状态 0未审核")
-    private Integer indicatorsStatus;
+    private Integer reportProgress;
 
 
 }

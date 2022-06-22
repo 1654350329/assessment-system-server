@@ -13,6 +13,7 @@ import com.tree.clouds.assessment.service.ScoreRecordService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class ScoreRecordController {
     @PostMapping("/scoreLeftTree/{year}/{unitId}")
     @ApiOperation(value = "评分左侧树")
     public RestResponse<List<IndicatorsTreeTreeVO>> scoreLeftTree(@PathVariable Integer year, @PathVariable String unitId) {
-        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, unitId, 1);
+        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, unitId, 2);
         return RestResponse.ok(tree);
     }
 
@@ -64,7 +65,7 @@ public class ScoreRecordController {
     @Log("专家评分")
     @PostMapping("/updateScore")
     @ApiOperation(value = "专家评分")
-    public RestResponse<Boolean> updateScore(@RequestBody UpdateScoreRecord updateScoreRecord) {
+    public RestResponse<Boolean> updateScore(@Validated @RequestBody UpdateScoreRecord updateScoreRecord) {
         scoreRecordService.updateScore(updateScoreRecord);
         return RestResponse.ok(true);
     }

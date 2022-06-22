@@ -63,10 +63,10 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
     @Override
     @Transactional
     public void addAssessment(List<String> ids, String unitId) {
-        if (CollUtil.isEmpty(ids)) {
-            return;
-        }
-        Integer release = this.baseMapper.isRelease(ids.get(0));
+//        if (CollUtil.isEmpty(ids)) {
+//            return;
+//        }
+        Integer release = this.baseMapper.isRelease(DateUtil.year(new Date()));
         if (release != null && release == 1) {
             throw new BaseBusinessException(400, "当前年已发布,不许修改分配考核指标");
         }
@@ -93,8 +93,8 @@ public class UnitAssessmentServiceImpl extends ServiceImpl<UnitAssessmentMapper,
     }
 
     @Override
-    public Integer getDistributeNumber(String unitId) {
-        return this.baseMapper.getDistributeNumber(unitId);
+    public Integer getDistributeNumber(String unitId, Integer type) {
+        return this.baseMapper.getDistributeNumber(unitId, type);
 
     }
 

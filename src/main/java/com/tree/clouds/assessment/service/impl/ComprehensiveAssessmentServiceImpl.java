@@ -54,7 +54,7 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
     public IPage<ComprehensiveAssessment> performancePage(PerformancePageVO performancePageVO) {
         List<RoleManage> roleManageList = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
         List<String> role_admin = roleManageList.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin")).collect(Collectors.toList());
-        if (CollUtil.isEmpty(role_admin)){
+        if (CollUtil.isEmpty(role_admin)) {
             performancePageVO.setUnitId(LoginUserUtil.getUnitId());
             performancePageVO.setComprehensiveProgress("2");
         }
@@ -78,32 +78,31 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         comprehensiveAssessment.setComprehensiveProgress(1);
         this.updateById(comprehensiveAssessment);
         ComprehensiveAssessment assessment = this.getById(comprehensiveAssessment.getComprehensiveId());
-//        List<IndicatorReport> list = indicatorReportService.list(new QueryWrapper<IndicatorReport>().eq(IndicatorReport.REPORT_PROGRESS, 4));
-//        for (IndicatorReport indicatorReport : list) {
-//            //修改上报进度
-//            indicatorReportService.updateProgress(indicatorReport.getReportId(), 5);
-//        }
-//        AssessmentIndicators indicators = assessmentIndicatorsService.getById(assessment.getIndicatorsId());
-
-
         //修改专家评分状态
-        scoreRecordService.updateStatusByYearAndUnit(assessment.getAssessmentYear(), assessment.getUnitId(),1);
+        scoreRecordService.updateStatusByYearAndUnit(assessment.getAssessmentYear(), assessment.getUnitId(), 1);
 
 
     }
 
 
     @Override
+    @Transactional
     public void assessmentComplete(AssessmentCompleteVO assessmentCompleteVO) {
         if (StrUtil.isBlank(assessmentCompleteVO.getAssessmentYear())) {
             assessmentCompleteVO.setAssessmentYear(String.valueOf(DateUtil.year(new Date())));
         }
-        List<AssessmentConditionVO> assessmentConditionVOS = this.getCompleteDate(assessmentCompleteVO.getUnitId(), assessmentCompleteVO.getAssessmentYear());
-        List<ScoreRecord> scoreRecords = scoreRecordService.getByTypeAndUnitIdAndYear(assessmentCompleteVO.getUnitId(), assessmentCompleteVO.getAssessmentYear(), 2);
-        if (CollUtil.isNotEmpty(scoreRecords)) {
-           throw new BaseBusinessException(400,"还有待复评,未评审!");
+        ComprehensiveAssessment one = this.getOne(new QueryWrapper<ComprehensiveAssessment>()
+                .eq(ComprehensiveAssessment.ASSESSMENT_YEAR, assessmentCompleteVO.getAssessmentYear())
+                .eq(ComprehensiveAssessment.UNIT_ID, assessmentCompleteVO.getUnitId()));
+        if (one != null && one.getComprehensiveProgress() == 2) {
+            throw new BaseBusinessException(400, "已完成考核!");
         }
-        scoreRecordService.updateStatusByYearAndUnit(assessmentCompleteVO.getAssessmentYear(),assessmentCompleteVO.getUnitId(),2);
+        List<AssessmentConditionVO> assessmentConditionVOS = this.getCompleteDate(assessmentCompleteVO.getUnitId(), assessmentCompleteVO.getAssessmentYear());
+        List<ScoreRecord> scoreRecords = scoreRecordService.getByTypeAndUnitIdAndYear(assessmentCompleteVO.getUnitId(), assessmentCompleteVO.getAssessmentYear(), 0);
+        if (CollUtil.isNotEmpty(scoreRecords)) {
+            throw new BaseBusinessException(400, "还有待复评,未评审!");
+        }
+        scoreRecordService.updateStatusByYearAndUnit(assessmentCompleteVO.getAssessmentYear(), assessmentCompleteVO.getUnitId(), 2);
         //修改状态
         ComprehensiveAssessment assessment = new ComprehensiveAssessment();
         assessment.setComprehensiveProgress(2);
@@ -119,7 +118,7 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
             assessmentCondition.setIndicatorsName(vo.getIndicatorsName());
             assessmentCondition.setAssessmentCriteria(vo.getAssessmentCriteria());
             //专家评分
-            assessmentCondition.setIllustrate(String.valueOf(vo.getIllustrate()));
+            assessmentCondition.setIllustrate(vo.getIllustrate());
             return assessmentCondition;
         }).collect(Collectors.toList());
         assessmentConditionService.saveBatch(assessmentConditions);
@@ -141,7 +140,7 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         //添加到待办
         AssessmentIndicatorsDetail detail = this.detailService.getByReportId(reAssessmentVO.getId());
         AssessmentIndicators indicators = this.assessmentIndicatorsService.getById(detail.getProjectId());
-        matterListService.addMatter(indicators.getIndicatorsName()+"-"+detail.getAssessmentCriteria()+"材料复评通知",null,reAssessmentVO.getId(),indicators.getUnitId(),4,indicators.getAssessmentYear(),detail.getIndicatorsId());
+        matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料复评通知", null, reAssessmentVO.getId(), indicators.getUnitId(), 4, indicators.getAssessmentYear(), detail.getIndicatorsId());
     }
 
     @Override

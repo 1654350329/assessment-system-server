@@ -11,4 +11,7 @@ public class UnitManagePageVO extends PageParam {
 
     @ApiModelProperty(value = "所属单位")
     private String areaName;
+
+    @ApiModelProperty(value = "单位类型 0下属单位 1区县")
+    private Integer unitType;
 }

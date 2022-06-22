@@ -10,12 +10,13 @@ public class ComprehensiveAssessmentVO {
     private String comprehensiveId;
 
     @ApiModelProperty(value = "机制创新分")
-    @TableField("innovation_score")
     private Double innovationScore;
 
     @ApiModelProperty(value = "综合得分")
-    @TableField("score_sum")
     private Double scoreSum;
+    @ApiModelProperty(value = "线下得分")
+    private Double offlineScore;
+
 
     @ApiModelProperty(value = "评价等级")
     @TableField("evel_Id")

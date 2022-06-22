@@ -23,7 +23,13 @@
         where detail_id in (select indicators_id from assessment_indicators where assessment_Year=#{assessmentYear})
     </select>
     <select id="getDistributeNumber" resultType="java.lang.Integer">
-      select count(*) from unit_assessment where unit_id=#{unitId}
+        select count(a.assessment_id) from unit_assessment a
+        left join assessment_indicators_detail b on a.detail_id =b.detail_id
+        left join assessment_indicators c on b.project_id=c.indicators_id
+        where a.unit_id=#{unitId}
+        <if test="type==1">
+            and c.evaluation_method=1
+        </if>
     </select>
     <select id="getCountUnit" resultType="java.lang.Integer">
         select count(*) from unit_assessment a
@@ -38,22 +44,22 @@
         where c.assessment_year=#{assessmentYear}
     </select>
     <select id="isRelease" resultType="java.lang.Integer">
-        select b.indicators_status from assessment_indicators_detail a
-        left join assessment_indicators b on a.indicators_id=b.indicators_id
-        where a.detail_id=#{detailId}
+        select indicators_status from
+        assessment_indicators
+        where assessment_year=#{year} and indicators_type=0 and assessment_Type=0 limit 1
     </select>
     <select id="getExpertDistributeNumber" resultType="java.lang.Integer">
 	    select	 count(a.assessment_id) from unit_assessment a
 		 left join assessment_indicators_detail b on a.detail_id=b.detail_id
 		 LEFT JOIN assessment_indicators c on b.task_id=c.indicators_id
 		LEFT JOIN assessment_indicators d on b.project_id=d.indicators_id
-		where a.unit_id=#{expertUnit} and c.unit_id=#{unitId} and d.evaluation_method=1
+		where a.unit_id=#{unitId} and c.unit_id=#{expertUnit} and d.evaluation_method=1
 	</select>
     <select id="getScoreByUnitIdAndYear" resultType="java.lang.Double">
         select sum(b.fraction) from unit_assessment a
           left join assessment_indicators_detail b on a.detail_id=b.detail_id
          left join assessment_indicators c on c.indicators_id=b.indicators_id
-         where a.unit_id=#{unitId} and c.assessment_year=#{year}
+         where a.unit_id=#{unitId} and c.assessment_year=#{year} and c.indicators_name !='绩效减分'
     </select>
 
 

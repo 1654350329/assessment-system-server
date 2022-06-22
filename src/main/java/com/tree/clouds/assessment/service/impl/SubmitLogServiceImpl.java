@@ -29,14 +29,15 @@ public class SubmitLogServiceImpl extends ServiceImpl<SubmitLogMapper, SubmitLog
     }
 
     @Override
-    public void addLog(AssessmentIndicators indicators, String assessmentCriteria, Integer indicatorsStatus, String remark, String unitId, String time,String reportId) {
-        SubmitLog submitLog =new SubmitLog();
+    public void addLog(AssessmentIndicators indicators, String assessmentCriteria, Integer indicatorsStatus, String remark,
+                       String unitId, String time, String reportId, String expirationDate) {
+        SubmitLog submitLog = new SubmitLog();
         submitLog.setAssessmentYear(indicators.getAssessmentYear());
         submitLog.setAssessmentCriteria(assessmentCriteria);
         submitLog.setIndicatorsName(indicators.getIndicatorsName());
         submitLog.setIndicatorsStatus(indicatorsStatus);
         submitLog.setEvaluationMethod(time);
-        submitLog.setExpirationDate(indicators.getExpirationDate());
+        submitLog.setExpirationDate(expirationDate);
         submitLog.setRemark(remark);
         submitLog.setUnitId(unitId);
         submitLog.setReportId(reportId);

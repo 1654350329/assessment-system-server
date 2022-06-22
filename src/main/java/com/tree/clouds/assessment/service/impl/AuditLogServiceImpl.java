@@ -1,5 +1,6 @@
 package com.tree.clouds.assessment.service.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,27 +52,39 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
         if (!(roleCodes.contains("ROLE_admin") || roleCodes.contains("ROLE_user_admin"))) {
             throw new BaseBusinessException(400, "没有审核权限!");
         }
+
         //修改审核状态
         IndicatorReport indicatorReport = indicatorReportService.getById(updateAuditVO.getId());
         indicatorReport.setReportStatus(updateAuditVO.getIndicatorsStatus());
+        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate()) && new Date().getTime() > DateUtil.parseDate(updateAuditVO.getExpirationDate()).getTime()) {
+            throw new BaseBusinessException(400, "截止日期必须大于当前时间!");
+        }
         if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate())) {
             indicatorReport.setExpirationDate(updateAuditVO.getExpirationDate());
         }
 
         AssessmentIndicators indicators = assessmentIndicatorsService.getById(indicatorReport.getIndicatorsId());
-        if ( updateAuditVO.getIndicatorsStatus() == 1) {
-            indicatorReport.setReportProgress(2);
-        }
         AssessmentIndicatorsDetail detail = detailService.getById(indicatorReport.getDetailId());
+        AssessmentIndicators id = this.assessmentIndicatorsService.getById(detail.getProjectId());
+        if (updateAuditVO.getIndicatorsStatus() == 1) {
+            if (id.getEvaluationMethod() == 2) {
+                indicatorReport.setReportProgress(3);
+            }
+            if (id.getEvaluationMethod() == 1) {
+                indicatorReport.setReportProgress(2);
+            }
+        }
+
         if (updateAuditVO.getIndicatorsStatus() == 0) {
             indicatorReport.setReportProgress(0);
             //添加到驳回待办
-            matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料驳回", indicatorReport.getUnitId(), indicatorReport.getReportId(), null, 2,indicators.getAssessmentYear(),indicatorReport.getIndicatorsId());
+            matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料驳回", indicatorReport.getUnitId(), indicatorReport.getReportId(), null, 2, indicators.getAssessmentYear(), indicatorReport.getIndicatorsId());
         }
 
         //修改截止日期
         //新增报送历史日志
-        submitLogService.addLog(indicators, detail.getAssessmentCriteria(), updateAuditVO.getIndicatorsStatus(), updateAuditVO.getRemark(), LoginUserUtil.getUnitId(), indicatorReport.getReportTime(), indicatorReport.getReportId());
+        submitLogService.addLog(indicators, detail.getAssessmentCriteria(), updateAuditVO.getIndicatorsStatus(), updateAuditVO.getRemark(),
+                LoginUserUtil.getUnitId(), indicatorReport.getReportTime(), indicatorReport.getReportId(), updateAuditVO.getExpirationDate());
         //修改上报进度
         indicatorReportService.updateById(indicatorReport);
         //修改审核记录
@@ -85,8 +99,8 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
         auditLog.setIndicatorsStatus(updateAuditVO.getIndicatorsStatus());
         this.saveOrUpdate(auditLog, new QueryWrapper<AuditLog>().eq(AuditLog.REPORT_ID, indicatorReport.getReportId()));
         if (updateAuditVO.getIndicatorsStatus() == 1) {
-            AssessmentIndicators id = this.assessmentIndicatorsService.getById(detail.getProjectId());
-            if (id.getEvaluationMethod()==1) {
+
+            if (id.getEvaluationMethod() == 1) {
                 ScoreRecord scoreRecord = new ScoreRecord();
                 scoreRecord.setReportId(updateAuditVO.getId());
                 scoreRecord.setScoreType(0);
@@ -94,11 +108,11 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
                 scoreRecordService.saveOrUpdate(scoreRecord, new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateAuditVO.getId()));
                 //添加到专家待评
                 AssessmentIndicators project = assessmentIndicatorsService.getById(detail.getTaskId());
-                matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料驳回", indicatorReport.getUnitId(), indicatorReport.getReportId(), project.getUnitId(), 3,indicators.getAssessmentYear(),indicatorReport.getIndicatorsId());
+                matterListService.addMatter(indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料待审", indicatorReport.getUnitId(), indicatorReport.getReportId(), project.getUnitId(), 3, indicators.getAssessmentYear(), indicatorReport.getIndicatorsId());
             }
 
         }
-
+        scoreRecordService.isCompleteResult(LoginUserUtil.getUnitId(), indicators.getAssessmentYear());
     }
 
 

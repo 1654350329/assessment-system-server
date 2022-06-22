@@ -29,18 +29,18 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         Integer errorNumber = (Integer) redisUtil.hget(Constants.ERROR_LOGIN, username);
         if (errorNumber != null) {
             if (errorNumber < 5) {
-                redisUtil.hset(Constants.ERROR_LOGIN, username, errorNumber + 1, 1000 * 60 * 10);
+                redisUtil.hset(Constants.ERROR_LOGIN, username, errorNumber + 1, 60 * 10);
             } else {
-                redisUtil.hset(Constants.LOCK_ACCOUNT, username, DateUtil.now(), 1000 * 60 * 10);
+                redisUtil.hset(Constants.LOCK_ACCOUNT, username, DateUtil.now(), 60 * 10);
             }
         } else {
-            redisUtil.hset(Constants.ERROR_LOGIN, username, 1, 1000 * 60 * 10);
+            redisUtil.hset(Constants.ERROR_LOGIN, username, 1, 60 * 10);
         }
         String errorInfo = exception.getMessage().equals("Bad credentials") ? "用户名或密码错误，请重新输入" : exception.getMessage();
 
         response.setContentType("application/json;charset=UTF-8");
         ServletOutputStream outputStream = response.getOutputStream();
-        RestResponse result = RestResponse.fail(401,errorInfo);
+        RestResponse result = RestResponse.fail(401, errorInfo);
         outputStream.write(JSONUtil.toJsonStr(result).getBytes(StandardCharsets.UTF_8));
 
         outputStream.flush();

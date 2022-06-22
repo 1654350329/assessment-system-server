@@ -1,6 +1,7 @@
 package com.tree.clouds.assessment.controller;
 
 
+import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.tree.clouds.assessment.common.RestResponse;
 import com.tree.clouds.assessment.common.aop.Log;
@@ -8,6 +9,7 @@ import com.tree.clouds.assessment.model.entity.UnitManage;
 import com.tree.clouds.assessment.model.vo.UnitManagePageVO;
 import com.tree.clouds.assessment.model.vo.PublicIdsReqVO;
 import com.tree.clouds.assessment.service.UnitManageService;
+import com.tree.clouds.assessment.utils.BaseBusinessException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,9 @@ public class UnitManageController {
     @ApiOperation(value = "修改单位")
     @Log("修改单位")
     public RestResponse<Boolean> updateGroupRole(@RequestBody UnitManage groupRole) {
+        if (NumberUtil.isNumber(groupRole.getUnitId()) && Integer.parseInt(groupRole.getUnitId()) <= 10) {
+            throw new BaseBusinessException(400, "基础单位不许修改!");
+        }
         unitManageService.updateById(groupRole);
         return RestResponse.ok(true);
     }

@@ -61,13 +61,20 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             );
             menus.addAll(list);
         }
-        UnitManage unitManage = unitManageService.getById(LoginUserUtil.getUserId());
-        if (unitManage!=null){
+
+        UnitManage unitManage = unitManageService.getById(LoginUserUtil.getUnitId());
+        if (unitManage != null) {
             if (roleCodes.contains("ROLE_user_admin") && unitManage.getUnitType() == 0) {
                 menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("区县单位加减分一览表")).collect(Collectors.toList());
             }
             if (roleCodes.contains("ROLE_user_admin") && unitManage.getUnitType() == 1) {
-                menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("下属单位加减分一览表")).collect(Collectors.toList());
+                menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("下属单位加减分一览表"))
+                        .filter(sysMenu -> !sysMenu.getName().equals("初审管理"))
+                        .filter(sysMenu -> !sysMenu.getName().equals("考核与材料报送"))
+                        .filter(sysMenu -> !sysMenu.getName().equals("下属单位考核指标"))
+                        .filter(sysMenu -> !sysMenu.getName().equals("考核指标"))
+                        .filter(sysMenu -> !sysMenu.getName().equals("驳回列表"))
+                        .collect(Collectors.toList());
             }
         }
 

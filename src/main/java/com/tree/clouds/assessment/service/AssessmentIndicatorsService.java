@@ -50,7 +50,7 @@ public interface AssessmentIndicatorsService extends IService<AssessmentIndicato
 
     void copyTask(Integer year,Integer indicatorsType);
 
-    int getScoreSum(Integer year, Integer indicatorsType);
+    double getScoreSum(Integer year, Integer indicatorsType);
 
     void export(Integer year,Integer indicatorsType ,HttpServletResponse response);
 

@@ -20,7 +20,7 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
 
     IPage<IndicatorReportVO> assessmentList(AssessmentPageVO assessmentPageVO, Integer type);
 
-    List<AssessmentListVO> assessmentList();
+    IPage<AssessmentListVO> assessmentList(PageParam pageParam);
 
     void updateReport(UpdateReportVO updateReportVO, int progress);
 
@@ -37,7 +37,11 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
 
     int getMaterial(Integer type, String unitId);
 
-    int getMaterial(String unitId, Integer type);
+    int getReportSum(Integer type, String unitId);
+
+    int getMaterial(String unitId, String expertUnit, Integer type);
+
+    int getReportSum(String unitId, String expertUnit, Integer type);
 
     Integer getReviewedNumber(String unitId, int type, String year);
 
@@ -48,4 +52,5 @@ public interface IndicatorReportService extends IService<IndicatorReport> {
     Integer getAuditNumber(String unitId, int year);
 
     List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year, String unitId, int progress);
+
 }

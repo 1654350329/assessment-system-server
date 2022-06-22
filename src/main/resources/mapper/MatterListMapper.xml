@@ -32,7 +32,7 @@
                 and (matter_type=0 or matter_type=2)
             </if>
             <if test="type==3">
-                and (matter_type=3 or matter_type=4)
+                and ( matter_type=3 or matter_type=4)
             </if>
             <if test="unitId!=null">
                 and unit_Id=#{unitId}

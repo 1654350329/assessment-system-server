@@ -20,7 +20,7 @@ public interface ScoreRecordMapper extends BaseMapper<ScoreRecord> {
 
     Double getExpertRating(String unitId, String assessmentYear);
 
-    IPage<ReviewVO> getReviewPage(IPage<ReviewVO> page, ReviewPageVO reviewPageVO);
+    IPage<ReviewVO> getReviewPage(IPage<ReviewVO> page, ReviewPageVO reviewPageVO, String expertUnitId);
 
     Double getSumByUnitAndYear(String unitId, int year);
 

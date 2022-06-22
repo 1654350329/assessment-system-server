@@ -5,6 +5,7 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.tree.clouds.assessment.common.Constants;
 import com.tree.clouds.assessment.mapper.SysRoleMenuMapper;
 import com.tree.clouds.assessment.model.bo.UserManageBO;
 import com.tree.clouds.assessment.model.entity.RoleManage;
@@ -13,10 +14,7 @@ import com.tree.clouds.assessment.model.entity.UserManage;
 import com.tree.clouds.assessment.mapper.UserManageMapper;
 import com.tree.clouds.assessment.model.vo.UpdatePasswordVO;
 import com.tree.clouds.assessment.model.vo.UserManagePageVO;
-import com.tree.clouds.assessment.service.UnitUserService;
-import com.tree.clouds.assessment.service.RoleUserService;
-import com.tree.clouds.assessment.service.SysMenuService;
-import com.tree.clouds.assessment.service.UserManageService;
+import com.tree.clouds.assessment.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tree.clouds.assessment.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -51,13 +50,19 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
     @Autowired
     private SysMenuService sysMenuService;
 
+    @Autowired
+    private RoleManageService roleManageService;
+
     @Override
     public void rebuildPassword(List<String> ids) {
         // 加密后密码
         String password = bCryptPasswordEncoder.encode("888888");
 
         List<UserManage> userManages = this.listByIds(ids);
-        userManages.forEach(userManage -> userManage.setPassword(password));
+        userManages.forEach(userManage -> {
+            userManage.setPassword(password);
+            redisUtil.hdel(Constants.ERROR_LOGIN, userManage.getAccount());
+        });
         this.updateBatchById(userManages);
     }
 
@@ -71,6 +76,11 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
 
     @Override
     public IPage<UserManageBO> userManagePage(UserManagePageVO userManagePageVO) {
+        List<RoleManage> roleManageList = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> collect = roleManageList.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
+        if (!collect.contains("ROLE_admin")) {
+            userManagePageVO.setUnitId(LoginUserUtil.getUnitId());
+        }
         IPage<UserManageBO> page = userManagePageVO.getPage();
         IPage<UserManageBO> userManageVOIPage = this.baseMapper.userManagePage(page, userManagePageVO);
         List<UserManageBO> records = userManageVOIPage.getRecords();
@@ -129,6 +139,11 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
     @Override
     @Transactional
     public void addUserManage(UserManageBO userManageBO) {
+        List<RoleManage> roleManageList = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> collect = roleManageList.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
+        if (!collect.contains("ROLE_admin") && !userManageBO.getUnitId().equals(LoginUserUtil.getUnitId())) {
+            throw new BaseBusinessException(400, "只能添加当前单位用户!");
+        }
         if (StrUtil.isNotBlank(userManageBO.getUserId())) {
             updateUserManage(userManageBO);
             return;
@@ -138,10 +153,10 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
             throw new BaseBusinessException(400, "账号已存在,请重新输入!!");
         }
         //手机号码正则匹配
-//        String REGEX_MOBILE = "((\\+86|0086)?\\s*)((134[0-8]\\d{7})|(((13([0-3]|[5-9]))|(14[5-9])|15([0-3]|[5-9])|(16(2|[5-7]))|17([0-3]|[5-8])|18[0-9]|19(1|[8-9]))\\d{8})|(14(0|1|4)0\\d{7})|(1740([0-5]|[6-9]|[10-12])\\d{7}))";
-//        if (!Pattern.matches(REGEX_MOBILE, userManageBO.getPhoneNumber())) {
-//            throw new BaseBusinessException(400, "手机号码不合法");
-//        }
+        String REGEX_MOBILE = "((\\+86|0086)?\\s*)((134[0-8]\\d{7})|(((13([0-3]|[5-9]))|(14[5-9])|15([0-3]|[5-9])|(16(2|[5-7]))|17([0-3]|[5-8])|18[0-9]|19(1|[8-9]))\\d{8})|(14(0|1|4)0\\d{7})|(1740([0-5]|[6-9]|[10-12])\\d{7}))";
+        if (!Pattern.matches(REGEX_MOBILE, userManageBO.getPhoneNumber())) {
+            throw new BaseBusinessException(400, "手机号码不合法");
+        }
         UserManage userManage = BeanUtil.toBean(userManageBO, UserManage.class);
         String password = bCryptPasswordEncoder.encode(Base64.decodeStr(userManage.getPassword()));
         userManage.setPassword(password);

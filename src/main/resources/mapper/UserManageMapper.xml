@@ -54,7 +54,7 @@
                 #{id}
             </foreach>
         </if>
-
+        ORDER BY a.CREATED_USER desc
     </select>
     <select id="listByMenuId" resultType="com.tree.clouds.assessment.model.entity.UserManage">
         select DISTINCT a.* from user_manage a

@@ -28,7 +28,7 @@
         <where>
             del=0
             <if test="pageVO.evelName!=null and pageVO.evelName!=''">
-                and evel_Name like '%'#{pageVO.evelName}'%'
+                and evel_Name like "%"#{pageVO.evelName}"%"
             </if>
         </where>
     </select>

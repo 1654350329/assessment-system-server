@@ -15,7 +15,10 @@
         <if test="unitManagePageVO.areaName !=null and unitManagePageVO.areaName !=''">
             and area_name like "%"#{unitManagePageVO.areaName}"%"
         </if>
-        order by  unit_type desc
+        <if test="unitManagePageVO.unitType !=null ">
+            and unit_type = #{unitManagePageVO.unitType}
+        </if>
+        order by unit_type desc
     </select>
 
 </mapper>

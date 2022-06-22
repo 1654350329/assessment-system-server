@@ -79,7 +79,8 @@ public class AuthController {
         map.put("roles", roles);
         map.put("name", user.getUserName());
         map.put("phoneNumber", user.getPhoneNumber());
-//        map.put("regionId", LoginUserUtil.getUnitId());
+        map.put("unitId", LoginUserUtil.getUnitId());
+        map.put("unitName", LoginUserUtil.getUnitName());
 
         return RestResponse.ok(map);
     }

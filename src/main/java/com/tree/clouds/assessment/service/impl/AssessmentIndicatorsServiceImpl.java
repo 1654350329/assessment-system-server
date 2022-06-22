@@ -146,7 +146,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                 if (prentById != null) {
                     all.addAll(prentById);
                 }
-                Set<IndicatorsTreeTreeVO> children = getChildrenById(treeTreeVO.getId(),unitId);
+                Set<IndicatorsTreeTreeVO> children = getChildrenById(treeTreeVO.getId(), unitId);
                 all.addAll(children);
             }
         } else {
@@ -186,9 +186,15 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         Set<IndicatorsTreeTreeVO> set = new LinkedHashSet<>();
         //获得子集
         List<IndicatorsTreeTreeVO> tree2 = this.baseMapper.getIndicatorsTreeTreeVOByPId(id);
+
+
         for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : tree2) {
             set.add(indicatorsTreeTreeVO);
             List<IndicatorsTreeTreeVO> VOByPId3 = this.baseMapper.getIndicatorsTreeTreeVOByPId(indicatorsTreeTreeVO.getId());
+            if (CollUtil.isEmpty(VOByPId3)) {
+                List<IndicatorsTreeTreeVO> VOByPId4 = this.detailService.getByParentId(indicatorsTreeTreeVO.getId(), unitId);
+                set.addAll(VOByPId4);
+            }
             if (CollUtil.isNotEmpty(VOByPId3)) {
                 for (IndicatorsTreeTreeVO treeTreeVO : VOByPId3) {
                     set.add(treeTreeVO);
@@ -199,6 +205,10 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                         List<IndicatorsTreeTreeVO> tree3 = this.baseMapper.getIndicatorsTreeTreeVOByPId(treeTreeVO.getId());
                         for (IndicatorsTreeTreeVO treeVO : tree3) {
                             set.add(treeVO);
+                            if (treeTreeVO.getAssessmentType() == 3) {
+                                List<IndicatorsTreeTreeVO> VOByPId4 = this.detailService.getByParentId(treeTreeVO.getId(), unitId);
+                                set.addAll(VOByPId4);
+                            }
                             List<IndicatorsTreeTreeVO> VOByPId4 = this.detailService.getByParentId(treeVO.getId(), LoginUserUtil.getUnitId());
                             set.addAll(VOByPId4);
                         }
@@ -206,7 +216,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                 }
             }
         }
-        if (CollUtil.isEmpty(tree2)){
+        if (CollUtil.isEmpty(tree2)) {
             List<IndicatorsTreeTreeVO> VOByPId4 = this.detailService.getByParentId(id, unitId);
             set.addAll(VOByPId4);
         }
@@ -281,7 +291,9 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         if (updateTaskVO.getAssessmentType() != 4) {
             getStatus(updateTaskVO.getIndicatorsId());
             AssessmentIndicators assessmentIndicators = BeanUtil.toBean(updateTaskVO, AssessmentIndicators.class);
-            assessmentIndicators.setUnitIds(String.join(",", updateTaskVO.getUnitIds()));
+            if (updateTaskVO.getUnitIds() != null) {
+                assessmentIndicators.setUnitIds(String.join(",", updateTaskVO.getUnitIds()));
+            }
             this.updateById(assessmentIndicators);
         } else {
             AssessmentIndicatorsDetail detail = this.detailService.getById(updateTaskVO.getIndicatorsId());
@@ -334,6 +346,13 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                 throw new BaseBusinessException(400, "考核指标已存在,不许添加!");
             }
             AssessmentIndicatorsDetail indicatorsDetail = this.getDetail(updateTaskVO.getParentId());
+            AssessmentIndicators assessmentIndicators = this.getById(indicatorsDetail.getIndicatorsId());
+            if (!assessmentIndicators.getIndicatorsName().equals("绩效减分") && updateTaskVO.getFraction() < 0) {
+                throw new BaseBusinessException(400, "分数为正数!");
+            }
+            if (assessmentIndicators.getIndicatorsName().equals("绩效减分") && updateTaskVO.getFraction() > 0) {
+                throw new BaseBusinessException(400, "绩效减分项目,分数为负数!");
+            }
             indicatorsDetail.setFraction(updateTaskVO.getFraction());
             indicatorsDetail.setInstructions(updateTaskVO.getInstructions());
             indicatorsDetail.setAssessmentCriteria(updateTaskVO.getIndicatorsName());
@@ -389,10 +408,11 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                 .eq(AssessmentIndicators.ASSESSMENT_YEAR, releaseAssessmentVO.getAssessmentYear())
                 .eq(AssessmentIndicators.INDICATORS_TYPE, releaseAssessmentVO.getIndicatorsType()));
 
-        Set<String> unitIds = new HashSet<>();
+
         List<IndicatorReport> reports = new ArrayList<>();
         //下属单位
         if (releaseAssessmentVO.getIndicatorsType() == 0) {
+            Set<String> unitIds = new HashSet<>();
             List<UnitAssessment> unitAssessments = unitAssessmentService.getByYear(releaseAssessmentVO.getAssessmentYear());
             if (CollUtil.isEmpty(unitAssessments)) {
                 throw new BaseBusinessException(400, "责任单位数量为0,不许发布!");
@@ -407,12 +427,18 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                 reports.add(indicatorReport);
                 unitIds.add(unitAssessment.getUnitId());
             }
-
+            //添加到待办列表
+            for (String unitId : unitIds) {
+                matterListService.addMatter(releaseAssessmentVO.getAssessmentYear() + "年考核指标已发布", unitId, null, null, 0, releaseAssessmentVO.getAssessmentYear(), null);
+            }
         } else {
             //区县
             List<UnitAssessment> unitAssessments = new ArrayList<>();
             List<UnitManage> areaList = unitManageService.getListByType(UnitManage.UNIT_TYPE_ONE, null);
             List<AssessmentIndicatorsDetail> details = this.detailService.getListByYearAndType(1, releaseAssessmentVO.getAssessmentYear());
+            if (CollUtil.isEmpty(details)) {
+                throw new BaseBusinessException(400, "发布失败,请先配置指标方案!");
+            }
             for (UnitManage unitManage : areaList) {
                 for (AssessmentIndicatorsDetail detail : details) {
                     IndicatorReport indicatorReport = new IndicatorReport();
@@ -427,11 +453,14 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                     indicatorReport.setUnitId(unitManage.getUnitId());
                     indicatorReport.setExpirationDate(releaseAssessmentVO.getExpirationDate());
                     reports.add(indicatorReport);
-                    unitIds.add(unitManage.getUnitId());
                     UnitAssessment unitAssessment = new UnitAssessment();
                     unitAssessment.setDetailId(detail.getDetailId());
                     unitAssessment.setUnitId(unitManage.getUnitId());
                     unitAssessments.add(unitAssessment);
+                    AssessmentIndicators task = this.getById(detail.getTaskId());
+                    matterListService.addMatter(unitManage.getUnitName() + "-" + indicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料待审",
+                            indicatorReport.getUnitId(), indicatorReport.getReportId(), task.getUnitId(), 3,
+                            indicators.getAssessmentYear(), indicatorReport.getIndicatorsId());
                 }
             }
             unitAssessmentService.saveBatch(unitAssessments);
@@ -446,11 +475,6 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             return scoreRecord;
         }).collect(Collectors.toList());
         scoreRecordService.saveBatch(collect);
-
-        //添加到待办列表
-        for (String unitId : unitIds) {
-            matterListService.addMatter(releaseAssessmentVO.getAssessmentYear() + "年考核指标已发布", unitId, null, null, 0, releaseAssessmentVO.getAssessmentYear(), null);
-        }
 
 
     }
@@ -537,12 +561,16 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
 
     @Override
     public List<IndicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO) {
-        int status = 1;
+        int status = 8;
         if (StrUtil.isNotBlank(auditTreeVO.getReportStatus())) {
             status = Integer.parseInt(auditTreeVO.getReportStatus());
             if (status == 2) {
                 status = 7;
             }
+//            else {
+//                //0对应 未审核状态1 1对应已审核
+//                status = status + 1;
+//            }
         }
         return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent(), 0);
     }
@@ -638,8 +666,8 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     }
 
     @Override
-    public int getScoreSum(Integer year, Integer indicatorsType) {
-        Integer scoreSumByYear = this.baseMapper.getScoreSumByYear(year, indicatorsType);
+    public double getScoreSum(Integer year, Integer indicatorsType) {
+        Double scoreSumByYear = this.baseMapper.getScoreSumByYear(year, indicatorsType);
         return scoreSumByYear == null ? 0 : scoreSumByYear;
     }
 
@@ -655,6 +683,9 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             // 添加段落（分组）
             writer.addText(new Font("方正小标宋简体", Font.PLAIN, 10), i + "", indicatorsTreeTreeVO.getTitle(), "   分数:" + indicatorsTreeTreeVO.getFraction());
             int j = 0;
+            if (indicatorsTreeTreeVO.getChildren() == null) {
+                continue;
+            }
             for (IndicatorsTreeTreeVO child : indicatorsTreeTreeVO.getChildren()) {
                 j++;
                 // 添加段落（项目）

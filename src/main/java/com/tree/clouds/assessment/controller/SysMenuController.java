@@ -18,6 +18,7 @@ import com.tree.clouds.assessment.service.SysMenuService;
 import com.tree.clouds.assessment.service.SysRoleMenuService;
 import com.tree.clouds.assessment.service.UserManageService;
 import com.tree.clouds.assessment.utils.LoginUserUtil;
+import com.tree.clouds.assessment.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +48,17 @@ public class SysMenuController {
 
     @Autowired
     private UserManageService userManageService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @GetMapping("/nav")
     @ApiOperation(value = "当前用户的菜单和权限信息")
     public RestResponse<Map<Object, Object>> nav() {
-
+//        if (!redisUtil.hasKey(LoginUserUtil.getUserAccount())){
+//            redisUtil.get()
+//        }
         UserManage userByAccount = userManageService.getUserByAccount(LoginUserUtil.getUserAccount());
+
 
         // 获取权限信息
         String authorityInfo = userManageService.getUserAuthorityInfo(userByAccount.getUserId());// ROLE_admin,ROLE_normal,sys:user:list,....

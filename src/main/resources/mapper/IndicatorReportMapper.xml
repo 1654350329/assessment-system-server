@@ -42,7 +42,7 @@
     <select id="getUserScoreByUnit" resultType="java.lang.Double">
        select sum(a.user_score) from indicator_report a
        left join assessment_indicators b on a.indicators_id=b.indicators_id
-          where  b.assessment_Year=#{assessmentYear} and a.unit_id=#{unitId}
+          where  b.assessment_Year=#{assessmentYear} and a.unit_id=#{unitId} and b.indicators_name!='绩效减分'
     </select>
     <select id="getMaterial" resultType="java.lang.Integer">
         select count(b.FILE_ID) from indicator_report a
@@ -62,17 +62,19 @@
         </if>
     </select>
     <select id="getAssessmentList" resultType="com.tree.clouds.assessment.model.vo.AssessmentListVO">
-         select a.report_id,a.UPDATED_TIME as assessmentDate,g.indicators_Status,b.assessment_year,e.UNIT_NAME,c.USER_NAME as createdUser,c.PHONE_NUMBER,b.indicators_name,f.assessment_criteria from indicator_report a
-             left join assessment_indicators b on a.indicators_id=b.indicators_id
-             left join user_manage c on a.CREATED_USER=c.user_id
-             left join unit_user d on a.CREATED_USER= d.user_id
-		     left join unit_manage e on e.UNIT_ID= a.unit_ID
-		     left join assessment_indicators_detail f on f.detail_id= a.detail_id
-		     left join audit_log g on g.report_id= a.report_id
-		     <if test="unitId!=null">
-                 where a.unit_id=#{unitId}
-             </if>
-             ORDER BY a.CREATED_TIME desc   limit 10
+        select a.report_id,a.UPDATED_TIME as
+        assessmentDate,a.report_Progress,b.assessment_year,e.UNIT_NAME,c.USER_NAME as
+        createdUser,c.PHONE_NUMBER,b.indicators_name,f.assessment_criteria from indicator_report a
+        left join assessment_indicators b on a.indicators_id=b.indicators_id
+        left join user_manage c on a.CREATED_USER=c.user_id
+        left join unit_user d on a.CREATED_USER= d.user_id
+        left join unit_manage e on e.UNIT_ID= a.unit_ID
+        left join assessment_indicators_detail f on f.detail_id= a.detail_id
+        left join audit_log g on g.report_id= a.report_id
+        <if test="unitId!=null">
+            where a.unit_id=#{unitId}
+        </if>
+        ORDER BY a.unit_id asc,a.CREATED_TIME desc
 
     </select>
     <select id="getReviewedNumber" resultType="java.lang.Integer">
@@ -94,11 +96,11 @@
             and a.report_progress=3
         </if>
     </select>
-    <select id="getDistributeSum" resultType="java.lang.Integer">
+    <select id="getDistributeSum" resultType="java.lang.Double">
         select sum(b.fraction) from indicator_report a
         left join assessment_indicators_detail b on a.detail_id=b.detail_id
         left join assessment_indicators c on c.indicators_id=b.indicators_id
-        where a.unit_id=#{unitId} and c.assessment_year=#{year}
+        where a.unit_id=#{unitId} and c.assessment_year=#{year} and c.indicators_name !='绩效减分'
     </select>
     <select id="getAssessmentIndicatorsByReportId"
             resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
@@ -112,6 +114,65 @@
         left join assessment_indicators b on b.indicators_id=a.indicators_id
         left join audit_log c on c.report_id=a.report_id
         where b.assessment_year =#{year} and a.unit_id=#{unitId} and  c.indicators_status=1
+    </select>
+    <select id="getMaterialReport" resultType="java.lang.Integer">
+        select count(b.FILE_ID) from indicator_report a
+        left join file_info b on a.report_id=b.biz_Id
+        left join assessment_indicators_detail c on a.detail_id=c.detail_id
+        left join assessment_indicators d on c.task_id=d.indicators_id
+        where
+        <if test="type==0">
+            a.report_Progress> 0
+        </if>
+        <if test="type==1">
+            a.report_Progress> 1
+        </if>
+        <if test="unitId != null">
+            and a.unit_Id= #{unitId}
+        </if>
+        <if test="expertUnit != null">
+            and d.unit_Id= #{expertUnit}
+        </if>
+    </select>
+    <select id="getReportSum" resultType="java.lang.Integer">
+        select count(a.report_id) from indicator_report a
+        where
+        <if test="type==0">
+            a.report_Progress> 0
+        </if>
+        <if test="type==1">
+            a.report_Progress> 1
+        </if>
+        <if test="type==2">
+            a.report_Status= 2
+        </if>
+        <if test="unitId != null">
+            and a.unit_Id= #{unitId}
+        </if>
+    </select>
+    <select id="getReport2Sum" resultType="java.lang.Integer">
+        select count(a.report_id) from indicator_report a
+        left join assessment_indicators_detail c on a.detail_id=c.detail_id
+        left join assessment_indicators d on c.task_id=d.indicators_id
+        where
+        <if test="type==0">
+            a.report_Progress> 0
+        </if>
+        <if test="type==1">
+            a.report_Progress>1
+        </if>
+        <if test="type==5">
+            a.report_Progress>= 2
+        </if>
+        <if test="type==6">
+            a.report_Progress>=3
+        </if>
+        <if test="unitId != null">
+            and a.unit_Id= #{unitId}
+        </if>
+        <if test="expertUnit != null">
+            and d.unit_Id= #{expertUnit}
+        </if>
     </select>
 
 </mapper>

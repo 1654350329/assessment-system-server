@@ -18,13 +18,13 @@ public interface UnitAssessmentMapper extends BaseMapper<UnitAssessment> {
 
     int getCount(String assessmentYear);
 
-    Integer getDistributeNumber(String unitId);
+    Integer getDistributeNumber(String unitId, Integer type);
 
     Integer getCountUnit(String unitId, Integer year);
 
     List<UnitAssessment> getByYear(String assessmentYear);
 
-    Integer isRelease(String detailId);
+    Integer isRelease(Integer year);
 
     Integer getExpertDistributeNumber(String unitId, String expertUnit);
 

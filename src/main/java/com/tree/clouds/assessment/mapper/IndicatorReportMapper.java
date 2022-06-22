@@ -35,13 +35,19 @@ public interface IndicatorReportMapper extends BaseMapper<IndicatorReport> {
 
     Integer getMaterial(String unitId, Integer type);
 
-    List<AssessmentListVO> getAssessmentList(String unitId);
+    IPage<AssessmentListVO> getAssessmentList(IPage<AssessmentListVO> page, String unitId);
 
     Integer getReviewedNumber(String unitId, int type, String year, String expertUnitId);
 
-    Integer getDistributeSum(String unitId, String year);
+    Double getDistributeSum(String unitId, String year);
 
     AssessmentIndicators getAssessmentIndicatorsByReportId(String reportId);
 
     Integer getAuditNumber(String unitId, int year);
+
+    int getMaterialReport(String unitId, String expertUnit, Integer type);
+
+    int getReportSum(Integer type, String unitId);
+
+    int getReport2Sum(String unitId, String expertUnit, Integer type);
 }

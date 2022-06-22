@@ -18,18 +18,24 @@ public interface UnitAssessmentService extends IService<UnitAssessment> {
 
     List<UnitVO> assessmentList(UnitVO unitVO);
 
-    void addAssessment(List<String> ids,String unitId);
+    void addAssessment(List<String> ids, String unitId);
 
     List<String> getAssessment(String unitId);
 
     int getCount(String assessmentYear);
 
-    Integer getDistributeNumber(String unitId);
+    /**
+     * @param unitId
+     * @param type   0获取所有分配数  1获取线上分配数
+     * @return
+     */
+    Integer getDistributeNumber(String unitId, Integer type);
 
 
     List<UnitAssessment> getByYear(String assessmentYear);
 
     Integer getExpertDistributeNumber(String unitId, String expertUnit);
+
     Double getScoreByUnitIdAndYear(String unitId, String year);
 
 }

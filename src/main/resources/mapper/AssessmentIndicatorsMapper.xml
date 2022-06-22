@@ -60,7 +60,7 @@
         created_User,a.indicators_type
         from assessment_indicators a left join user_manage b on a.release_user=b.user_id
         <where>
-            1=1
+            a.assessment_Type=0
             <if test="assessmentPageVO.indicatorsType !=null">
                 and a.indicators_type=#{assessmentPageVO.indicatorsType}
             </if>
@@ -112,7 +112,16 @@
         <if test="reportId!=null and reportId!=''">
             and b.report_id=#{reportId}
         </if>
-        <if test="reportStatus!=null and reportStatus!=7">
+        <if test="reportStatus==8 ">
+            and b.report_progress >=1
+        </if>
+        <if test="reportStatus==9 ">
+            and b.report_progress >=2
+        </if>
+        <if test="reportStatus!=null and  reportStatus ==0">
+            and b.report_progress =#{reportStatus}
+        </if>
+        <if test="reportStatus!=null and reportStatus !=7 and reportStatus !=8 and reportStatus !=9 and  reportStatus !=0">
             and b.report_progress >=#{reportStatus}
         </if>
         <if test="reportStatus!=null and reportStatus==7">
@@ -126,9 +135,10 @@
     <select id="getByNameAndPid" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
         select * from assessment_indicators where indicators_Name=#{indicatorsName} and parent_Id=#{pid}
     </select>
-    <select id="getScoreSumByYear" resultType="java.lang.Integer">
-        select sum(a.fraction) from assessment_indicators_detail a left join assessment_indicators b on  a.indicators_id=b.indicators_id
-        where b.assessment_year=#{year} and b.indicators_type=#{indicatorsType}
+    <select id="getScoreSumByYear" resultType="java.lang.Double">
+        select sum(a.fraction) from assessment_indicators_detail a
+        left join assessment_indicators b on  a.indicators_id=b.indicators_id
+        where b.assessment_year=#{year} and b.indicators_type=#{indicatorsType} and b.indicators_name !='绩效减分'
     </select>
     <select id="getUnitNumberByYear" resultType="java.lang.Integer">
      select  count(distinct c.unit_id) from assessment_indicators a

@@ -21,8 +21,9 @@ public interface ScoreRecordService extends IService<ScoreRecord> {
 
     IPage<ReviewVO> reviewPage(ReviewPageVO reviewPageVO);
 
-    ScoreRecord getScore(String detailId, String unitId,Integer type);
+    ScoreRecord getScore(String detailId, String unitId, Integer type);
 
+    void isCompleteResult(String unitId, String year);
 
     double getExpertRating(String unitId, String assessmentYear);
 

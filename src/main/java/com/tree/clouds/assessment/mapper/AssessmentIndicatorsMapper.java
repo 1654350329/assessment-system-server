@@ -35,7 +35,7 @@ public interface AssessmentIndicatorsMapper extends BaseMapper<AssessmentIndicat
 
     AssessmentIndicators getByNameAndPid(String indicatorsName, String pid);
 
-    Integer getScoreSumByYear(Integer year, Integer indicatorsType);
+    Double getScoreSumByYear(Integer year, Integer indicatorsType);
 
     Integer getUnitNumberByYear(String assessmentYear);
 

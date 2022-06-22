@@ -71,6 +71,9 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         if (type == 1 || type == 2) {
             List<UnitManage> list;
             if (type == 1) {
+                if (!roleCodes.contains("ROLE_admin")) {
+                    assessmentPageVO.setUnitName(LoginUserUtil.getUnitName());
+                }
                 list = unitManageService.getListByType(UnitManage.UNIT_TYPE_ZERO, assessmentPageVO.getUnitName());
             } else {
                 QueryWrapper<UnitManage> queryWrapper = new QueryWrapper<>();
@@ -80,21 +83,23 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 list = unitManageService.list(queryWrapper);
             }
             for (UnitManage unitManage : list) {
-                if (!roleCodes.contains("ROLE_admin") && !Objects.equals(LoginUserUtil.getUnitId(), unitManage.getUnitId())) {
+                if (assessmentPageVO.getIndicatorsType() != null && !Objects.equals(unitManage.getUnitType(), assessmentPageVO.getIndicatorsType())) {
                     continue;
                 }
                 for (AssessmentVO record : assessmentVOIPage.getRecords()) {
                     if (!Objects.equals(unitManage.getUnitType(), record.getIndicatorsType())) {
                         continue;
                     }
+
                     IndicatorReportVO indicatorReportVO = BeanUtil.toBean(record, IndicatorReportVO.class);
                     //获取分配指标数
-                    if (unitManage.getUnitType() == 0) {
-                        Integer expertDistributeNumber = unitAssessmentService.getExpertDistributeNumber(unitManage.getUnitId(), LoginUserUtil.getUnitId());
-                        indicatorReportVO.setDistributeNumber(expertDistributeNumber);
+                    Integer expertDistributeNumber;
+                    if (type == 2) {
+                        expertDistributeNumber = unitAssessmentService.getExpertDistributeNumber(unitManage.getUnitId(), LoginUserUtil.getUnitId());
                     } else {
-                        indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(unitManage.getUnitId()));
+                        expertDistributeNumber = unitAssessmentService.getDistributeNumber(unitManage.getUnitId(), 0);
                     }
+                    indicatorReportVO.setDistributeNumber(expertDistributeNumber);
                     if (indicatorReportVO.getDistributeNumber() == 0) {
                         continue;
                     }
@@ -118,6 +123,9 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0, record.getAssessmentYear(), LoginUserUtil.getUnitId()));
                     //是否完成填报
                     indicatorReportVO.setUnitType(unitManage.getUnitType());
+                    if (assessmentPageVO.getOverdue() != null && indicatorReportVO.getOverdue() != assessmentPageVO.getOverdue()) {
+                        continue;
+                    }
                     collect.add(indicatorReportVO);
                 }
             }
@@ -125,7 +133,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
             collect = assessmentVOIPage.getRecords().stream().map(record -> {
                 IndicatorReportVO indicatorReportVO = BeanUtil.toBean(record, IndicatorReportVO.class);
                 //获取分配指标数
-                indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(LoginUserUtil.getUnitId()));
+                indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(LoginUserUtil.getUnitId(), 0));
                 //获取提交材料数
                 Integer submitNumber = this.baseMapper.getSubmitNumber(LoginUserUtil.getUnitId());
                 indicatorReportVO.setSubmitNumber(submitNumber);
@@ -139,6 +147,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 if (StrUtil.isNotBlank(indicatorReportVO.getExpirationDate())) {
                     indicatorReportVO.setOverdue(new Date().getTime() > DateUtil.parseDate(indicatorReportVO.getExpirationDate()).getTime());
                 }
+
                 UnitManage unitManage = unitManageService.getById(LoginUserUtil.getUnitId());
                 if (unitManage != null) {
                     indicatorReportVO.setUnitName(unitManage.getUnitName());
@@ -160,14 +169,15 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     }
 
     @Override
-    public List<AssessmentListVO> assessmentList() {
+    public IPage<AssessmentListVO> assessmentList(PageParam pageParam) {
         List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
         List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
         String unitId = null;
         if (!roleCodes.contains("ROLE_admin")) {
             unitId = LoginUserUtil.getUnitId();
         }
-        return this.baseMapper.getAssessmentList(unitId);
+        IPage<AssessmentListVO> page = pageParam.getPage();
+        return this.baseMapper.getAssessmentList(page, unitId);
     }
 
     //手动实现分页
@@ -196,9 +206,17 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         }
 
         AssessmentIndicatorsDetail detail = detailService.getById(one.getDetailId());
-        if (StrUtil.isNotBlank(updateReportVO.getUserScore()) && Double.parseDouble(updateReportVO.getUserScore()) > detail.getFraction()) {
-            throw new BaseBusinessException(400, "自评分数不许大于考核指标分数");
-        }
+//        AssessmentIndicators indicators = this.assessmentIndicatorsService.getById(detail.getIndicatorsId());
+//        if (!indicators.getIndicatorsName().equals("绩效减分")) {
+//            if (StrUtil.isNotBlank(updateReportVO.getUserScore()) && Double.parseDouble(updateReportVO.getUserScore()) > detail.getFraction()) {
+//                throw new BaseBusinessException(400, "自评分数不许大于考核指标分数");
+//            }
+//        } else {
+//            if (StrUtil.isNotBlank(updateReportVO.getUserScore()) && Double.parseDouble(updateReportVO.getUserScore()) < detail.getFraction()) {
+//                throw new BaseBusinessException(400, "扣分分数不许超过考核指标分数");
+//            }
+//        }
+
         if (StrUtil.isNotBlank(updateReportVO.getUserScore())) {
             one.setUserScore(Double.valueOf(updateReportVO.getUserScore()));
         }
@@ -214,7 +232,8 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         fileInfoService.deleteByBizId(one.getReportId());
         fileInfoService.saveFileInfo(updateReportVO.getFileInfoVOS(), one.getReportId());
         //新增报送历史日志
-        submitLogService.addLog(assessmentIndicators, detail.getAssessmentCriteria(), 0, null, LoginUserUtil.getUnitId(), one.getReportTime(), one.getReportId());
+        submitLogService.addLog(assessmentIndicators, detail.getAssessmentCriteria(), 0, null, LoginUserUtil.getUnitId(),
+                one.getReportTime(), one.getReportId(), assessmentIndicators.getExpirationDate());
         //新增到初审
         AuditLog auditLog = new AuditLog();
         auditLog.setDetailId(one.getDetailId());
@@ -325,6 +344,9 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 one.setPhoneNumber(userManage.getPhoneNumber());
                 //获取考核指标信息
                 AssessmentIndicatorsDetail detail = this.detailService.getById(one.getDetailId());
+                if (detail == null) {
+                    continue;
+                }
                 List<FileInfo> detailFileInfo = fileInfoService.getByBizIdsAndType(detail.getDetailId(), null);
                 detail.setFileInfoVOS(detailFileInfo);
                 List<FileInfo> reportFileInfo = fileInfoService.getByBizIdsAndType(one.getReportId(), null);
@@ -369,10 +391,19 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     }
 
     @Override
-    public int getMaterial(String unitId, Integer type) {
-        return this.baseMapper.getMaterial(unitId, type);
+    public int getMaterial(String unitId, String expertUnit, Integer type) {
+        return this.baseMapper.getMaterialReport(unitId, expertUnit, type);
     }
 
+    @Override
+    public int getReportSum(String unitId, String expertUnit, Integer type) {
+        return this.baseMapper.getReport2Sum(unitId, expertUnit, type);
+    }
+
+    @Override
+    public int getReportSum(Integer type, String unitId) {
+        return this.baseMapper.getReportSum(type, unitId);
+    }
 
     @Override
     public Integer getReviewedNumber(String unitId, int type, String year) {
@@ -382,7 +413,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     @Override
     public Map<String, Object> getData(GetDataVO getDataVO) {
         Map<String, Object> map = new LinkedHashMap<>();
-        Integer sum = this.baseMapper.getDistributeSum(LoginUserUtil.getUnitId(), getDataVO.getYear());
+        Double sum = this.baseMapper.getDistributeSum(LoginUserUtil.getUnitId(), getDataVO.getYear());
         map.put("总分值", sum);
         Double UserScore = this.baseMapper.getUserScoreByUnit(LoginUserUtil.getUnitId(), getDataVO.getYear());
         map.put("自评总分", UserScore == null ? 0 : UserScore);
@@ -404,7 +435,20 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     @Override
     public List<IndicatorsTreeTreeVO> scoreLeftTree(Integer year, String unitId, int progress) {
         UnitManage unitManage = unitManageService.getById(unitId);
-        return assessmentIndicatorsService.getScoreLeftTree(year, unitId, unitManage.getUnitType(), progress);
+        List<IndicatorsTreeTreeVO> scoreLeftTree = assessmentIndicatorsService.getScoreLeftTree(year, unitId, unitManage.getUnitType(), progress);
+        for (IndicatorsTreeTreeVO treeVO : scoreLeftTree) {
+            if (treeVO == null || treeVO.getChildren() == null) {
+                continue;
+            }
+            if (progress == 2) {
+                treeVO.getChildren().removeIf(chTree -> {
+                    AssessmentIndicators indicators = this.assessmentIndicatorsService.getById(chTree.getId());
+                    return 2 == indicators.getEvaluationMethod();
+                });
+            }
+
+        }
+        return scoreLeftTree;
     }
 
 
