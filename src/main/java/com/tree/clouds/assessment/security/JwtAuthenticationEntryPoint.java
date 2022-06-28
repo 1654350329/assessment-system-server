@@ -22,8 +22,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
         ServletOutputStream outputStream = response.getOutputStream();
-
-        RestResponse result = RestResponse.fail(402,"用户身份异常,请重新登入!");
+        RestResponse result = RestResponse.fail(402,
+                authException.getMessage().equals("用户账户在其他地区登录，可能存在账号被盗风险!")
+                        ? authException.getMessage() : "用户身份异常,请重新登入");
 
         outputStream.write(JSONUtil.toJsonStr(result).getBytes(StandardCharsets.UTF_8));
 

@@ -18,7 +18,7 @@
         <if test="unitManagePageVO.unitType !=null ">
             and unit_type = #{unitManagePageVO.unitType}
         </if>
-        order by unit_type desc
+        order by CREATED_TIME desc
     </select>
 
 </mapper>

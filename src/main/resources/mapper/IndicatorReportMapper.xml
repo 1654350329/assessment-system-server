@@ -84,7 +84,7 @@
         left join score_record d on a.report_id=d.report_id
         where a.unit_id=#{unitId} and c.assessment_year=#{year}
         <if test="expertUnitId!=null">
-            and c.unit_id =#{expertUnitId}
+            and (c.unit_id =#{expertUnitId} or c.unit_ids=#{expertUnitId})
         </if>
         <if test="type==0">
             and (d.expert_status=0 or d.expert_status is null) and a.report_progress=2

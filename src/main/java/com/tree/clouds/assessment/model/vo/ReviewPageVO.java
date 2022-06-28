@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class ReviewPageVO extends PageParam{
     @ApiModelProperty(value = "考核内容")
-    private Integer assessmentCriteria;
+    private String assessmentCriteria;
 
     @ApiModelProperty(value = "责任单位")
     private String unitName;

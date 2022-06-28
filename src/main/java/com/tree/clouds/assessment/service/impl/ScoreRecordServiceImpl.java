@@ -102,7 +102,9 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
             assessment.setIndicatorsType(unitManage.getUnitType());
             assessment.setAssessmentYear(year);
             Double sum = this.baseMapper.getExpertRating(unitId, year);
-            assessment.setOnLineScore(sum.toString());
+            if (sum != null) {
+                assessment.setOnLineScore(sum.toString());
+            }
             Double score = unitAssessmentService.getScoreByUnitIdAndYear(unitId, year);
             assessment.setTaskScore(score.toString());
             comprehensiveAssessmentService.save(assessment);
@@ -164,8 +166,12 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
     }
 
     @Override
-    public ScoreRecord getByReportId(String id) {
-        return this.getOne(new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, id));
+    public ScoreRecord getByReportId(String reportId) {
+        ScoreRecord record = this.baseMapper.getByReportId(reportId);
+        if (record != null && record.getUnitId() != null) {
+            record.setExpertType(record.getUnitId().equals(LoginUserUtil.getUnitId()));
+        }
+        return record;
     }
 
     @Override

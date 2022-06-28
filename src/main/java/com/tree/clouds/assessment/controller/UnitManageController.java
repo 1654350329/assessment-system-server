@@ -49,7 +49,7 @@ public class UnitManageController {
     @Log("添加单位")
     public RestResponse<Boolean> addGroupRole(@RequestBody UnitManage groupRole) {
         groupRole.setUnitType(0);
-        unitManageService.save(groupRole);
+        unitManageService.addGroupRole(groupRole);
         return RestResponse.ok(true);
     }
 
@@ -60,7 +60,7 @@ public class UnitManageController {
         if (NumberUtil.isNumber(groupRole.getUnitId()) && Integer.parseInt(groupRole.getUnitId()) <= 10) {
             throw new BaseBusinessException(400, "基础单位不许修改!");
         }
-        unitManageService.updateById(groupRole);
+        unitManageService.updateGroupRole(groupRole);
         return RestResponse.ok(true);
     }
 

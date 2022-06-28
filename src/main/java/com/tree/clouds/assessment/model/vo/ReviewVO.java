@@ -1,6 +1,5 @@
 package com.tree.clouds.assessment.model.vo;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

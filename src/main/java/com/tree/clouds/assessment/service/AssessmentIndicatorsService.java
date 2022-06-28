@@ -48,13 +48,15 @@ public interface AssessmentIndicatorsService extends IService<AssessmentIndicato
 
     List<IndicatorsTreeTreeVO> auditTree(AuditTreeVO auditTreeVO);
 
-    void copyTask(Integer year,Integer indicatorsType);
+    void copyTask(Integer year, Integer indicatorsType);
 
     double getScoreSum(Integer year, Integer indicatorsType);
 
-    void export(Integer year,Integer indicatorsType ,HttpServletResponse response);
+    void export(Integer year, Integer indicatorsType, HttpServletResponse response);
 
-    List<IndicatorsTreeTreeVO> getScoreLeftTree(Integer year, String unitId, Integer unitType,Integer progress);
+    List<IndicatorsTreeTreeVO> getScoreLeftTree(Integer year, String unitId, Integer unitType, Integer progress);
 
     boolean isExpertUnit(String unitId);
+
+    boolean getTaskAndExpertUnitId(String indicatorsId, String unitId);
 }

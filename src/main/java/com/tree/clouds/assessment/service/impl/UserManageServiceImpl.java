@@ -108,6 +108,7 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
     public UserManage getUserByAccount(String account) {
         QueryWrapper<UserManage> wrapper = new QueryWrapper<>();
         wrapper.eq(UserManage.ACCOUNT, account);
+        wrapper.eq(UserManage.DEL, 0);
         return this.getOne(wrapper);
     }
 
@@ -220,12 +221,22 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
 
     @Override
     public void updatePassword(UpdatePasswordVO updatePasswordVO) {
-        String decodeStr = Base64.decodeStr(updatePasswordVO.getPassword());
+        //验证旧密码
+        String password = Base64.decodeStr(updatePasswordVO.getPassword());
+        UserManage userManage = this.getById(LoginUserUtil.getUserId());
+        if (!bCryptPasswordEncoder.matches(password, userManage.getPassword())) {
+            throw new BaseBusinessException(400, "原密码输入不正确!");
+        }
+        String newPassword = Base64.decodeStr(updatePasswordVO.getNewPassword());
+        String towPassword = Base64.decodeStr(updatePasswordVO.getTowPassword());
+        if (!newPassword.equals(towPassword)) {
+            throw new BaseBusinessException(400, "两次输入的密码不一致!");
+        }
         //校验密码复杂度
-        PwdCheckUtil.checkStrongPwd(decodeStr);
-        String password = bCryptPasswordEncoder.encode(decodeStr);
+        PwdCheckUtil.checkStrongPwd(newPassword);
+        newPassword = bCryptPasswordEncoder.encode(newPassword);
         UserManage user = new UserManage();
-        user.setPassword(password);
+        user.setPassword(newPassword);
         user.setUserId(LoginUserUtil.getUserId());
         this.updateById(user);
     }

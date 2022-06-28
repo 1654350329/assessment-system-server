@@ -53,7 +53,7 @@
 		 left join assessment_indicators_detail b on a.detail_id=b.detail_id
 		 LEFT JOIN assessment_indicators c on b.task_id=c.indicators_id
 		LEFT JOIN assessment_indicators d on b.project_id=d.indicators_id
-		where a.unit_id=#{unitId} and c.unit_id=#{expertUnit} and d.evaluation_method=1
+		where a.unit_id=#{unitId} and (c.unit_id=#{expertUnit} or c.unit_ids like "%"#{expertUnit}"%") and d.evaluation_method=1
 	</select>
     <select id="getScoreByUnitIdAndYear" resultType="java.lang.Double">
         select sum(b.fraction) from unit_assessment a

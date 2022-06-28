@@ -46,6 +46,7 @@ public class UnitManageServiceImpl extends ServiceImpl<UnitManageMapper, UnitMan
             unitManagePageVO.setUnitName(LoginUserUtil.getUnitName());
         }
         IPage<UnitManage> page = unitManagePageVO.getPage();
+        unitManagePageVO.setUnitType(0);
         return this.baseMapper.unitManagePage(page, unitManagePageVO);
     }
 
@@ -71,5 +72,28 @@ public class UnitManageServiceImpl extends ServiceImpl<UnitManageMapper, UnitMan
             queryWrapper.like(UnitManage.UNIT_NAME, unitName);
         }
         return this.list(queryWrapper);
+    }
+
+    @Override
+    public void addGroupRole(UnitManage groupRole) {
+        QueryWrapper<UnitManage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(UnitManage.UNIT_NAME, groupRole.getUnitName());
+        UnitManage one = this.getOne(queryWrapper);
+        if (one != null) {
+            throw new BaseBusinessException(400, "单位已存在");
+        }
+        this.save(groupRole);
+
+    }
+
+    @Override
+    public void updateGroupRole(UnitManage groupRole) {
+        QueryWrapper<UnitManage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(UnitManage.UNIT_NAME, groupRole.getUnitName());
+        UnitManage one = this.getOne(queryWrapper);
+        if (one != null) {
+            throw new BaseBusinessException(400, "单位已存在");
+        }
+        this.updateById(groupRole);
     }
 }

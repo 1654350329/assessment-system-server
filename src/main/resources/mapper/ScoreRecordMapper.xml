@@ -33,7 +33,7 @@
     <select id="getReviewPage" resultType="com.tree.clouds.assessment.model.vo.ReviewVO">
         select
         a.report_id,a.expert_Status,d.assessment_Year,f.unit_id,f.unit_name,e.user_name as
-        createdUser,e.PHONE_NUMBER,c.project_id as indicatorsId,d.indicators_name,c.assessment_criteria,a.expert_status
+        createdUser,e.PHONE_NUMBER,c.project_id as indicatorsId,d.indicators_name,c.assessment_criteria
         from score_record a
         left join indicator_report b on b.report_id=a.report_id
         left join assessment_indicators_detail c on c.detail_id=b.detail_id
@@ -44,16 +44,16 @@
         <where>
             a.score_type=2 and g.unit_id=#{expertUnitId}
             <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
-                and c.assessment_criteria like '%'#{reviewPageVO.assessmentCriteria}'%'
+                and c.assessment_criteria like "%"#{reviewPageVO.assessmentCriteria}"%"
             </if>
-            <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
-                and e.user_name like '%'#{reviewPageVO.unitName}'%'
+            <if test="reviewPageVO.unitName !=null and reviewPageVO.unitName !=''">
+                and f.unit_name like "%"#{reviewPageVO.unitName}"%"
             </if>
-            <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
+            <if test="reviewPageVO.assessmentYear !=null and reviewPageVO.assessmentYear !=''">
                 and d.assessment_Year = #{reviewPageVO.assessmentYear}
             </if>
-            <if test="reviewPageVO.assessmentCriteria !=null and reviewPageVO.assessmentCriteria !=''">
-                and a.expert_status = #{reviewPageVO.expertStatus}
+            <if test="reviewPageVO.reviewStatus !=null and reviewPageVO.reviewStatus !=''">
+                and a.expert_status = #{reviewPageVO.reviewStatus}
             </if>
         </where>
     </select>
@@ -69,6 +69,13 @@
          left join assessment_indicators c on c.indicators_id=b.indicators_id
         where b.unit_id=#{unitId} and c.assessment_year=#{assessmentYear} and a.expert_status=#{type}
 
+    </select>
+    <select id="getByReportId" resultType="com.tree.clouds.assessment.model.entity.ScoreRecord">
+         select a.*,d.unit_id as unitId from score_record a
+        left join indicator_report b on a.report_id=b.report_id
+         left join assessment_indicators_detail c on c.detail_id=b.detail_id
+          left join assessment_indicators d on c.task_id=d.indicators_id
+          where a.report_id=#{reportId}
     </select>
 
 </mapper>

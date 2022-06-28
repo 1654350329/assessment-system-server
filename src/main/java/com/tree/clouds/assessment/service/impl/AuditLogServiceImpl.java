@@ -56,7 +56,10 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
         //修改审核状态
         IndicatorReport indicatorReport = indicatorReportService.getById(updateAuditVO.getId());
         indicatorReport.setReportStatus(updateAuditVO.getIndicatorsStatus());
-        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate()) && new Date().getTime() > DateUtil.parseDate(updateAuditVO.getExpirationDate()).getTime()) {
+        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate()) && !updateAuditVO.getExpirationDate().contains(":")) {
+            updateAuditVO.setExpirationDate(updateAuditVO.getExpirationDate() + " 00:00:00");
+        }
+        if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate()) && new Date().getTime() > DateUtil.parseDateTime(updateAuditVO.getExpirationDate()).getTime()) {
             throw new BaseBusinessException(400, "截止日期必须大于当前时间!");
         }
         if (StrUtil.isNotBlank(updateAuditVO.getExpirationDate())) {
@@ -112,7 +115,7 @@ public class AuditLogServiceImpl extends ServiceImpl<AuditLogMapper, AuditLog> i
             }
 
         }
-        scoreRecordService.isCompleteResult(LoginUserUtil.getUnitId(), indicators.getAssessmentYear());
+        scoreRecordService.isCompleteResult(indicatorReport.getUnitId(), indicators.getAssessmentYear());
     }
 
 

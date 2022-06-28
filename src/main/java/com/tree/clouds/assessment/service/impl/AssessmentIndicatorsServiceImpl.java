@@ -65,11 +65,11 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         }
         List<IndicatorsTreeTreeVO> list = this.baseMapper.getByYear(year, type, indicatorsType);
         if (CollUtil.isEmpty(list)) {
-            String[] names = {"县（市、区）绩效任务", "机制创新", "正向激励加分", "绩效减分"};
+            String[] names = {"绩效任务", "机制创新", "正向激励加分", "绩效减分"};
             List<AssessmentIndicators> assessmentIndicatorsList = new ArrayList<>();
             for (String name : names) {
                 AssessmentIndicators assessmentIndicators = new AssessmentIndicators();
-                if (name.equals("县（市、区）绩效任务")) {
+                if (name.equals("绩效任务")) {
                     assessmentIndicators.setSort(1);
                 }
                 if (name.equals("机制创新")) {
@@ -92,14 +92,6 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             this.saveBatch(assessmentIndicatorsList);
             list = this.baseMapper.getByYear(year, type, indicatorsType);
         }
-//        List<RoleManage> roleManages = roleManageService.getRoleByUserId(userId);
-//        List<String> role_admin = roleManages.stream().map(RoleManage::getRoleCode).filter(code -> code.equals("ROLE_admin") || code.equals("ROLE_user_admin")).collect(Collectors.toList());
-//        if (userId != null && CollUtil.isEmpty(role_admin)) {
-//            list = list.stream().filter(vo -> {
-//                AssessmentIndicators id = this.getById(vo.getId());
-//                return vo.getAssessmentType() != 2 || Objects.equals(id.getUnitId(), userId);
-//            }).collect(Collectors.toList());
-//        }
         for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
             if (indicatorsTreeTreeVO.getAssessmentType() == 1 && type == 1) {
                 indicatorsTreeTreeVO.setFile("文件");
@@ -253,18 +245,59 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
     public AssessmentIndicatorsVO evaluationStandard(String id) {
         AssessmentIndicators indicators = this.getById(id);
         AssessmentIndicatorsVO assessmentIndicatorsVO = BeanUtil.toBean(indicators, AssessmentIndicatorsVO.class);
-        if (StrUtil.isNotBlank(indicators.getUnitIds())) {
+        if (StrUtil.isNotBlank(indicators.getUnitIds()) && !indicators.getUnitIds().equals("[]")) {
             assessmentIndicatorsVO.setUnitIds(Arrays.asList(indicators.getUnitIds().split(",")));
         }
         return assessmentIndicatorsVO;
     }
 
     @Override
+    @Transactional
     public void deleteIndicators(List<String> ids) {
+        Set<String> detailId = new HashSet<>();
+        Set<String> indicatorsIds = new HashSet<>();
         for (String id : ids) {
             getStatus(id);
+            indicatorsIds.add(id);
+            List<AssessmentIndicators> list = this.list(new QueryWrapper<AssessmentIndicators>().eq(AssessmentIndicators.PARENT_ID, id));
+            if (CollUtil.isEmpty(list)) {
+                List<AssessmentIndicatorsDetail> detailList = this.detailService.list(new QueryWrapper<AssessmentIndicatorsDetail>().eq(AssessmentIndicatorsDetail.ASSESSMENT_ID, id));
+                if (detailList != null) {
+                    Set<String> collect = detailList.stream().map(AssessmentIndicatorsDetail::getDetailId).collect(Collectors.toSet());
+                    detailId.addAll(collect);
+                }
+            }
+
+
+            getChild(detailId, indicatorsIds, list);
+
+
         }
-        this.removeByIds(ids);
+        if (detailId.size() != 0) {
+            this.detailService.removeByIds(detailId);
+        }
+        this.removeByIds(indicatorsIds);
+    }
+
+    private void getChild(Set<String> detailId, Set<String> indicatorsIds, List<AssessmentIndicators> list) {
+        for (AssessmentIndicators indicators : list) {
+            indicatorsIds.add(indicators.getIndicatorsId());
+            if (indicators.getAssessmentType() == 3) {
+                List<AssessmentIndicatorsDetail> detailList = this.detailService.list(new QueryWrapper<AssessmentIndicatorsDetail>().eq(AssessmentIndicatorsDetail.ASSESSMENT_ID, indicators.getIndicatorsId()));
+                if (detailList != null) {
+                    Set<String> collect = detailList.stream().map(AssessmentIndicatorsDetail::getDetailId).collect(Collectors.toSet());
+                    detailId.addAll(collect);
+                }
+            } else {
+                list = this.list(new QueryWrapper<AssessmentIndicators>().eq(AssessmentIndicators.PARENT_ID, indicators.getIndicatorsId()));
+                if (CollUtil.isNotEmpty(list)) {
+                    Set<String> indicatorsId = list.stream().map(AssessmentIndicators::getIndicatorsId).collect(Collectors.toSet());
+                    indicatorsIds.addAll(indicatorsId);
+                }
+                getChild(detailId, indicatorsIds, list);
+            }
+
+        }
     }
 
     @Override
@@ -291,12 +324,19 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         if (updateTaskVO.getAssessmentType() != 4) {
             getStatus(updateTaskVO.getIndicatorsId());
             AssessmentIndicators assessmentIndicators = BeanUtil.toBean(updateTaskVO, AssessmentIndicators.class);
-            if (updateTaskVO.getUnitIds() != null) {
+            if (CollUtil.isNotEmpty(updateTaskVO.getUnitIds())) {
                 assessmentIndicators.setUnitIds(String.join(",", updateTaskVO.getUnitIds()));
             }
             this.updateById(assessmentIndicators);
         } else {
             AssessmentIndicatorsDetail detail = this.detailService.getById(updateTaskVO.getIndicatorsId());
+            AssessmentIndicators assessmentIndicators = this.getById(detail.getIndicatorsId());
+            if (!assessmentIndicators.getIndicatorsName().equals("绩效减分") && updateTaskVO.getFraction() < 0) {
+                throw new BaseBusinessException(400, "分数为正数!");
+            }
+            if (assessmentIndicators.getIndicatorsName().equals("绩效减分") && updateTaskVO.getFraction() > 0) {
+                throw new BaseBusinessException(400, "绩效减分项目,分数为负数!");
+            }
             getStatus(detail.getIndicatorsId());
             detail.setAssessmentCriteria(updateTaskVO.getIndicatorsName());
             detail.setInstructions(updateTaskVO.getInstructions());
@@ -566,11 +606,10 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             status = Integer.parseInt(auditTreeVO.getReportStatus());
             if (status == 2) {
                 status = 7;
+            } else {
+                //0对应 未审核状态1 1对应已审核
+                status = status + 1;
             }
-//            else {
-//                //0对应 未审核状态1 1对应已审核
-//                status = status + 1;
-//            }
         }
         return this.indicatorReportService.getTreeById(auditTreeVO.getId(), auditTreeVO.getUnitId(), auditTreeVO.getReportId(), status, auditTreeVO.getContent(), 0);
     }
@@ -616,7 +655,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             } else {
                 AssessmentIndicators indicators = new AssessmentIndicators();
                 indicators.setIndicatorsName(indicatorsTreeTreeVO.getTitle());
-                if (indicatorsTreeTreeVO.getTitle().equals("县（市、区）绩效任务")) {
+                if (indicatorsTreeTreeVO.getTitle().equals("绩效任务")) {
                     indicators.setSort(1);
                 }
                 if (indicatorsTreeTreeVO.getTitle().equals("机制创新")) {
@@ -681,7 +720,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
         for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : tree) {
             i++;
             // 添加段落（分组）
-            writer.addText(new Font("方正小标宋简体", Font.PLAIN, 10), i + "", indicatorsTreeTreeVO.getTitle(), "   分数:" + indicatorsTreeTreeVO.getFraction());
+            writer.addText(new Font("方正小标宋简体", Font.PLAIN, 10), i + " ", indicatorsTreeTreeVO.getTitle(), "   分数:" + indicatorsTreeTreeVO.getFraction());
             int j = 0;
             if (indicatorsTreeTreeVO.getChildren() == null) {
                 continue;
@@ -689,7 +728,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
             for (IndicatorsTreeTreeVO child : indicatorsTreeTreeVO.getChildren()) {
                 j++;
                 // 添加段落（项目）
-                writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j, child.getTitle(), "   分数:" + child.getFraction());
+                writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + " ", child.getTitle(), "   分数:" + child.getFraction());
                 if (child.getChildren() == null) {
                     continue;
                 }
@@ -697,7 +736,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                 for (IndicatorsTreeTreeVO childChild : child.getChildren()) {
                     k++;
                     // 添加段落（任务）
-                    writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k, childChild.getTitle(), "   分数:" + childChild.getFraction());
+                    writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k + " ", childChild.getTitle(), "   分数:" + childChild.getFraction());
                     if (childChild.getChildren() == null) {
                         continue;
                     }
@@ -708,7 +747,7 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                         if (childChildChild.getAssessmentType() == 4) {
                             childChildChild.setTitle("考核标准:" + childChildChild.getTitle());
                         }
-                        writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k + "-" + l, childChildChild.getTitle(), "   分数:" + childChildChild.getFraction());
+                        writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k + "-" + l + " ", childChildChild.getTitle(), "   分数:" + childChildChild.getFraction());
                         if (childChildChild.getAssessmentType() == 4) {
                             writer.addText(new Font("宋体", Font.PLAIN, 10), "申报填报说明:" + childChildChild.getInstructions());
                         }
@@ -723,9 +762,9 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
                                 childChildChild.setTitle("考核标准:" + childChildChild.getTitle());
                             }
                             // 添加段落（考核标准）
-                            writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k + "-" + l + "-" + m, childChildChildChild.getTitle(), "   分数:" + childChildChildChild.getFraction());
+                            writer.addText(new Font("宋体", Font.PLAIN, 10), i + "-" + j + "-" + k + "-" + l + "-" + m + " ", childChildChildChild.getTitle(), "   分数:" + childChildChildChild.getFraction());
                             if (childChildChild.getAssessmentType() == 4) {
-                                writer.addText(new Font("宋体", Font.PLAIN, 10), "申报填报说明:" + childChildChildChild.getInstructions());
+                                writer.addText(new Font("宋体", Font.PLAIN, 10), "申报填报说明: " + childChildChildChild.getInstructions());
                             }
                         }
                     }
@@ -760,7 +799,21 @@ public class AssessmentIndicatorsServiceImpl extends ServiceImpl<AssessmentIndic
 
     @Override
     public boolean isExpertUnit(String unitId) {
-        return CollUtil.isNotEmpty(this.list(new QueryWrapper<AssessmentIndicators>().eq(AssessmentIndicators.UNIT_ID, unitId)));
+        return CollUtil.isNotEmpty(this.list(new QueryWrapper<AssessmentIndicators>().eq(AssessmentIndicators.UNIT_ID, unitId)
+                .or().like(AssessmentIndicators.UNIT_IDS, unitId)));
+    }
+
+    /**
+     * 当前单位是否是任务主评单位或者协助单位
+     *
+     * @param indicatorsId
+     * @param unitId
+     * @return
+     */
+    @Override
+    public boolean getTaskAndExpertUnitId(String indicatorsId, String unitId) {
+        int count = this.baseMapper.getTaskAndExpertUnitId(indicatorsId, unitId);
+        return count != 0;
     }
 
 }

@@ -48,8 +48,6 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
     @Autowired
     private ScoreRecordService scoreRecordService;
     @Autowired
-    private ComprehensiveAssessmentService assessmentService;
-    @Autowired
     private FileInfoService fileInfoService;
     @Autowired
     private AuditLogService auditLogService;
@@ -105,6 +103,9 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     }
                     //获取提交材料数
                     Integer ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId());
+                    if (type == 1 && ids == 0) {
+                        continue;
+                    }
                     indicatorReportVO.setSubmitNumber(ids);
                     //获取通过审核数
                     indicatorReportVO.setPassNumber(this.baseMapper.getStatusNumber(unitManage.getUnitId(), 1, null));
@@ -121,6 +122,9 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                     //已评数
                     indicatorReportVO.setReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 1, record.getAssessmentYear(), LoginUserUtil.getUnitId()));
                     indicatorReportVO.setUnReviewedNumber(this.baseMapper.getReviewedNumber(indicatorReportVO.getUnitId(), 0, record.getAssessmentYear(), LoginUserUtil.getUnitId()));
+                    if (type == 2 && indicatorReportVO.getReviewedNumber() == 0 && indicatorReportVO.getUnReviewedNumber() == 0) {
+                        continue;
+                    }
                     //是否完成填报
                     indicatorReportVO.setUnitType(unitManage.getUnitType());
                     if (assessmentPageVO.getOverdue() != null && indicatorReportVO.getOverdue() != assessmentPageVO.getOverdue()) {
@@ -155,9 +159,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 return indicatorReportVO;
             }).collect(Collectors.toList());
         }
-        if (!roleCodes.contains("ROLE_admin")) {
-            collect = collect.stream().filter(indicatorReportVO -> indicatorReportVO.getDistributeNumber() != 0).collect(Collectors.toList());
-        }
+        collect = collect.stream().filter(indicatorReportVO -> indicatorReportVO.getDistributeNumber() != 0).collect(Collectors.toList());
 
         IPage<IndicatorReportVO> iPage = new Page(assessmentVOIPage.getCurrent(), assessmentVOIPage.getSize());
         int cursor = Math.toIntExact(((assessmentVOIPage.getCurrent() - 1) * assessmentVOIPage.getSize()));
@@ -206,16 +208,6 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         }
 
         AssessmentIndicatorsDetail detail = detailService.getById(one.getDetailId());
-//        AssessmentIndicators indicators = this.assessmentIndicatorsService.getById(detail.getIndicatorsId());
-//        if (!indicators.getIndicatorsName().equals("绩效减分")) {
-//            if (StrUtil.isNotBlank(updateReportVO.getUserScore()) && Double.parseDouble(updateReportVO.getUserScore()) > detail.getFraction()) {
-//                throw new BaseBusinessException(400, "自评分数不许大于考核指标分数");
-//            }
-//        } else {
-//            if (StrUtil.isNotBlank(updateReportVO.getUserScore()) && Double.parseDouble(updateReportVO.getUserScore()) < detail.getFraction()) {
-//                throw new BaseBusinessException(400, "扣分分数不许超过考核指标分数");
-//            }
-//        }
 
         if (StrUtil.isNotBlank(updateReportVO.getUserScore())) {
             one.setUserScore(Double.valueOf(updateReportVO.getUserScore()));
@@ -320,14 +312,24 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
         for (IndicatorsTreeTreeVO indicatorsTreeTreeVO : list) {
 
+            AssessmentIndicators assessmentIndicators = this.assessmentIndicatorsService.getById(indicatorsTreeTreeVO.getId());
             if (!(roleCodes.contains("ROLE_admin") || roleCodes.contains("ROLE_user_admin")) && type == 3 && indicatorsTreeTreeVO.getAssessmentType() == 2) {
-                AssessmentIndicators assessmentIndicators = this.assessmentIndicatorsService.getById(indicatorsTreeTreeVO.getId());
                 if (!assessmentIndicators.getUnitId().equals(LoginUserUtil.getUnitId())) {
                     continue;
                 }
             }
             if (indicatorsTreeTreeVO.getAssessmentType() == 1) {
                 indicatorsTreeTreeVO.setParentId("0");
+            }
+            if (indicatorsTreeTreeVO.getAssessmentType() != 4) {
+                indicatorsTreeTreeVO.setFile("文件夹");
+                indicatorsTreeTreeVO.setFraction(this.detailService.getScoreByType(indicatorsTreeTreeVO.getId(), indicatorsTreeTreeVO.getAssessmentType(), String.valueOf(DateUtil.year(new Date()))));
+            }
+            if (type == 3 && indicatorsTreeTreeVO.getAssessmentType() == 2) {
+                if (!((assessmentIndicators.getUnitId() != null && assessmentIndicators.getUnitId().equals(LoginUserUtil.getUnitId())) || (assessmentIndicators.getUnitIds() != null && assessmentIndicators.getUnitIds().contains(Objects.requireNonNull(LoginUserUtil.getUnitId()))))) {
+                    continue;
+                }
+
             }
             if (indicatorsTreeTreeVO.getAssessmentType() != 4) {
                 indicatorsTreeTreeVO.setFile("文件夹");
@@ -440,10 +442,12 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
             if (treeVO == null || treeVO.getChildren() == null) {
                 continue;
             }
+            //专家评分 线下不展示 或者 没有属于这个专家的评分任务
             if (progress == 2) {
                 treeVO.getChildren().removeIf(chTree -> {
                     AssessmentIndicators indicators = this.assessmentIndicatorsService.getById(chTree.getId());
-                    return 2 == indicators.getEvaluationMethod();
+                    boolean isAssessmentUnit = this.assessmentIndicatorsService.getTaskAndExpertUnitId(indicators.getIndicatorsId(), LoginUserUtil.getUnitId());
+                    return 2 == indicators.getEvaluationMethod() || !isAssessmentUnit;
                 });
             }
 

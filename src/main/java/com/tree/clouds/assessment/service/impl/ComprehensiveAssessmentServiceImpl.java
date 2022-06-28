@@ -102,7 +102,7 @@ public class ComprehensiveAssessmentServiceImpl extends ServiceImpl<Comprehensiv
         if (CollUtil.isNotEmpty(scoreRecords)) {
             throw new BaseBusinessException(400, "还有待复评,未评审!");
         }
-        scoreRecordService.updateStatusByYearAndUnit(assessmentCompleteVO.getAssessmentYear(), assessmentCompleteVO.getUnitId(), 2);
+        scoreRecordService.updateStatusByYearAndUnit(assessmentCompleteVO.getAssessmentYear(), assessmentCompleteVO.getUnitId(), 3);
         //修改状态
         ComprehensiveAssessment assessment = new ComprehensiveAssessment();
         assessment.setComprehensiveProgress(2);

@@ -14,53 +14,48 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class LoginUserUtil {
 
     public static String getUserId() {
-        try{
-            Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
-            if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
-                return null;
-            }
-            UserManage user = (UserManage) credentials;
-            return user.getUserId();
-        }catch (RuntimeException e){
-            e.printStackTrace();
-            return null;
-        }
+        UserManage user = getUserManage();
+        if (user == null) return null;
+        return user.getUserId();
     }
 
     public static String getUserName() {
-        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
-        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
-            return null;
-        }
-        UserManage user = (UserManage) credentials;
+        UserManage user = getUserManage();
+        if (user == null) return null;
         return user.getUserName();
     }
 
     public static String getUnitId() {
-        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
-        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
-            return null;
-        }
-        UserManage user = (UserManage) credentials;
+        UserManage user = getUserManage();
+        if (user == null) return null;
         return user.getUnitId();
     }
 
     public static String getUnitName() {
-        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
-        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
-            return null;
-        }
-        UserManage user = (UserManage) credentials;
+        UserManage user = getUserManage();
+        if (user == null) return null;
         return user.getUnitName();
     }
 
     public static String getUserAccount() {
-        Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
-        if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
-            return null;
-        }
-        UserManage user = (UserManage) credentials;
+        UserManage user = getUserManage();
+        if (user == null) return null;
         return user.getAccount();
     }
 
+    private static UserManage getUserManage() {
+        try {
+            if (SecurityContextHolder.getContext() == null || SecurityContextHolder.getContext().getAuthentication() == null) {
+                return null;
+            }
+            Object credentials = SecurityContextHolder.getContext().getAuthentication().getCredentials();
+            if (ObjectUtil.isNull(credentials) || StrUtil.isBlank(credentials.toString())) {
+                return null;
+            }
+            return (UserManage) credentials;
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

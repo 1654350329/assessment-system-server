@@ -48,13 +48,16 @@
         <if test="userManagePageVO.userName != null and userManagePageVO.userName != ''">
             and a.user_name like "%"#{userManagePageVO.userName}"%"
         </if>
+        <if test="userManagePageVO.unitName != null and userManagePageVO.unitName != ''">
+            and c.unit_Name like "%"#{userManagePageVO.unitName}"%"
+        </if>
         <if test="userManagePageVO.roleIds != null and userManagePageVO.roleIds != ''">
             and d.role_id in
             <foreach collection="userManagePageVO.roleIds" item="id" separator="," open="(" close=")">
                 #{id}
             </foreach>
         </if>
-        ORDER BY a.CREATED_USER desc
+        ORDER BY a.CREATED_USER DESC
     </select>
     <select id="listByMenuId" resultType="com.tree.clouds.assessment.model.entity.UserManage">
         select DISTINCT a.* from user_manage a

@@ -65,8 +65,11 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         UnitManage unitManage = unitManageService.getById(LoginUserUtil.getUnitId());
         if (unitManage != null) {
             if (roleCodes.contains("ROLE_user_admin") && unitManage.getUnitType() == 0) {
-                menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("区县单位加减分一览表")).collect(Collectors.toList());
+                menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("区县单位加减分一览表"))
+                        .filter(sysMenu -> !sysMenu.getName().equals("区县单位综合评定"))
+                        .collect(Collectors.toList());
             }
+            //区县单位不展示初审管理下属单位管理
             if (roleCodes.contains("ROLE_user_admin") && unitManage.getUnitType() == 1) {
                 menus = menus.stream().filter(sysMenu -> !sysMenu.getName().equals("下属单位加减分一览表"))
                         .filter(sysMenu -> !sysMenu.getName().equals("初审管理"))
@@ -74,6 +77,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                         .filter(sysMenu -> !sysMenu.getName().equals("下属单位考核指标"))
                         .filter(sysMenu -> !sysMenu.getName().equals("考核指标"))
                         .filter(sysMenu -> !sysMenu.getName().equals("驳回列表"))
+                        .filter(sysMenu -> !sysMenu.getName().equals("下属单位综合评定"))
                         .collect(Collectors.toList());
             }
         }

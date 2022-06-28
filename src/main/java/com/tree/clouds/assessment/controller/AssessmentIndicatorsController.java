@@ -91,7 +91,7 @@ public class AssessmentIndicatorsController {
 
     @Log("删除项目,指标,考评标准")
     @PostMapping("/deleteIndicators")
-    @ApiOperation(value = "删除项目,指标,考评标准")
+    @ApiOperation(value = "删除项目,指标")
     public RestResponse<Boolean> deleteIndicators(@RequestBody PublicIdsReqVO publicIdsReqVO) {
         assessmentIndicatorsService.deleteIndicators(publicIdsReqVO.getIds());
         return RestResponse.ok(true);

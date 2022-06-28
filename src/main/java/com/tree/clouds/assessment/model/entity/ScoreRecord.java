@@ -3,6 +3,8 @@ package com.tree.clouds.assessment.model.entity;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -50,12 +52,20 @@ public class ScoreRecord extends BaseEntity {
     @TableField("expert_score")
     private Double expertScore;
 
+    @ApiModelProperty(value = "主办单位")
+    @TableField(exist = false)
+    private String unitId;
+
+    @ApiModelProperty(value = "专家类型")
+    @TableField(exist = false)
+    private Boolean expertType;
+
     @ApiModelProperty(value = "得分说明")
     @TableField("illustrate")
     private String illustrate;
 
     @ApiModelProperty(value = "驳回说明")
-    @TableField(value = "remark",updateStrategy = FieldStrategy.IGNORED)
+    @TableField(value = "remark", updateStrategy = FieldStrategy.IGNORED)
     private String remark;
 
 

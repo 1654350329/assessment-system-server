@@ -33,22 +33,21 @@
 
     </delete>
     <select id="getByYear" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
-        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort,CREATED_TIME
         from assessment_indicators where assessment_year =#{year} and indicators_type = #{indicatorsType}
         <if test="type==1">
             and assessment_Type &lt; 2
         </if>
-
         UNION
-        select a.detail_id as id ,a.assessment_id as parent_Id,4,a.assessment_criteria as title,4 from
-        assessment_indicators_detail a
+        select a.detail_id as id ,a.assessment_id as parent_Id,4,a.assessment_criteria as title,4,a.CREATED_TIME
+        from assessment_indicators_detail a
         left join assessment_indicators b on a.indicators_id=b.indicators_id where b.indicators_type=#{indicatorsType}
         and b.assessment_year =#{year}
-        order by sort asc
+        order by sort asc,CREATED_TIME asc
     </select>
     <select id="getGroupByYear" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
         select * from assessment_indicators
-        where (indicators_Name ='县（市、区）绩效任务' or indicators_Name ='机制创新'
+        where (indicators_Name ='绩效任务' or indicators_Name ='机制创新'
         or indicators_Name ='正向激励加分' or indicators_Name ='绩效减分' ) and parent_Id=0
         <if test="year !=null and year !=''">
             and assessment_year =#{year}
@@ -73,11 +72,12 @@
         </where>
     </select>
     <select id="getByIndicatorId" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
-           select indicators_id as id,parent_Id,assessment_Type,indicators_name as title
+           select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,CREATED_TIME
         from assessment_indicators where  assessment_Type > 0
         	UNION
-		select detail_id as id ,assessment_id as parent_Id,4,assessment_criteria as title
+		select detail_id as id ,assessment_id as parent_Id,4,assessment_criteria as title,CREATED_TIME
 		from assessment_indicators_detail
+		   order by CREATED_TIME asc
     </select>
     <select id="getDistributeNumber" resultType="java.lang.Integer">
         SELECT count(DISTINCT a.detail_id) from assessment_indicators_detail a left join unit_assessment b on
@@ -97,13 +97,13 @@
         </if>
     </select>
     <select id="getByReportId" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
-        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort,CREATED_TIME
         from assessment_indicators where assessment_Type > 0
         <if test="content!=null and content!=''">
             and indicators_name like "%"#{content}"%"
         </if>
         UNION
-        select b.report_id as id ,assessment_id as parent_Id,4,assessment_criteria as title,4
+        select b.report_id as id ,assessment_id as parent_Id,4,assessment_criteria as title,4,a.CREATED_TIME
         from assessment_indicators_detail a right join indicator_report b on a.detail_id=b.detail_id
         where 1=1
         <if test="unitId!=null and unitId!=''">
@@ -118,10 +118,10 @@
         <if test="reportStatus==9 ">
             and b.report_progress >=2
         </if>
-        <if test="reportStatus!=null and  reportStatus ==0">
+        <if test="reportStatus!=null and  reportStatus ==1">
             and b.report_progress =#{reportStatus}
         </if>
-        <if test="reportStatus!=null and reportStatus !=7 and reportStatus !=8 and reportStatus !=9 and  reportStatus !=0">
+        <if test="reportStatus!=null and reportStatus !=7 and reportStatus !=8 and reportStatus !=9 and  reportStatus !=1">
             and b.report_progress >=#{reportStatus}
         </if>
         <if test="reportStatus!=null and reportStatus==7">
@@ -130,7 +130,7 @@
         <if test="content!=null and content!=''">
             and (a.assessment_criteria like "%"#{content}"%" or a.instructions like "%"#{content}"%")
         </if>
-        order by sort asc
+        order by sort asc,CREATED_TIME asc
     </select>
     <select id="getByNameAndPid" resultType="com.tree.clouds.assessment.model.entity.AssessmentIndicators">
         select * from assessment_indicators where indicators_Name=#{indicatorsName} and parent_Id=#{pid}
@@ -165,17 +165,20 @@
         from assessment_indicators where parent_id=#{id}
     </select>
     <select id="getScoreLeftTree" resultType="com.tree.clouds.assessment.model.vo.IndicatorsTreeTreeVO">
-        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort
+        select indicators_id as id,parent_Id,assessment_Type,indicators_name as title,sort,CREATED_TIME
         from assessment_indicators where assessment_year =#{year} and indicators_type = #{unitType}
          and assessment_Type = 0
         UNION
-        select a.indicators_id as id,a.parent_Id,a.assessment_Type,a.indicators_name as title,4
+        select a.indicators_id as id,a.parent_Id,a.assessment_Type,a.indicators_name as title,4,a.CREATED_TIME
         from assessment_indicators a
         left join assessment_indicators_detail b on a.indicators_id=b.project_id
         left join indicator_report c on c.detail_id=b.detail_id
         where a.assessment_year =#{year} and a.indicators_type = #{unitType}
          and a.assessment_Type = 1 and c.report_id is not null and c.unit_id=#{unitId} and c.report_progress>=#{progress}
-           order by sort asc
+           order by sort asc,CREATED_TIME asc
+    </select>
+    <select id="getTaskAndExpertUnitId" resultType="java.lang.Integer">
+        select count(*) from assessment_indicators where parent_Id=#{indicatorsId} and (unit_id=#{unitId} or unit_ids like "%"#{unitId}"%")
     </select>
 
 </mapper>

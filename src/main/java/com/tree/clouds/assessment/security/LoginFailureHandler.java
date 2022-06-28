@@ -31,7 +31,8 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
             if (errorNumber < 5) {
                 redisUtil.hset(Constants.ERROR_LOGIN, username, errorNumber + 1, 60 * 10);
             } else {
-                redisUtil.hset(Constants.LOCK_ACCOUNT, username, DateUtil.now(), 60 * 10);
+                Object time = redisUtil.hget(Constants.LOCK_ACCOUNT, username);
+                redisUtil.hset(Constants.LOCK_ACCOUNT, username, time.toString() == null ? DateUtil.now() : time, 60 * 10);
             }
         } else {
             redisUtil.hset(Constants.ERROR_LOGIN, username, 1, 60 * 10);

@@ -7,6 +7,7 @@ import com.tree.clouds.assessment.common.Constants;
 import com.tree.clouds.assessment.common.RestResponse;
 import com.tree.clouds.assessment.model.entity.UserManage;
 import com.tree.clouds.assessment.service.UserManageService;
+import com.tree.clouds.assessment.utils.IPUtil;
 import com.tree.clouds.assessment.utils.JwtUtils;
 import com.tree.clouds.assessment.utils.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -42,7 +44,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         //登入日志
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-
         //清除登入失败记录
         redisUtil.hdel(Constants.ERROR_LOGIN, username);
         UserManage userByAccount = userManageService.getUserByAccount(username);
@@ -54,7 +55,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         ServletOutputStream outputStream = response.getOutputStream();
 
         // 生成jwt，并放置到请求头中
-        String jwt = jwtUtils.generateToken(authentication.getName());
+        String key = UUID.randomUUID().toString();
+        String jwt = jwtUtils.generateToken(authentication.getName(), key);
+        redisUtil.hset(Constants.ACCOUNT_KEY, username, key, 60 * 10);
+
         response.setHeader(jwtUtils.getHeader(), jwt);
         Map<String, Object> map = new HashMap<>();
         map.put(jwtUtils.getHeader(), jwt);

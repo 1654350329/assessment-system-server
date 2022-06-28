@@ -65,6 +65,8 @@ public class IndicatorReportController {
             //如果查询2驳回状态  则查7改为另一个字段
             if (status == 2) {
                 status = 7;
+            } else {
+                status = status + 1;
             }
         }
         List<IndicatorsTreeTreeVO> treeById = indicatorReportService.getTreeById(publicIdReqVO.getId(), publicIdReqVO.getUnitId(), publicIdReqVO.getReportId(), status, publicIdReqVO.getContent(), 0);
