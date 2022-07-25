@@ -63,7 +63,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         Map<String, Object> map = new HashMap<>();
         map.put(jwtUtils.getHeader(), jwt);
         if (StrUtil.isNotBlank(userByAccount.getPasswordTime()) &&
-                DateUtil.parseDate(userByAccount.getPasswordTime()).getTime() + 1000 * 60 * 60 * 24 * 85 > new Date().getTime()) {
+                DateUtil.parseDate(userByAccount.getPasswordTime()).getTime() + 1000 * 60 * 60 * 24 * 85L > new Date().getTime()) {
             map.put("passwordStatus", "密码长时间未修改,请及时修改密码!");
         }
         if (password.equals("888888")) {

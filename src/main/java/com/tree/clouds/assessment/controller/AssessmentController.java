@@ -35,6 +35,7 @@ public class AssessmentController {
     @Log("考核指标列表分页查询")
     @PostMapping("/assessmentPage")
     @ApiOperation(value = "考核指标列表分页查询")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<IPage<AssessmentVO>> assessmentPage(@RequestBody AssessmentPageVO assessmentPageVO) {
         IPage<AssessmentVO> page = assessmentIndicatorsService.assessmentPage(assessmentPageVO);
         return RestResponse.ok(page);
@@ -43,6 +44,7 @@ public class AssessmentController {
     @Log("发布考核指标")
     @PostMapping("/releaseAssessment")
     @ApiOperation(value = "发布考核指标")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> releaseAssessment(@RequestBody ReleaseAssessmentVO releaseAssessmentVO) {
         if (StrUtil.isBlank(releaseAssessmentVO.getAssessmentYear())) {
             releaseAssessmentVO.setAssessmentYear(String.valueOf(DateUtil.year(new Date())));

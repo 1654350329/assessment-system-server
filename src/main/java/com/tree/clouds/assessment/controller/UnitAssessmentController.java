@@ -13,6 +13,7 @@ import com.tree.clouds.assessment.utils.LoginUserUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -54,6 +55,7 @@ public class UnitAssessmentController {
     @Log("添加指标任务")
     @PostMapping("/addAssessment/{unitId}")
     @ApiOperation(value = "添加指标任务")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> addAssessment(@RequestBody PublicIdsReqVO publicIdsReqVO, @PathVariable String unitId) {
         unitAssessmentService.addAssessment(publicIdsReqVO.getIds(), unitId);
         return RestResponse.ok(true);

@@ -41,8 +41,6 @@ public class AuthController {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
     private UserManageService userManageService;
-    @Autowired
-    private UnitManageService unitManageService;
 
     @GetMapping("/captcha")
     @ApiOperation(value = "获取验证码")
@@ -81,6 +79,7 @@ public class AuthController {
         map.put("phoneNumber", user.getPhoneNumber());
         map.put("unitId", LoginUserUtil.getUnitId());
         map.put("unitName", LoginUserUtil.getUnitName());
+        map.put("passwordStatus", bCryptPasswordEncoder.matches("888888", user.getPassword()));
 
         return RestResponse.ok(map);
     }

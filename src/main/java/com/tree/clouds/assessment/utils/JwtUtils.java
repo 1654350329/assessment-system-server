@@ -25,11 +25,9 @@ public class JwtUtils {
 
         Date nowDate = new Date();
         Date expireDate = new Date(nowDate.getTime() + 1000 * expire);
-
         Map<String, Object> map = new HashMap<>();
         map.put("key", key);
         map.put("sub", username);
-
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(username)
@@ -56,5 +54,4 @@ public class JwtUtils {
     public boolean isTokenExpired(Claims claims) {
         return claims.getExpiration().before(new Date());
     }
-
 }

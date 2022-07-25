@@ -77,7 +77,7 @@ public class IndicatorReportController {
     @PostMapping("/updateReport")
     @ApiOperation(value = "填报数据")
     public RestResponse<Boolean> updateReport(@RequestBody UpdateReportVO updateReportVO) {
-        indicatorReportService.updateReport(updateReportVO, 1);
+        indicatorReportService.updateReport(updateReportVO, 2);
         return RestResponse.ok(true);
     }
 

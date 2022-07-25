@@ -118,7 +118,7 @@ public class ScoreRecordServiceImpl extends ServiceImpl<ScoreRecordMapper, Score
 
     public Boolean isComplete(String unitId, String year) {
         Integer reviewedNumber = this.indicatorReportService.getReviewedNumber(unitId, 2, year);
-        Integer distributeNumber = unitAssessmentService.getDistributeNumber(unitId, 1);
+        Integer distributeNumber = unitAssessmentService.getDistributeNumber(unitId, 0);
         return reviewedNumber.equals(distributeNumber);
     }
 

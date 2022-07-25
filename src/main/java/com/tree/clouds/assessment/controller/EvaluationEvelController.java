@@ -42,6 +42,7 @@ public class EvaluationEvelController {
     @PostMapping("/evaluationEvelPage")
     @ApiOperation(value = "评价等级模块分页查询")
     @Log("评价等级分页查询")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<IPage<EvaluationEvel>> evaluationEvelPage(@RequestBody EvaluationEvelVO pageVO) {
         IPage<EvaluationEvel> page = evaluationEvelService.evaluationEvelPage(pageVO);
         return RestResponse.ok(page);
@@ -50,6 +51,7 @@ public class EvaluationEvelController {
     @PostMapping("/addEval")
     @ApiOperation(value = "添加评价等级")
     @Log("添加评价等级")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> addEvaluation(@RequestBody  EvaluationEvel evaluationEvel) {
         evaluationEvelService.save(evaluationEvel);
         return RestResponse.ok(true);
@@ -58,7 +60,7 @@ public class EvaluationEvelController {
     @PostMapping("/updateEval")
     @ApiOperation(value = "修改评价等级")
     @Log("修改评价等级")
-
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> updateEvaluation(@RequestBody  EvaluationEvel evaluationEvel) {
         evaluationEvelService.updateById(evaluationEvel);
         return RestResponse.ok(true);
@@ -67,6 +69,7 @@ public class EvaluationEvelController {
     @PostMapping("/deleteEval")
     @ApiOperation(value = "刪除评价等级")
     @Log("刪除评价等级")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> deleteEvaluation(@Validated @RequestBody PublicIdsReqVO publicIdReqVO) {
         evaluationEvelService.deleteEvaluation(publicIdReqVO.getIds());
         return RestResponse.ok(true);

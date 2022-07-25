@@ -22,6 +22,7 @@ import com.tree.clouds.assessment.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -108,8 +109,8 @@ public class SysMenuController {
     }
 
     @PostMapping("/update")
-//    @PreAuthorize("hasAuthority('sys:menu:update')")
     @ApiOperation(value = "菜单更新")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> update(@Validated @RequestBody SysMenuVOS sysMenuVOS) {
         for (SysMenuVO sysMenuVO : sysMenuVOS.getSysMenuVOS()) {
             SysMenu sysMenu = BeanUtil.toBean(sysMenuVO, SysMenu.class);
@@ -135,7 +136,7 @@ public class SysMenuController {
     }
 
     @PostMapping("/delete")
-//    @PreAuthorize("hasAuthority('sys:menu:delete')")
+    @PreAuthorize("hasRole('ROLE_admin')")
     @ApiOperation(value = "菜单删除")
     public RestResponse<Boolean> delete(@RequestBody PublicIdReqVO publicIdReqVO) {
 

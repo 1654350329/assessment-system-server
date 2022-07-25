@@ -20,7 +20,16 @@
         report_id, unit_id, user_score, illustrate, CREATED_USER, CREATED_TIME, UPDATED_USER, UPDATED_TIME, DEL
     </sql>
     <select id="getSubmitNumber" resultType="java.lang.Integer">
- select count(*) from  file_info where biz_id in(select report_id from indicator_report where unit_id=#{unit_id})
+        select count(*) from file_info where biz_id in(
+        select report_id from indicator_report a
+        left join assessment_indicators_detail b on b.detail_id= a.detail_id
+        left join assessment_indicators c on b.task_id= c.indicators_id
+        left join assessment_indicators d on b.project_id= d.indicators_id
+        where a.unit_id=#{unitId} and c.assessment_year=#{year}
+        <if test="expertUnitId!=null">
+            and c.unit_id=#{expertUnitId} and d.evaluation_method=1
+        </if>
+        )
     </select>
 
     <select id="getStatusNumber" resultType="java.lang.Integer">

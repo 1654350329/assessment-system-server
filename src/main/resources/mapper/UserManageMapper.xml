@@ -84,5 +84,15 @@
         left join unit_manage c on c.unit_id =b.unit_id
         where a.user_id=#{userId}
     </select>
+    <select id="getListByIds" resultType="com.tree.clouds.assessment.model.entity.UserManage">
+        select a.*,c.unit_id,c.unit_name from user_manage a
+        left join unit_user b on a.user_id =b.user_id
+        left join unit_manage c on c.unit_id =b.unit_id
+        where a.user_id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+
+    </select>
 
 </mapper>

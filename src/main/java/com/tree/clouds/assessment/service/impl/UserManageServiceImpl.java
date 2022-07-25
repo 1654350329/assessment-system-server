@@ -2,6 +2,7 @@ package com.tree.clouds.assessment.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -54,14 +55,35 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
     private RoleManageService roleManageService;
 
     @Override
+    @Transactional
     public void rebuildPassword(List<String> ids) {
         // 加密后密码
         String password = bCryptPasswordEncoder.encode("888888");
+        List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
+        List<String> codes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
 
-        List<UserManage> userManages = this.listByIds(ids);
+        List<UserManage> userManages = this.baseMapper.getListByIds(ids);
+        List<UserManage> manageList = userManages.stream().filter(userManage -> !userManage.getUnitId().equals(LoginUserUtil.getUnitId())).collect(Collectors.toList());
+        if (!codes.contains("ROLE_admin") && CollUtil.isNotEmpty(manageList)) {
+            throw new BaseBusinessException(401, "没有操作权限!");
+        }
+
+        if (!(codes.contains("ROLE_admin") || codes.contains("ROLE_up_user"))) {
+            throw new BaseBusinessException(401, "没有操作权限");
+        }
+        if (!codes.contains("ROLE_admin") && codes.contains("ROLE_up_user")) {
+            for (String id : ids) {
+                List<RoleManage> roles = roleManageService.getRoleByUserId(id);
+                List<RoleManage> role_admin = roles.stream().filter(roleManage -> roleManage.getRoleCode().equals("ROLE_admin")).limit(1).collect(Collectors.toList());
+                if (CollUtil.isNotEmpty(role_admin)) {
+                    throw new BaseBusinessException(401, "没有操作权限!");
+                }
+            }
+        }
         userManages.forEach(userManage -> {
             userManage.setPassword(password);
             redisUtil.hdel(Constants.ERROR_LOGIN, userManage.getAccount());
+            redisUtil.hdel(Constants.LOCK_ACCOUNT, userManage.getAccount());
         });
         this.updateBatchById(userManages);
     }
@@ -194,6 +216,9 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
 
     @Override
     public void deleteUserManage(String userId) {
+        if (Objects.requireNonNull(LoginUserUtil.getUserId()).equals(userId)) {
+            throw new BaseBusinessException(400, "不许删除当前用户");
+        }
         UserManage userManage = new UserManage();
         userManage.setUserId(userId);
         userManage.setDel(1);
@@ -231,6 +256,9 @@ public class UserManageServiceImpl extends ServiceImpl<UserManageMapper, UserMan
         String towPassword = Base64.decodeStr(updatePasswordVO.getTowPassword());
         if (!newPassword.equals(towPassword)) {
             throw new BaseBusinessException(400, "两次输入的密码不一致!");
+        }
+        if (password.equals(newPassword)) {
+            throw new BaseBusinessException(400, "不能与原密码一致!!");
         }
         //校验密码复杂度
         PwdCheckUtil.checkStrongPwd(newPassword);

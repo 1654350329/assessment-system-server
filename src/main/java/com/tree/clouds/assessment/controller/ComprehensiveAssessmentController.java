@@ -47,6 +47,7 @@ public class ComprehensiveAssessmentController {
     @Log("综合评定")
     @PostMapping("/assessment")
     @ApiOperation(value = "综合评定")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> assessment(@RequestBody ComprehensiveAssessmentVO assessmentVO) {
         assessmentService.assessment(assessmentVO);
         return RestResponse.ok(true);
@@ -63,6 +64,7 @@ public class ComprehensiveAssessmentController {
     @Log("完成考核")
     @PostMapping("/assessmentComplete")
     @ApiOperation(value = "完成考核")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> assessmentComplete(@RequestBody AssessmentCompleteVO assessmentCompleteVO) {
         assessmentService.assessmentComplete(assessmentCompleteVO);
         return RestResponse.ok(true);

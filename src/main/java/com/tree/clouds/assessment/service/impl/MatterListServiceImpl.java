@@ -38,22 +38,22 @@ public class MatterListServiceImpl extends ServiceImpl<MatterListMapper, MatterL
     public IPage<MatterList> matterListPage(PageParam pageVO) {
         List<RoleManage> roleManages = roleManageService.getRoleByUserId(LoginUserUtil.getUserId());
         List<String> roleCodes = roleManages.stream().map(RoleManage::getRoleCode).collect(Collectors.toList());
-        Set<MatterList> matterLists=new LinkedHashSet<>();
+        Set<MatterList> matterLists = new LinkedHashSet<>();
         //获得管理员待办
         if (roleCodes.contains("ROLE_admin")) {
-            List<MatterList> matterListIPage = this.baseMapper.getMatterList( 1, null,null);
-            matterLists.addAll(matterListIPage);
-        }
-        //获得普通账号待办0.2
-        if (roleCodes.contains("ROLE_up_user")) {
-            List<MatterList> matterListIPage = this.baseMapper.getMatterList( 2,null, LoginUserUtil.getUnitId());
-            matterLists.addAll(matterListIPage);
-        }
-        //获得账号管理员待办3 4
-        if (roleCodes.contains("ROLE_user_admin")) {
             List<MatterList> matterListIPage = this.baseMapper.getMatterList(1, null, LoginUserUtil.getUnitId());
             matterLists.addAll(matterListIPage);
         }
+        //获得普通账号待办0.2
+//        if (roleCodes.contains("ROLE_up_user")) {
+//            List<MatterList> matterListIPage = this.baseMapper.getMatterList(2, null, LoginUserUtil.getUnitId());
+//            matterLists.addAll(matterListIPage);
+//        }
+        //获得账号管理员待办3 4
+//        if (roleCodes.contains("ROLE_user_admin")) {
+//            List<MatterList> matterListIPage = this.baseMapper.getMatterList(1, null, LoginUserUtil.getUnitId());
+//            matterLists.addAll(matterListIPage);
+//        }
         if (roleCodes.contains("ROLE_user_admin")) {
             List<MatterList> matterListIPage = this.baseMapper.getMatterList(3, LoginUserUtil.getUnitId(), null);
             matterLists.addAll(matterListIPage);
@@ -90,7 +90,7 @@ public class MatterListServiceImpl extends ServiceImpl<MatterListMapper, MatterL
     }
 
     @Override
-    public void addMatter(String title, String unitId, String reportId, String expertUnitId, Integer type,String year,String indicatorsId) {
+    public void addMatter(String title, String unitId, String reportId, String expertUnitId, Integer type, String year, String indicatorsId) {
         MatterList matterList = new MatterList();
         matterList.setTitle(title);
         matterList.setUnitId(unitId);

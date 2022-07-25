@@ -102,7 +102,13 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                         continue;
                     }
                     //获取提交材料数
-                    Integer ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId());
+                    Integer ids = 0;
+                    if (type == 2) {
+                        ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId(), LoginUserUtil.getUnitId(), record.getAssessmentYear());
+                    } else {
+                        ids = this.baseMapper.getSubmitNumber(unitManage.getUnitId(), null, record.getAssessmentYear());
+                    }
+
                     if (type == 1 && ids == 0) {
                         continue;
                     }
@@ -139,7 +145,7 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
                 //获取分配指标数
                 indicatorReportVO.setDistributeNumber(unitAssessmentService.getDistributeNumber(LoginUserUtil.getUnitId(), 0));
                 //获取提交材料数
-                Integer submitNumber = this.baseMapper.getSubmitNumber(LoginUserUtil.getUnitId());
+                Integer submitNumber = this.baseMapper.getSubmitNumber(LoginUserUtil.getUnitId(), null, record.getAssessmentYear());
                 indicatorReportVO.setSubmitNumber(submitNumber);
                 //获取通过审核数
                 indicatorReportVO.setPassNumber(this.baseMapper.getStatusNumber(LoginUserUtil.getUnitId(), 1, null));
@@ -212,10 +218,15 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         if (StrUtil.isNotBlank(updateReportVO.getUserScore())) {
             one.setUserScore(Double.valueOf(updateReportVO.getUserScore()));
         }
-
+        AssessmentIndicators id = this.assessmentIndicatorsService.getById(detail.getProjectId());
+        if (id.getEvaluationMethod() == 2) {
+            one.setReportProgress(3);
+        } else {
+            one.setReportProgress(progress);
+        }
         one.setIllustrate(updateReportVO.getIllustrate());
         one.setCreatedUser(LoginUserUtil.getUserId());
-        one.setReportProgress(progress);
+
         one.setReportStatus(1);
         one.setReportTime(DateUtil.now());
         this.updateById(one);
@@ -223,18 +234,28 @@ public class IndicatorReportServiceImpl extends ServiceImpl<IndicatorReportMappe
         //新增文件
         fileInfoService.deleteByBizId(one.getReportId());
         fileInfoService.saveFileInfo(updateReportVO.getFileInfoVOS(), one.getReportId());
-        //新增报送历史日志
-        submitLogService.addLog(assessmentIndicators, detail.getAssessmentCriteria(), 0, null, LoginUserUtil.getUnitId(),
-                one.getReportTime(), one.getReportId(), assessmentIndicators.getExpirationDate());
+//        //新增报送历史日志
+//        submitLogService.addLog(assessmentIndicators, detail.getAssessmentCriteria(), 0, null, LoginUserUtil.getUnitId(),
+//                one.getReportTime(), one.getReportId(), assessmentIndicators.getExpirationDate());
         //新增到初审
-        AuditLog auditLog = new AuditLog();
-        auditLog.setDetailId(one.getDetailId());
-        auditLog.setReportId(one.getReportId());
-        auditLog.setIndicatorsStatus(0);
-        auditLogService.saveOrUpdate(auditLog, new QueryWrapper<AuditLog>().eq(AuditLog.REPORT_ID, one.getReportId()));
+//        AuditLog auditLog = new AuditLog();
+//        auditLog.setDetailId(one.getDetailId());
+//        auditLog.setReportId(one.getReportId());
+//        auditLog.setIndicatorsStatus(0);
+//        auditLogService.saveOrUpdate(auditLog, new QueryWrapper<AuditLog>().eq(AuditLog.REPORT_ID, one.getReportId()));
         //添加到待办列表
-        UnitManage unitManage = unitManageService.getById(one.getUnitId());
-        matterListService.addMatter(unitManage.getUnitName() + "-" + assessmentIndicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料上报待审核", one.getUnitId(), one.getReportId(), null, 1, assessmentIndicators.getAssessmentYear(), assessmentIndicators.getIndicatorsId());
+        if (id.getEvaluationMethod() == 1) {
+            ScoreRecord scoreRecord = new ScoreRecord();
+            scoreRecord.setReportId(updateReportVO.getReportId());
+            scoreRecord.setScoreType(0);
+            scoreRecord.setExpertStatus(0);
+            scoreRecordService.saveOrUpdate(scoreRecord, new QueryWrapper<ScoreRecord>().eq(ScoreRecord.REPORT_ID, updateReportVO.getReportId()));
+            //添加到专家待评
+            AssessmentIndicators project = assessmentIndicatorsService.getById(detail.getTaskId());
+            matterListService.addMatter(assessmentIndicators.getIndicatorsName() + "-" + detail.getAssessmentCriteria() + "材料待审", one.getUnitId(), one.getReportId(), project.getUnitId(), 3, assessmentIndicators.getAssessmentYear(), assessmentIndicators.getIndicatorsId());
+        }
+
+        scoreRecordService.isCompleteResult(one.getUnitId(), assessmentIndicators.getAssessmentYear());
     }
 
     @Override

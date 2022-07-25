@@ -37,7 +37,7 @@ public class RoleManageController {
     @PostMapping("/addRole")
     @ApiOperation(value = "添加角色")
     @Log("添加角色")
-    @PreAuthorize("hasAuthority('role:manage:add')")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> addRole(@RequestBody RoleManage roleManage) {
         roleManage.setRoleCode(UUID.randomUUID().toString());
         roleManageService.save(roleManage);
@@ -47,7 +47,7 @@ public class RoleManageController {
     @PostMapping("/updateRole")
     @ApiOperation(value = "修改角色")
     @Log("修改角色")
-    @PreAuthorize("hasAuthority('role:manage:update')")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> updateRole(@RequestBody RoleManage roleManage) {
         roleManageService.updateById(roleManage);
         return RestResponse.ok(true);
@@ -58,6 +58,7 @@ public class RoleManageController {
     @PostMapping("/distributeRole")
     @ApiOperation(value = "配置权限")
     @Log("配置权限")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<Boolean> distributeRole(@RequestBody DistributeRoleVO distributeRoleVO) {
         roleManageService.distributeRole(distributeRoleVO);
         return RestResponse.ok(true);

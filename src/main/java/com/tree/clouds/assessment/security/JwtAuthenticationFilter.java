@@ -60,7 +60,18 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         }
 
         String account = claim.getSubject();
-        String key = claim.get("key").toString();
+        String key = null;
+        try {
+            if (claim.containsKey("key")) {
+                key = claim.get("key").toString();
+                Object hget = redisUtil.hget(Constants.ACCOUNT_KEY, account);
+                if (hget != null && !hget.equals(key)) {
+                    jwtAuthenticationEntryPoint.commence(request, response, new InsufficientAuthenticationException("用户账户在其他地区登录，可能存在账号被盗风险!", new BaseBusinessException(402, "")));
+                }
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
         Object hget = redisUtil.hget(Constants.ACCOUNT_KEY, account);
         if (hget != null && !hget.equals(key)) {
             jwtAuthenticationEntryPoint.commence(request, response, new InsufficientAuthenticationException("用户账户在其他地区登录，可能存在账号被盗风险!", new BaseBusinessException(402, "")));

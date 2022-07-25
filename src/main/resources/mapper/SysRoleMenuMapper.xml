@@ -18,7 +18,8 @@
        SELECT DISTINCT c.menu_id from user_manage a
             LEFT JOIN role_user  b on a.USER_ID=b.USER_ID
             LEFT JOIN sys_role_menu c on b.ROLE_ID=c.role_id
-            where a.user_id=#{userId}
+            LEFT JOIN sys_menu d on d.id=c.menu_id
+            where a.user_id=#{userId} and d.del=0
     </select>
 
 </mapper>

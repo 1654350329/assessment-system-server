@@ -13,6 +13,7 @@ import com.tree.clouds.assessment.service.SubmitLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +45,7 @@ public class AuditLogController {
     @Log("单位考核指标列表")
     @PostMapping("/assessmentList")
     @ApiOperation(value = "单位考核指标列表")
+    @PreAuthorize("hasRole('ROLE_admin')")
     public RestResponse<IPage<IndicatorReportVO>> assessmentList(@RequestBody AssessmentPageVO assessmentPageVO) {
         assessmentPageVO.setIndicatorsType(0);
         IPage<IndicatorReportVO> assessmentVOS = indicatorReportService.assessmentList(assessmentPageVO,1);
@@ -68,18 +70,18 @@ public class AuditLogController {
     }
 
 
-    @Log("初审审核")
-    @PostMapping("/updateAudit")
-    @ApiOperation(value = "初审审核")
-    public RestResponse<Boolean> updateAudit(@Validated @RequestBody UpdateAuditVO updateAuditVO) {
-        auditLogService.updateAudit(updateAuditVO);
-        return RestResponse.ok(true);
-    }
+    //    @Log("初审审核")
+//    @PostMapping("/updateAudit")
+//    @ApiOperation(value = "初审审核")
+//    public RestResponse<Boolean> updateAudit(@Validated @RequestBody UpdateAuditVO updateAuditVO) {
+//        auditLogService.updateAudit(updateAuditVO);
+//        return RestResponse.ok(true);
+//    }
     @Log("评分左侧树")
     @PostMapping("/scoreLeftTree/{year}/{unitId}")
     @ApiOperation(value = "评分左侧树")
     public RestResponse<List<IndicatorsTreeTreeVO>> scoreLeftTree(@PathVariable Integer year, @PathVariable String unitId) {
-        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, unitId,1);
+        List<IndicatorsTreeTreeVO> tree = indicatorReportService.scoreLeftTree(year, unitId, 1);
         return RestResponse.ok(tree);
     }
 

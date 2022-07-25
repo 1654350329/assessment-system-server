@@ -28,12 +28,12 @@ spring:
     time-zone: GMT+8
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/graded?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
-#    username: graded
-#    password: root
-    url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
-    username: root
-    password: 123456
+    url: jdbc:mysql://localhost:3306/graded?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
+    username: graded
+    password: root
+#    url: jdbc:mysql://localhost:3306/graded_assessment?useUnicode=true&useSSL=true&useUnicode=true&characterEncoding=UTF-8
+#    username: root
+#    password: 123456
 
 # mybatis-plus 配置
 mybatis-plus:
@@ -48,7 +48,7 @@ markerhub:
   jwt:
     header: Authorization
     expire: 1800 #30分钟，秒单位
-    secret: ji8n3439n439n43ld9ne9343fdfer49h
+    secret: ji8n3439n439n43ld9ne9343fdfer49hji8n3439n439n43ld9ne9343fdfer49hji8n3439n439n43ld9ne9343fdfer49h
 
 qiniu:
   accessKey: BGUpQznLLmK0W230OZBiAoaCuavRh-7OYSnLFdtT

@@ -21,7 +21,7 @@ import java.util.List;
  */
 public interface IndicatorReportMapper extends BaseMapper<IndicatorReport> {
 
-    Integer getSubmitNumber(String unitId);
+    Integer getSubmitNumber(String unitId, String expertUnitId, String year);
 
     Integer getStatusNumber(String unitId, int status, Integer progress);
 

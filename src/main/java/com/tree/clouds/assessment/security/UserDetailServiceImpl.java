@@ -27,9 +27,9 @@ public class UserDetailServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         UserManage userManage = userManageService.getUserByAccount(username);
-//        if (userManage == null) {
-//            throw new BaseBusinessException(400, "账号不存在");
-//        }
+        if (userManage == null) {
+            throw new BaseBusinessException(400, "账号或密码错误");
+        }
         if (userManage.getAccountStatus() == 0) {
             throw new BaseBusinessException(400, "账号已停用");
         }

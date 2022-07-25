@@ -30,4 +30,6 @@ public interface UserManageMapper extends BaseMapper<UserManage> {
     List<RoleManage> getRoleById(String userId);
 
     UserManage getInfo(String userId);
+
+    List<UserManage> getListByIds(List<String> ids);
 }

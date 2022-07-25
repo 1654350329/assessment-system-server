@@ -28,7 +28,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/webjars/**",
             "/v2/api-docs/**",
             "/indicators/export/**",
-            "/comprehensive-assessment/exportDate/**"
+            "/comprehensive-assessment/exportDate/**",
 
     };
     @Autowired
